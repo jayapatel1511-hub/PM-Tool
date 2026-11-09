@@ -282,7 +282,7 @@ Per user: each event type → App / Email / Off (Digest is a single on/off with 
 ### 17.6 Delivery
 
 - In-app: `Notification` rows (§24) read by the notification centre. The unread count is read again whenever a cheap pulse, polled every 4 seconds while the tab is visible, changes (packet 020). Where `flag.live_events` is on, change events (§46.6) also refresh it; the pulse stays as the fallback and as the behaviour with the flag off.
-- Email: sent by a background worker via an outbound email provider. **TBD — Business Decision Required:** Microsoft Graph `sendMail` from a service mailbox (keeps mail in Exchange Online, respects corporate mail policies) vs. Azure Communication Services Email vs. SMTP relay. Recommendation: Graph with an application permission scoped to a single shared mailbox, subject to IT approval.
+- Email: sent by a background worker via an outbound email provider. **TBD — Business Decision Required:** Microsoft Graph `sendMail` from a service mailbox (keeps mail in Exchange Online, respects corporate mail policies) vs. an SMTP relay. Recommendation: Graph with an application permission scoped to a single shared mailbox, subject to IT approval. Until a mail path is approved, the homedev stacks run with `Email__Mode: Log` and send nothing.
 - Emails are plain, branded minimally, with the item key in the subject and deep links. No reply-by-email.
 
 ### 17.7 Future: Microsoft Teams [Phase 3]

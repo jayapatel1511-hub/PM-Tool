@@ -29,7 +29,7 @@ Start with [DESIGN.md](DESIGN.md), the [packet index](specs/README.md), the [res
 | `src/Hub.Api/Data/Migrations` | EF Core migrations, applied when the app starts |
 | `web` | React 19 + TypeScript + Vite single-page application (Tailwind, shadcn/Radix, TanStack Query) |
 | `tests/Hub.Tests` | xUnit domain tests and API integration tests against a real PostgreSQL |
-| `infra` | Bicep for one Azure environment; `infra/env/<env>.bicepparam` per environment |
+| `infra` | Earlier Bicep template for an Azure environment; not the deployment path. Hosting is homedev, defined in `hosting/` |
 | `tools` | Specification build and traceability checks, coverage gate, accessibility audit, scale test data |
 | `docs` | User and administrator guides, API conventions, runbooks, security, pilot plan |
 
@@ -65,8 +65,8 @@ permitted only in Development, Testing and Staging. Production refuses the synth
 Never copy the review database into production. The sample `@hub.test` records have reserved development identities;
 real Entra accounts cannot claim them by matching email. Jay clarified on 2026-10-01 that no Azure deployment or
 new paid service is part of this release. Company production uses the reviewed Staging local-password hosting
-configuration; see [homedev production gates](docs/pilot/production-readiness.md). The existing
-[Azure environment design](docs/runbooks/environments.md) is optional future work.
+configuration; see [homedev production gates](docs/pilot/production-readiness.md). Hosting stays on
+homedev; see the [environments runbook](docs/runbooks/environments.md).
 
 ## Checks
 
@@ -101,7 +101,8 @@ dotnet publish src/Hub.Api -c Release -o out
 ```
 
 The SPA build writes into `src/Hub.Api/wwwroot`, so the published API serves the application, its API and its background
-jobs from one App Service. Zip `out/` and deploy it; the app migrates the schema and seeds reference data on start. The
+jobs from one container. On homedev the image is built from `hosting/Dockerfile.review` and activated with the
+scripts in `scripts/`; the app migrates the schema and seeds reference data on start. The
 environment runbook, [`docs/runbooks/environments.md`](docs/runbooks/environments.md), gives the full order; restores are
 in [`restore.md`](docs/runbooks/restore.md) and jobs and alerts in [`jobs.md`](docs/runbooks/jobs.md).
 
@@ -119,18 +120,18 @@ Each environment has two app registrations in the organisation's tenant:
    `http://localhost:5173/` only in development), API permission to the Hub API's `access_as_user`, admin-consented.
 
 `Auth:Entra:TenantId`, `Auth:Entra:Audience` (the Hub API's client ID, which v2.0 tokens carry as their audience), `Auth:Entra:SpaClientId` and
-`Auth:Entra:ApiScope` (`api://<api-app-id>/access_as_user`) come from these registrations; they are public values set in
-`infra/env/<env>.bicepparam`. There are no Hub passwords; the database is reached with the app's managed identity.
+`Auth:Entra:ApiScope` (`api://<api-app-id>/access_as_user`) come from these registrations; they are public values set as
+environment variables, on homedev in the stack's private `.runtime/` env file.
 
 ## Configuration
 
 Settings are app settings (environment variables use `__` for `:`). Nothing secret is kept in configuration files;
-secrets live in Key Vault.
+secrets live in each stack's owner-only `.runtime/` directory on homedev.
 
 | Key | Default | Purpose |
 |---|---|---|
-| `ConnectionStrings:Hub` | development database | PostgreSQL connection; in Azure without a password, with `Db:UseManagedIdentity=true` |
-| `Db:UseManagedIdentity` | `false` | Use the managed identity's Entra token as the database password |
+| `ConnectionStrings:Hub` | development database | PostgreSQL connection; on homedev the password comes from the stack's `.runtime/` env file |
+| `Db:UseManagedIdentity` | `false` | Use a managed identity's Entra token as the database password; not used on homedev |
 | `Db:Migrate` | `true` | Apply migrations at start |
 | `Auth:Mode` | `Entra` | `Development` (header sign-in) is accepted only in Development and Testing |
 | `Auth:Entra:TenantId`, `:Audience`, `:SpaClientId`, `:ApiScope` | empty | Entra sign-in (above) |
@@ -138,7 +139,7 @@ secrets live in Key Vault.
 | `Graph:Mail` | `false` | Send mail with Microsoft Graph from `Graph:Mailbox` |
 | `Graph:Mailbox` | empty | The service mailbox Graph sends from |
 | `Graph:ManagedIdentityClientId` | empty | A user-assigned identity for Graph, when one is used |
-| `Email:Mode` | `Log` | `Smtp` to send through a relay (`Email:Smtp:Host`, `:Port`, `:User`, `:Password` from Key Vault); `Log` records subjects only |
+| `Email:Mode` | `Log` | `Smtp` to send through a relay (`Email:Smtp:Host`, `:Port`, `:User`, `:Password` from the private runtime file); `Log` records subjects only |
 | `Email:From` | empty | Sender address for SMTP |
 | `Email:BaseUrl` | empty | The application's public address, used for links in emails |
 | `Jobs:Enabled` | `true` | Run the background jobs in this instance |

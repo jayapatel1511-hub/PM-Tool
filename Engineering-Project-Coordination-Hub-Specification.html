@@ -143,10 +143,6 @@ td,th{font-variant-numeric:tabular-nums}
 <a href="#33-risks-and-technical-considerations"><span class="n">33</span><span>Risks and Technical Considerations</span></a>
 <a href="#34-open-decisions-questions"><span class="n">34</span><span>Open Decisions / Questions</span></a>
 <a href="#35-recommended-development-sequence"><span class="n">35</span><span>Recommended Development Sequence</span></a>
-<a href="#32-edge-cases-and-recommended-handling-1"><span class="n">32</span><span>Edge Cases and Recommended Handling</span></a>
-<a href="#33-risks-and-technical-considerations-1"><span class="n">33</span><span>Risks and Technical Considerations</span></a>
-<a href="#34-open-decisions-questions-1"><span class="n">34</span><span>Open Decisions / Questions</span></a>
-<a href="#35-recommended-development-sequence-1"><span class="n">35</span><span>Recommended Development Sequence</span></a>
 <div class="sep"></div>
 <a href="#decisions-we-need-to-make-before-development"><span class="n">›</span><span>Decisions We Need to Make Before Development</span></a>
 <a href="#features-that-sound-useful-but-should-not-be-built-yet"><span class="n">›</span><span>Features That Sound Useful But Should NOT Be Built Yet</span></a>
@@ -175,6 +171,8 @@ td,th{font-variant-numeric:tabular-nums}
 <a href="#53-task-pickup-amendment"><span class="n">53</span><span>Task Pickup Amendment</span></a>
 <a href="#54-company-structure-amendment"><span class="n">54</span><span>Company Structure Amendment</span></a>
 <a href="#55-user-feedback-round-1-data-entry-safety-backlog-and-admin-review"><span class="n">55</span><span>User Feedback Round 1: Data-Entry Safety, Backlog and Admin Review</span></a>
+<a href="#56-visual-system-and-navigation-amendment"><span class="n">56</span><span>Visual System and Navigation Amendment</span></a>
+<a href="#57-screen-completeness-amendment"><span class="n">57</span><span>Screen Completeness Amendment</span></a>
     </div></details>
   </nav>
   <main>
@@ -268,14 +266,14 @@ td,th{font-variant-numeric:tabular-nums}
 <li>A deterministic "PM Attention Required" engine with configurable thresholds.</li>
 <li>A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.</li>
 <li>A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)</li>
-<li>Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.</li>
-<li>A <strong>Weekly Resource Planner</strong>: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic rules flag over- and under-allocation, overlapping plans from two managers, leave conflicts and stale plans. A Manager Home exception dashboard answers "where does my team need attention" in about 30 seconds.</li>
+<li>Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and an individual sign-in for every person.</li>
+<li>A <strong>Weekly Resource Planner</strong>: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic indicators flag over-planned, under-planned and stale plans (§39). The v1.1 draft's Manager Home, People/Person Profile, Overlapping Plans and Leave Conflict rules were not adopted in that form; §27.2 items 16 and 17 state what was built.</li>
 </ul>
 <p>The planning workspace connects three views over the same records: <strong>Team Planner</strong> (weekly people and project staffing), <strong>Vacation &amp; Coverage</strong> (a year of approved leave and coverage concerns), and <strong>My Week</strong> (each person’s published plan). HR approves leave; Tuesday imports availability and helps managers arrange coverage. Leave reduces capacity without reducing assigned work or counting the same absence twice. Personal calendar subscriptions can surface dated commitments; weekly hours do not become invented appointments.</p>
 <p><strong>What comes later</strong></p>
-<p>Risk and Issue registers, Meeting Actions, and Project Templates are Phase 2. The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.</p>
+<p>Risk and Issue registers, Meeting Actions, and Project Templates were planned as Phase 2 and are built (packets 012, 014 and 015). The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.</p>
 <p><strong>Recommended technical approach</strong></p>
-<p>A modular monolith: a React + TypeScript single-page application, an ASP.NET Core Web API (with Node.js/TypeScript as an acceptable alternative if the team's skills favour it), PostgreSQL, Microsoft Entra ID single sign-on, hosted on Azure App Service with Azure Database for PostgreSQL. The system is sized for hundreds of active projects, tens of thousands of tasks, and a few hundred users, and is intended to be maintained by a small internal team.</p>
+<p>A modular monolith: a React + TypeScript single-page application, an ASP.NET Core Web API (with Node.js/TypeScript as an acceptable alternative if the team's skills favour it), PostgreSQL, individual sign-in (local-password accounts on homedev, with Microsoft and Google sign-in or Microsoft Entra ID as other modes, §23.6), hosted on homedev, Jay's Ubuntu server, as Docker Compose stacks (one API container and PostgreSQL 17 per stack) behind a Cloudflare tunnel (§23.7, §23.9). The system is sized for hundreds of active projects, tens of thousands of tasks, and a few hundred users, and is intended to be maintained by a small internal team.</p>
 <p><strong>What this document enables</strong></p>
 <p>The specification is written so that a development team (or a software-development agent) can design the database (Section 24), produce wireframes (Section 13), establish the architecture (Section 23), create development tickets (Sections 11, 27, 35), implement the MVP, and test it against explicit acceptance criteria (Section 31).</p>
 <hr />
@@ -474,7 +472,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>T2</td>
-<td>Corporate SSO from day one; no separate passwords.</td>
+<td>Individual sign-in from day one: no shared accounts and no stored passwords, only salted verifiers (FR-AUTH-01).</td>
 </tr>
 <tr>
 <td>T3</td>
@@ -482,7 +480,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>T4</td>
-<td>Deployable to Azure with infrastructure as code and separate dev/test/prod environments.</td>
+<td>Deployable to homedev from versioned releases by scripted activation, with separate review and pilot stacks (§23.7, §43).</td>
 </tr>
 <tr>
 <td>T5</td>
@@ -2512,31 +2510,31 @@ td,th{font-variant-numeric:tabular-nums}
 <tbody>
 <tr>
 <td>FR-AUTH-01</td>
-<td>Users sign in with their corporate Microsoft Entra ID account (OIDC/OAuth 2.0, PKCE). No local passwords.</td>
+<td>Each user signs in with an individual account through the mode the deployment selects with <code>Auth:Mode</code> (§23.6): <code>LocalPassword</code>, a user ID and password issued by an operator, which the homedev review, pilot and production stacks use; <code>Social</code>, a Microsoft or Google account, switched on for a stack only by an activation Jay authorises; or <code>Entra</code>, single-tenant corporate sign-in (OIDC/OAuth 2.0, PKCE), kept as an alternative. No password is stored: <code>LocalPassword</code> keeps only a salted verifier in the stack's private files outside Git. Development header sign-in exists only in Development and Testing.</td>
 <td>R</td>
-<td>§23.6</td>
+<td>§23.6, §48.6</td>
 </tr>
 <tr>
 <td>FR-AUTH-02</td>
-<td>A user record is created or updated on first sign-in (just-in-time provisioning) with display name, email, Entra object ID, job title, office (if available).</td>
+<td>In <code>Social</code> and <code>Entra</code> modes a user record is created or updated on first sign-in (just-in-time provisioning) with display name and email, plus Entra object ID, job title and office where Entra supplies them; a <code>Social</code> identity is keyed by provider and subject, never by email. In <code>LocalPassword</code> mode an operator maps each credential to one existing active user. A credential or provider claim grants no role by itself.</td>
 <td>R</td>
 <td>§23.6</td>
 </tr>
 <tr>
 <td>FR-AUTH-03</td>
-<td>System roles are derived from Entra ID group membership at sign-in and/or assigned in-app by a System Administrator.</td>
+<td>System roles are assigned in-app by a System Administrator in every mode; in <code>Entra</code> mode they are also derived from Entra ID group membership at sign-in.</td>
 <td>R</td>
 <td>§8.8, §34</td>
 </tr>
 <tr>
 <td>FR-AUTH-04</td>
-<td>Users disabled in Entra ID cannot sign in; a scheduled sync marks them Inactive in the Hub within 24 hours.</td>
+<td>An Inactive user cannot sign in, in any mode. In <code>Entra</code> mode users disabled in Entra ID cannot sign in and a scheduled sync marks them Inactive in the Hub within 24 hours; in the other modes a System Administrator deactivates the user, and removing or rotating a verifier ends that user's sessions on their next request.</td>
 <td>R</td>
 <td>§23.6, §32</td>
 </tr>
 <tr>
 <td>FR-AUTH-05</td>
-<td>Sessions use short-lived access tokens with silent renewal; idle sign-out after a configurable period.</td>
+<td><code>LocalPassword</code> and <code>Social</code> sessions are server-side, PostgreSQL-backed and expire eight hours after sign-in without sliding; sign-out revokes the session so a copied cookie is refused (FR-OPS-13). <code>Entra</code> sessions use short-lived access tokens with silent renewal. Idle sign-out after a configurable period applies in every mode.</td>
 <td>R</td>
 <td>§23.6</td>
 </tr>
@@ -4830,7 +4828,7 @@ td,th{font-variant-numeric:tabular-nums}
 <p><strong>What it deliberately does not do.</strong> The first-release workload calculation does not subtract logged actual task hours from estimates or treat them as an approved timesheet (§36.8). It also does not use leave/holiday calendars (Phase 3, or import from HR), utilisation targets, resource levelling, forecasts beyond 8 weeks, or capacity planning by role.</p>
 <h4 id="12152-capacity-and-leave">12.15.2 Capacity and leave</h4>
 <ul>
-<li>Each person has <code>weekly_capacity_hours</code> (default <code>default_weekly_capacity_hours</code> = 37.5) and <code>working_days</code> (default Mon–Fri). Stored in <code>PersonCapacity</code> with <code>effective_from</code> so a change to part-time does not rewrite history.</li>
+<li>Each person has <code>weekly_capacity_hours</code> (default <code>default_weekly_capacity_hours</code>, 40 h under §10.4 and Q18) and <code>working_days</code> (default Mon–Fri). Stored in <code>PersonCapacity</code> with <code>effective_from</code> so a change to part-time does not rewrite history.</li>
 <li><code>Leave</code> is a date range per person with full-day or hours-per-day, copied from HR-approved leave (§12.18). Admin imports it; an Admin/Supervisor may record an HR-referenced manual fallback. Employees do not approve or edit imported leave in Tuesday.</li>
 <li>Resource availability is calculated per working date using the effective capacity/schedule on that date, then summed into ISO weeks. Daily hours are weekly capacity divided by the number of working days (equal-length working days in MVP), unless the person's schedule sets per-weekday hours (§51.10). Approved leave is capped to those daily hours; office holidays make that date unavailable. Overlapping leave and holidays reduce the day at most once. A Leave row explains the reduction but is never added to planned hours. Changes preserve existing allocation hours and dates and raise warnings.</li>
 </ul>
@@ -6346,7 +6344,7 @@ td,th{font-variant-numeric:tabular-nums}
 <h3 id="176-delivery"><span class="num">17.6</span> Delivery</h3>
 <ul>
 <li>In-app: <code>Notification</code> rows (§24) read by the notification centre. The unread count is read again whenever a cheap pulse, polled every 4 seconds while the tab is visible, changes (packet 020). Where <code>flag.live_events</code> is on, change events (§46.6) also refresh it; the pulse stays as the fallback and as the behaviour with the flag off.</li>
-<li>Email: sent by a background worker via an outbound email provider. <strong><span class="tbd">TBD — Business Decision Required</span>:</strong> Microsoft Graph <code>sendMail</code> from a service mailbox (keeps mail in Exchange Online, respects corporate mail policies) vs. Azure Communication Services Email vs. SMTP relay. Recommendation: Graph with an application permission scoped to a single shared mailbox, subject to IT approval.</li>
+<li>Email: sent by a background worker via an outbound email provider. <strong><span class="tbd">TBD — Business Decision Required</span>:</strong> Microsoft Graph <code>sendMail</code> from a service mailbox (keeps mail in Exchange Online, respects corporate mail policies) vs. an SMTP relay. Recommendation: Graph with an application permission scoped to a single shared mailbox, subject to IT approval. Until a mail path is approved, the homedev stacks run with <code>Email__Mode: Log</code> and send nothing.</li>
 <li>Emails are plain, branded minimally, with the item key in the subject and deep links. No reply-by-email.</li>
 </ul>
 <h3 id="177-future-microsoft-teams-phase-3"><span class="num">17.7</span> Future: Microsoft Teams <span class="tag p3">Phase 3</span></h3>
@@ -6643,7 +6641,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Authentication</td>
-<td>Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; the optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No local accounts or passwords stored.</td>
+<td>An individual account per person, through the mode <code>Auth:Mode</code> selects (FR-AUTH-01, §23.6). On homedev: <code>LocalPassword</code>, with a Secure, HttpOnly, SameSite=Lax session cookie, same-origin checks on writes and server-side sessions; <code>Social</code> (Microsoft and Google) only by an authorised activation. <code>Entra</code> (OpenID Connect / OAuth 2.0 with PKCE, bearer tokens for the Hub API audience) stays available. The optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No password is stored, only salted verifiers in private files outside Git; no shared accounts.</td>
 <td>MVP</td>
 </tr>
 <tr>
@@ -6653,12 +6651,12 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Least privilege</td>
-<td>App Service uses a system-assigned managed identity to reach Key Vault and (if Graph is used) Graph with the minimum application permissions (<code>User.Read.All</code> for sync; <code>Mail.Send</code> restricted to one mailbox via an Application Access Policy). Database role for the app has only the needed DML; <code>activity_log</code> INSERT/SELECT only (Rec).</td>
+<td>The API container runs as UID 1000 with a read-only root filesystem, no Linux capabilities and <code>no-new-privileges</code>, under memory and CPU limits (<code>hosting/homedev*.compose.yml</code>). If Graph is used, it gets the minimum application permissions (<code>User.Read.All</code> for sync; <code>Mail.Send</code> restricted to one mailbox via an Application Access Policy). The pilot application connects as the ordinary role <code>hub_pilot_app</code>, separate from the owner, migration and bootstrap roles; <code>activity_log</code> INSERT/SELECT only (Rec).</td>
 <td>MVP</td>
 </tr>
 <tr>
 <td>Secret management</td>
-<td>No secrets in code or config files; connection strings and client secrets in Azure Key Vault referenced by App Service; rotate on schedule (TBD). Prefer Entra-authenticated PostgreSQL (managed identity) to avoid database passwords entirely.</td>
+<td>No secrets in code, images or Git. Each stack reads its database password, keys and credentials from its own owner-only <code>.runtime/</code> directory on homedev, outside the release tree; review, pilot and production never share them; rotate on schedule (TBD).</td>
 <td>MVP</td>
 </tr>
 <tr>
@@ -6668,13 +6666,13 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Backups</td>
-<td>Azure Database for PostgreSQL automated backups with point-in-time restore (7–35 days; <span class="tbd">TBD</span>); restore tested before go-live and quarterly (Rec).</td>
+<td>Daily logical dumps by the system timers <code>pm-tool-review-backup.timer</code> and <code>pm-tool-pilot-backup.timer</code>; WAL archiving and base backups on the pilot database for point-in-time restore; an encrypted off-host copy and a restore drill from it under §48.3 (FR-OPS-03 to FR-OPS-05); restore tested before go-live and quarterly (Rec).</td>
 <td>MVP</td>
 </tr>
 <tr>
 <td>Database security</td>
-<td>Private networking (VNet integration + private endpoint) or at minimum firewall restricted to App Service outbound IPs; TLS enforced; encryption at rest (platform default); no public admin access; separate credentials per environment.</td>
-<td>MVP (private endpoint Rec)</td>
+<td>PostgreSQL runs in the stack's private Compose network with no published port; only the API container reaches it. The API listens on loopback only (<code>127.0.0.1:3080</code> review, <code>127.0.0.1:3081</code> pilot). No public admin access; separate credentials, volumes and networks per stack. Disk encryption at rest on homedev is <span class="tbd">TBD</span>.</td>
+<td>MVP</td>
 </tr>
 <tr>
 <td>Secure coding</td>
@@ -6693,7 +6691,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Environment separation</td>
-<td>Separate Azure resource groups (and ideally subscriptions) for dev, test/UAT, prod; separate Entra app registrations per environment; no production data in dev; anonymised copy for test if needed (TBD).</td>
+<td>Separate Compose projects on homedev (<code>pm-tool-review</code>, <code>pm-tool-pilot</code>), each with its own base directory, database volume, network, port, <code>.runtime/</code> and backups. Review holds synthetic data only. Review data, credentials and protection keys are never copied into pilot or production. Accepted company production runs in the pilot stack (<code>docs/runbooks/environments.md</code>).</td>
 <td>MVP</td>
 </tr>
 <tr>
@@ -6740,7 +6738,7 @@ td,th{font-variant-numeric:tabular-nums}
 <td>Performance — page load</td>
 <td>Time to interactive for My Work, Project Dashboard, Task List (≤ 500 tasks) on the corporate network</td>
 <td>≤ 2 s p95</td>
-<td>Measured with App Insights browser SDK</td>
+<td>Measured by the browser suites; aggregate load-time bands per route under §51.4 while <code>route_counter_enabled</code> is on</td>
 </tr>
 <tr>
 <td>Performance — API</td>
@@ -6770,7 +6768,7 @@ td,th{font-variant-numeric:tabular-nums}
 <td>Availability</td>
 <td>Business hours across the organisation's time zones</td>
 <td>99.5% monthly (≈ 3.5 h downtime)</td>
-<td>Single-region; no HA database in MVP unless required (<span class="tbd">TBD</span>)</td>
+<td>One server, homedev, with no failover or battery backup; a power or network loss is downtime, so the target is unproven there (<span class="tbd">TBD</span>)</td>
 </tr>
 <tr>
 <td>Reliability</td>
@@ -6786,7 +6784,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Scalability</td>
-<td>Scale App Service plan vertically/horizontally; database tier upgrade; no architectural change needed up to 5× assumed scale</td>
+<td>Raise the container memory and CPU limits in the Compose file; one PostgreSQL instance; no architectural change needed up to 5× assumed scale, within homedev's hardware</td>
 <td>—</td>
 <td></td>
 </tr>
@@ -6810,19 +6808,19 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Backup/recovery</td>
-<td>Automated daily backups + PITR; quarterly restore drill; infrastructure re-creatable from IaC in &lt; 1 day</td>
+<td>Daily dumps, pilot WAL archive and off-host copy (§21, §48.3); quarterly restore drill; a stack re-creatable from the repository's <code>hosting/</code> files, <code>scripts/</code> and a backup in &lt; 1 day</td>
 <td>—</td>
 <td></td>
 </tr>
 <tr>
 <td>Monitoring</td>
-<td>App Insights: availability test on <code>/health</code>, request/dependency telemetry, exceptions, job durations, queue depths; alerts on error rate, job failure, digest not sent</td>
+<td><code>/health</code> probed after every activation (<code>scripts/verify-homedev-review.py</code>, <code>scripts/verify-homedev-pilot.py</code>) and by the homedev watchdog; job durations, queue depths and errors in the application log and on the Admin Operations page (§48.4); alerts on error rate, job failure, digest not sent</td>
 <td>—</td>
 <td></td>
 </tr>
 <tr>
 <td>Logging</td>
-<td>Structured JSON logs to App Insights/Log Analytics; 30–90 day retention (<span class="tbd">TBD</span>)</td>
+<td>Structured JSON logs to container stdout, kept by Docker with rotation (10 MB × 3 files per service); longer retention (30–90 days) is <span class="tbd">TBD</span></td>
 <td>—</td>
 <td></td>
 </tr>
@@ -6849,7 +6847,7 @@ td,th{font-variant-numeric:tabular-nums}
 <hr />
 <h2 id="23-technical-architecture"><span class="num">23</span><span class="ttl">Technical Architecture</span></h2>
 <h3 id="231-recommendation-in-one-paragraph"><span class="num">23.1</span> Recommendation in one paragraph</h3>
-<p><strong class="lbl rec">Recommendation</strong> Build a <strong>modular monolith</strong>: a React + TypeScript single-page application talking to a single <strong>ASP.NET Core (.NET 8 LTS) Web API</strong> backed by <strong>PostgreSQL</strong>, with background jobs hosted in the same application, authenticated by <strong>Microsoft Entra ID</strong>, deployed to <strong>Azure App Service (Linux)</strong> with <strong>Azure Database for PostgreSQL Flexible Server</strong>, <strong>Key Vault</strong>, and <strong>Application Insights</strong>, provisioned with <strong>Bicep</strong>, delivered via CI/CD. Node.js/TypeScript (NestJS + Prisma or Drizzle) is an acceptable alternative backend if the team's skills favour it; the rest of the architecture is unchanged.</p>
+<p><strong class="lbl rec">Recommendation</strong> Build a <strong>modular monolith</strong>: a React + TypeScript single-page application talking to a single <strong>ASP.NET Core (.NET 8 LTS) Web API</strong> backed by <strong>PostgreSQL</strong>, with background jobs hosted in the same application, authenticated by <strong>Microsoft Entra ID</strong>, deployed to <strong>homedev</strong>, Jay's Ubuntu server, as <strong>Docker Compose</strong> stacks (one API container and <strong>PostgreSQL 17</strong> per stack) reached through a dedicated <strong>Cloudflare tunnel</strong>, activated from versioned releases by the repository's scripts and delivered via CI/CD (§23.7, §43). Node.js/TypeScript (NestJS + Prisma or Drizzle) is an acceptable alternative backend if the team's skills favour it; the rest of the architecture is unchanged.</p>
 <h3 id="232-option-evaluation"><span class="num">23.2</span> Option evaluation</h3>
 <p><strong>Backend</strong></p>
 <div class="tbl"><table>
@@ -6887,7 +6885,7 @@ td,th{font-variant-numeric:tabular-nums}
 <td><span class="tbd">TBD</span> — one language across front and back</td>
 </tr>
 <tr>
-<td>Hosting on App Service</td>
+<td>Hosting in a container on homedev</td>
 <td>Native</td>
 <td>Native</td>
 </tr>
@@ -6910,7 +6908,7 @@ td,th{font-variant-numeric:tabular-nums}
 <tbody>
 <tr>
 <td>Fit</td>
-<td>Internal app behind SSO; no SEO; heavy tables and panels</td>
+<td>Internal app behind sign-in; no SEO; heavy tables and panels</td>
 <td>SSR/ISR add complexity without benefit here</td>
 </tr>
 <tr>
@@ -6920,7 +6918,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Hosting</td>
-<td>Static files served by App Service or Azure Static Web Apps</td>
+<td>Static files served by the API container</td>
 <td>Requires Node runtime</td>
 </tr>
 <tr>
@@ -6935,29 +6933,30 @@ td,th{font-variant-numeric:tabular-nums}
 <thead>
 <tr>
 <th>Criterion</th>
-<th>Azure App Service (Linux)</th>
-<th>Azure Container Apps</th>
-<th>AKS</th>
+<th>Docker Compose on homedev</th>
+<th>Managed cloud platform</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Operational simplicity</td>
-<td>Highest</td>
-<td>Medium</td>
-<td>Low</td>
+<td>High: one server, one Compose file per stack, scripted activation and rollback</td>
+<td>Medium: more services to provision and pay for</td>
 </tr>
 <tr>
 <td>Fit for one API + jobs</td>
-<td>Excellent (WebJobs or in-process hosted services)</td>
-<td>Good (scale-to-zero not needed)</td>
-<td>Over-engineered</td>
+<td>Excellent (in-process hosted services)</td>
+<td>Good</td>
 </tr>
 <tr>
-<td>Recommendation</td>
-<td><strong>Preferred</strong> for MVP</td>
-<td>Revisit if containerised workloads multiply</td>
-<td>Not recommended</td>
+<td>Limits</td>
+<td>One machine, no failover; Docker changes need Jay's sudo</td>
+<td>Managed backups and failover</td>
+</tr>
+<tr>
+<td>Decision</td>
+<td><strong>Used</strong> for review and pilot</td>
+<td>Not used. The earlier Azure Bicep template in <code>infra/</code> is kept for reference and is not the deployment path</td>
 </tr>
 </tbody>
 </table></div>
@@ -7052,8 +7051,40 @@ td,th{font-variant-numeric:tabular-nums}
 </ol>
 <blockquote class="note"><p><strong class="lbl note">Design note</strong> This hybrid avoids the two classic failure modes. Pure compute-on-read puts rule logic in SQL views and again in application code for notifications, and the two drift. Pure nightly batch leaves a task showing "not blocked" all day after its predecessor slipped. Evaluating the whole project on every change through one pure function, then diffing against the last result, gives a single source of truth, near-real-time indicators, and transition-based notifications from the same code path. Whole-project recomputation sounds wasteful but a project rarely exceeds a few thousand tasks, and simplicity wins.</p>
 </blockquote>
-<p>Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process with a single-instance lock (database-based) so scaling out App Service instances does not duplicate jobs; job runs recorded in <code>job_run</code>. If the team prefers, jobs can run in a separate App Service WebJob using the same codebase — same deployable, different entry point.</p>
+<p>Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process with a single-instance lock (database-based) so a second API container would not duplicate jobs; job runs recorded in <code>job_run</code>. If the team prefers, jobs can run in a separate container from the same image — same deployable, different entry point.</p>
 <h3 id="236-authentication-and-sso"><span class="num">23.6</span> Authentication and SSO</h3>
+<p><strong>Sign-in modes.</strong> <code>Auth:Mode</code> selects one mode per stack (FR-AUTH-01):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Who signs in</th>
+<th>Where it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LocalPassword</code></td>
+<td>A person with a user ID and password an operator issued and mapped to one active user. Only a salted verifier is kept, in the stack's owner-only <code>.runtime/</code> files</td>
+<td>The homedev review, pilot and production stacks (<code>hosting/homedev*.compose.yml</code>). It runs under the Staging runtime name and refuses to start under Production (FR-OPS-17)</td>
+</tr>
+<tr>
+<td><code>Social</code></td>
+<td>Anyone with a Microsoft or Google account; a new person gets an active profile with no system role and sees only Open projects. Identity is keyed by provider and subject</td>
+<td>A homedev stack only when Jay authorises an activation with <code>hosting/social-auth.override.yml</code> (<code>docs/runbooks/social-sign-in.md</code>)</td>
+</tr>
+<tr>
+<td><code>Entra</code></td>
+<td>Accounts in the organisation's tenant</td>
+<td>Not used on homedev; kept as an alternative. The bullets below that name app registrations, MSAL, app roles, directory sync and security groups describe this mode only</td>
+</tr>
+<tr>
+<td><code>Development</code></td>
+<td>Seeded people chosen from a list</td>
+<td>Development and Testing only</td>
+</tr>
+</tbody>
+</table></div>
 <ul>
 <li><strong>App registrations</strong>: one for the SPA (public client, redirect URIs per environment), one for the API (exposes scope <code>access_as_user</code>, defines <strong>App Roles</strong>: <code>Hub.Admin</code>, <code>Hub.Executive</code>, <code>Hub.Supervisor</code>, <code>Hub.ProjectManager</code>, <code>Hub.ReadOnly</code>). Recommendation: use App Roles assigned to Entra security groups (via the Enterprise Application) rather than raw group claims, which suffer from group-overage limits and leak group IDs into tokens.</li>
 <li><strong>Sign-in</strong>: MSAL.js authorization code flow with PKCE; access token for the API scope; silent renewal; token lifetime per tenant policy (~1 h). API validates issuer, audience, signature, and expiry with <code>Microsoft.Identity.Web</code>. Conditional Access and MFA are Entra concerns and apply automatically.</li>
@@ -7062,66 +7093,61 @@ td,th{font-variant-numeric:tabular-nums}
 <li><strong>Disabled accounts</strong>: cannot obtain tokens (Entra); marked Inactive by sync; A-18 flags their work; the "Reassign work" tool lists everything they own.</li>
 <li><strong>Security groups</strong>: five groups mapped to app roles, managed by IT; membership changes take effect at next token issuance.</li>
 <li><strong>Session management</strong>: Entra bearer-token authentication is stateless. SPA sign-out clears MSAL cache and redirects to Entra logout. Individual local-password review sign-in uses eight-hour, non-sliding PostgreSQL-backed session tickets; sign-out removes the current ticket, so copied cookies are refused across API instances and restarts. Existing stateless review cookies require a fresh sign-in after activation. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (<span class="tbd">TBD</span>). No refresh tokens stored server-side.</li>
-<li><strong>Service-to-service</strong>: none in MVP other than the API's managed identity to Key Vault/Graph/PostgreSQL.</li>
+<li><strong>Service-to-service</strong>: none in MVP other than the API's connection to PostgreSQL and, if approved, Graph.</li>
 </ul>
 <h3 id="237-environments-cicd-iac"><span class="num">23.7</span> Environments, CI/CD, IaC</h3>
 <ul>
-<li>Environments: <code>dev</code> (shared, auto-deployed from main), <code>test</code> (UAT, deployed on release candidates), <code>prod</code> (approval-gated). Each has its own resource group, database, Key Vault, app registrations, and Entra groups.</li>
-<li>IaC: Bicep modules for App Service plan and app, PostgreSQL Flexible Server (with private endpoint/VNet integration), Key Vault, App Insights/Log Analytics, and (if used) Static Web App. Parameter files per environment.</li>
+<li>Environments, all on homedev: <code>review</code> (Compose project <code>pm-tool-review</code>, public at <code>https://pm.engcalchub.com</code> through the tunnel, synthetic data only) and <code>pilot</code> (Compose project <code>pm-tool-pilot</code>, loopback only). Each has its own base directory with <code>releases/&lt;full-sha&gt;</code>, a <code>current</code> link, <code>.runtime/</code> and <code>data/</code>. Local development runs on the Mac with <code>docker-compose.yml</code>. Accepted company production runs in the pilot stack (<code>docs/runbooks/environments.md</code>).</li>
+<li>Infrastructure as code: <code>hosting/homedev.compose.yml</code>, <code>hosting/homedev-pilot.compose.yml</code>, <code>hosting/Dockerfile.review</code>, the backup units and <code>hosting/pm-tool-tunnel.service</code>. Docker and system units on homedev are changed only with Jay's sudo.</li>
 <li>CI: build, unit tests, rules-engine tests, lint, dependency scan, OpenAPI generation, SPA build, accessibility checks on key pages; PR required for main.</li>
-<li>CD: GitHub Actions or Azure DevOps Pipelines (<span class="tbd">TBD</span> by existing tooling); database migrations run as a deployment step with backup-before-migrate in prod; blue/green via App Service deployment slots (Rec).</li>
-<li>Configuration: environment variables from App Service settings referencing Key Vault; feature flags as organisation settings (§43.4).</li>
+<li>CD: GitHub Actions builds one image per green main commit (FR-DLV-14). Releases are activated with <code>scripts/activate-homedev-review.sh</code> and <code>scripts/activate-homedev-pilot.sh</code>: a database backup first, then migrations and the API, then <code>/health</code> and the verification probes. If the probes fail, the review script prints the command that returns to the previous release. Review may also deploy by timer with an automatic return to the previous image (FR-DLV-18); pilot and production stay manual (FR-DLV-19).</li>
+<li>Configuration: environment variables from each stack's <code>.runtime/</code> env file; feature flags as organisation settings (§43.4).</li>
 </ul>
 <h3 id="238-observability"><span class="num">23.8</span> Observability</h3>
-<p>Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting <code>route_counter_enabled</code> is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), availability test on <code>/health</code> (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Dashboards and alerts: error rate &gt; 2% for 10 min; outbox lag &gt; 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU &gt; 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).</p>
-<h3 id="239-azure-services-and-sizing-assumptions"><span class="num">23.9</span> Azure services and sizing (assumptions)</h3>
+<p>The application log and the Admin Operations page: requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting <code>route_counter_enabled</code> is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), a <code>/health</code> probe (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Watchdog alerts on homedev: error rate &gt; 2% for 10 min; outbox lag &gt; 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU &gt; 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).</p>
+<h3 id="239-homedev-services-and-sizing"><span class="num">23.9</span> Homedev services and sizing</h3>
 <div class="tbl"><table>
 <thead>
 <tr>
 <th>Service</th>
 <th>Purpose</th>
-<th>Initial size (Assumption)</th>
+<th>Size</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>App Service (Linux) — P1v3 or P2v3</td>
+<td>API container (<code>hosting/Dockerfile.review</code>)</td>
 <td>API + static SPA + in-process jobs</td>
-<td>1–2 instances</td>
+<td>One per stack; pilot limit 1 GB memory, 2 CPUs</td>
 </tr>
 <tr>
-<td>Azure Database for PostgreSQL Flexible Server</td>
-<td>Primary database</td>
-<td>General Purpose 2–4 vCores, 128 GB, PITR 14 days; zone-redundant HA <span class="tbd">TBD</span></td>
+<td>PostgreSQL 17 container (<code>postgres:17-alpine</code>)</td>
+<td>Primary database, one per stack on its own volume</td>
+<td>Pilot limit 1 GB memory, 1 CPU; WAL archive and base backups on the pilot</td>
 </tr>
 <tr>
-<td>Azure Key Vault</td>
-<td>Secrets and certificates</td>
-<td>Standard</td>
+<td>Cloudflare tunnel <code>pm-tool</code> (user unit <code>pm-tool-tunnel.service</code>)</td>
+<td>Public HTTPS for <code>pm.engcalchub.com</code>, routed to the review API on loopback</td>
+<td>192 MB memory limit</td>
 </tr>
 <tr>
-<td>Application Insights + Log Analytics</td>
-<td>Telemetry and logs</td>
-<td>Pay-as-you-go, 30–90 day retention</td>
+<td>Backup timers (<code>pm-tool-review-backup.timer</code>, <code>pm-tool-pilot-backup.timer</code>)</td>
+<td>Daily owner-only logical dumps</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Azure Static Web Apps (optional)</td>
-<td>SPA hosting with CDN</td>
-<td>Standard; alternatively serve SPA from App Service</td>
+<td>Encrypted off-host backup copy</td>
+<td>Recovery if homedev is lost (§48.3)</td>
+<td>Pilot or company data joins it only with Jay's approval (044-D2)</td>
 </tr>
 <tr>
 <td>Microsoft Graph</td>
 <td>User sync, mail send</td>
-<td>No cost; permissions approval</td>
+<td>Off on homedev until approved (Q3)</td>
 </tr>
 <tr>
-<td>Azure Communication Services Email (alternative)</td>
-<td>Outbound email</td>
-<td>If Graph mail is not approved</td>
-</tr>
-<tr>
-<td>Azure Storage</td>
-<td>Not required (no files); optional for export staging</td>
+<td>File storage</td>
+<td>Not required (no files)</td>
 <td>—</td>
 </tr>
 </tbody>
@@ -7134,23 +7160,24 @@ td,th{font-variant-numeric:tabular-nums}
   subgraph Entra[Microsoft Entra ID]
     IDP[(OIDC / OAuth2&lt;br/&gt;App Roles from Groups)]
   end
-  subgraph Azure[Azure — App Service (Linux)]
+  subgraph Homedev[homedev — Docker Compose stack]
     API[ASP.NET Core Web API&lt;br/&gt;Modules: Identity · Organisation · Projects · Work · Registers · Collaboration · Evaluation · Notifications · Reporting · Audit · Search]
     JOBS[In-process jobs&lt;br/&gt;Outbox consumer · Nightly evaluation · Digest · Graph sync]
     API --- JOBS
   end
-  PG[(Azure Database for PostgreSQL&lt;br/&gt;core tables · state tables · outbox · activity_log · FTS)]
-  KV[(Key Vault)]
-  AI[(Application Insights)]
+  PG[(PostgreSQL 17 container&lt;br/&gt;core tables · state tables · outbox · activity_log · FTS)]
+  CF[Cloudflare tunnel&lt;br/&gt;pm.engcalchub.com]
+  RT[(.runtime/ secrets&lt;br/&gt;owner-only)]
+  LOG[(Container logs)]
   GRAPH[Microsoft Graph&lt;br/&gt;Users · Mail.Send]
-  SPA -- bearer token --&gt; API
+  SPA -- HTTPS --&gt; CF
+  CF -- loopback --&gt; API
   SPA -. sign-in .-&gt; IDP
   API -. validate token .-&gt; IDP
   API --&gt; PG
   JOBS --&gt; PG
-  API --&gt; KV
-  API --&gt; AI
-  SPA --&gt; AI
+  API --&gt; RT
+  API --&gt; LOG
   JOBS --&gt; GRAPH
 </pre></div>
 <hr />
@@ -8292,9 +8319,9 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 <tr>
 <td>Microsoft Entra ID</td>
 <td>Inbound (auth)</td>
-<td>SSO, app roles</td>
+<td>SSO, app roles, in <code>Entra</code> mode only (§23.6); not used on homedev</td>
 <td>OIDC/OAuth 2.0</td>
-<td>MVP</td>
+<td>Optional</td>
 </tr>
 <tr>
 <td>Microsoft Graph — Users</td>
@@ -8304,10 +8331,10 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 <td>MVP (Rec)</td>
 </tr>
 <tr>
-<td>Microsoft Graph — Mail / ACS Email</td>
+<td>Microsoft Graph — Mail / SMTP relay</td>
 <td>Outbound</td>
 <td>Notification emails and digests</td>
-<td><code>Mail.Send</code> scoped to one mailbox, or ACS</td>
+<td><code>Mail.Send</code> scoped to one mailbox, or an SMTP relay</td>
 <td>MVP (<span class="tbd">TBD</span> provider)</td>
 </tr>
 <tr>
@@ -8467,9 +8494,9 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 <td>Security and clarity of ownership.</td>
 </tr>
 <tr>
-<td>SSO (Entra ID)</td>
+<td>Individual sign-in (local-password accounts on homedev; Social and Entra modes, §23.6)</td>
 <td><strong>MVP-Required</strong></td>
-<td>No local passwords; frictionless adoption. Feasible with standard libraries.</td>
+<td>Every action traces to one person; no shared accounts and no stored passwords.</td>
 </tr>
 <tr>
 <td>Activity history</td>
@@ -8538,12 +8565,12 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 </tr>
 <tr>
 <td>Project templates</td>
-<td><strong>Phase 2</strong></td>
+<td><strong>Phase 2</strong> (built, packet 012)</td>
 <td>High value but the template editor is a significant UI; MVP projects can be set up manually or by cloning a project (<strong>Recommendation: include "clone project structure" as a cheap MVP stopgap</strong> — copies disciplines, milestones (undated), deliverables, tasks (unassigned), and dependencies from an existing project).</td>
 </tr>
 <tr>
 <td>Risk / Issue registers, Meeting Actions</td>
-<td><strong>Phase 2</strong></td>
+<td><strong>Phase 2</strong> (built, packets 014 and 015)</td>
 <td>Valuable but not needed to answer the core question; can be represented in MVP by tasks and comments.</td>
 </tr>
 <tr>
@@ -8563,24 +8590,24 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 </tr>
 <tr>
 <td>Portfolio dashboard</td>
-<td><strong>Phase 2</strong></td>
-<td>Requires enough Active projects in the system to be meaningful; the Project List with health column covers the interim.</td>
+<td><strong>Moved to first release</strong> (§36.6)</td>
+<td>Original Phase 2 rationale: requires enough Active projects in the system to be meaningful; the Project List with health column covers the interim.</td>
 </tr>
 <tr>
 <td>Saved views</td>
-<td><strong>Phase 2</strong></td>
-<td>URL-encoded filters cover MVP.</td>
+<td><strong>Moved to first release</strong> (§36.7)</td>
+<td>Original Phase 2 rationale: URL-encoded filters cover MVP.</td>
 </tr>
 <tr>
 <td>Tasks/dependencies on the timeline, drag to reschedule</td>
-<td><strong>Phase 2</strong></td>
-<td>Scheduling-adjacent; risk of scope creep.</td>
+<td><strong>Moved to first release</strong> (§36.4)</td>
+<td>Original Phase 2 rationale: scheduling-adjacent; risk of scope creep.</td>
 </tr>
 </tbody>
 </table></div>
 <h3 id="272-mvp-feature-list"><span class="num">27.2</span> MVP feature list</h3>
 <p><strong>Required</strong>
-1. Entra ID SSO; user provisioning; system roles; supervisor field; inactive handling.
+1. Individual sign-in (FR-AUTH-01); user provisioning; system roles; supervisor field; inactive handling.
 2. Admin reference data: disciplines, clients, offices, project types, phases, deliverable types, thresholds, notification defaults.
 3. Projects: create/edit; statuses (Setup, Active, On Hold, Complete, Archived, Cancelled); links; phase; closeout checklist; archive.
 4. Team and disciplines: members with project roles; discipline leads; auto-add on assignment; discipline summaries.
@@ -8602,6 +8629,7 @@ The first-release Created by Me view (§36.7) requires <code>task.created_by_id<
 <p><strong>Recommended (ship if schedule allows; each independently cuttable)</strong>
 Personal calendar subscription (§12.19); External Parties; project-derived demand context column (§12.15.8); Deliverable Pressure rule RES-13; thin Risk and Issue registers (same pattern as Decisions); read-only Timeline; slip and due-change tracking; health snapshots; attention snooze; Restricted visibility enforcement; reassign-work tool; clone project structure; "Copy summary" on Weekly Coordination; milestone date cascade to deliverables.</p>
 <h3 id="273-explicitly-not-in-mvp-and-the-consequence"><span class="num">27.3</span> Explicitly not in MVP (and the consequence)</h3>
+<p>This table records the original v1.0 boundary. Since then, Templates, Risks, Issues and Meeting Actions were built as Phase 2 packets 012, 014 and 015, and the Portfolio Dashboard, tasks on the timeline with drag scheduling, and saved views moved to the first release (§28, §36). The other rows still apply.</p>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -8704,8 +8732,8 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>HR remains authoritative; importing approved availability and planning coverage are in scope.</td>
 </tr>
 <tr>
-<td>Timesheets or time tracking of any kind</td>
-<td>Duplicates ERP/timesheet systems; poisons task estimates with compliance behaviour.</td>
+<td>Payroll or billable timesheets, timesheet submission, approval or locking</td>
+<td>Duplicates ERP/timesheet systems; poisons task estimates with compliance behaviour. Actual hours entered against tasks under Time (§36.8, Q21) are in the first release, without approval or billing.</td>
 </tr>
 <tr>
 <td>Full ERP or CRM functionality</td>
@@ -8770,10 +8798,10 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <p>Format: Given / When / Then. Criteria are testable against the rules and thresholds in Sections 10, 15, and 16. Default thresholds are assumed unless stated.</p>
 <h3 id="311-authentication-and-access-ac-auth"><span class="num">31.1</span> Authentication and access (AC-AUTH)</h3>
 <ul>
-<li><strong>AC-AUTH-01</strong> Given a user with a valid corporate Entra ID account who has never used the Hub, When they sign in, Then a user record is created with their display name and email, they receive the Standard User role, and they land on My Work.</li>
-<li><strong>AC-AUTH-02</strong> Given a user whose Entra account is disabled, When they attempt to sign in, Then sign-in fails at Entra and, after the next directory sync, the user is marked Inactive and appears with an "(Inactive)" suffix wherever referenced.</li>
+<li><strong>AC-AUTH-01</strong> In <code>Entra</code> mode, given a user with a valid corporate Entra ID account who has never used the Hub, When they sign in, Then a user record is created with their display name and email, they receive the Standard User role, and they land on My Work.</li>
+<li><strong>AC-AUTH-02</strong> In <code>Entra</code> mode, given a user whose Entra account is disabled, When they attempt to sign in, Then sign-in fails at Entra and, after the next directory sync, the user is marked Inactive and appears with an "(Inactive)" suffix wherever referenced.</li>
 <li><strong>AC-AUTH-03</strong> Given a user in the <code>Hub.ProjectManager</code> app role, When they open Projects, Then the Create project action is visible; Given a user without it, Then it is not visible and a direct <code>POST /projects</code> returns 403.</li>
-<li><strong>AC-AUTH-04</strong> Given an API request without a valid bearer token, When any endpoint except <code>/health</code> is called, Then the response is 401.</li>
+<li><strong>AC-AUTH-04</strong> Given an API request without a valid session or bearer token, When any endpoint except <code>/health</code> is called, Then the response is 401.</li>
 </ul>
 <h3 id="312-permissions-ac-perm"><span class="num">31.2</span> Permissions (AC-PERM)</h3>
 <ul>
@@ -9151,16 +9179,6 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>Users with no supervisor appear only in the All staff scope and in an Admin "No supervisor" filter so the gap gets fixed; nobody can staff them from My Staff until a supervisor is set.</td>
 </tr>
 <tr>
-<td>E-28</td>
-<td><strong>Follower loses access to a Restricted project</strong></td>
-<td>The follow is deleted (ASG-04), and because the feed is permission-filtered at read time, that project's entries disappear from the Following tab immediately.</td>
-</tr>
-<tr>
-<td>E-29</td>
-<td><strong>Supervisor removes a direct report who owns open work on a project</strong></td>
-<td>The TM-04 prompt runs for the supervisor as it would for the PM: reassign the person's open items within the project or leave them assigned with an "Inactive on project" indicator; the PM is notified with the list of affected items; all logged.</td>
-</tr>
-<tr>
 <td>E-27</td>
 <td><strong>Person on many projects gets too many updates</strong></td>
 <td>Per-project follow levels (ASG-02); the digest groups updates by project and caps each at five rows; the Following tab has an "important only" filter; the system never overrides a level the user has set.</td>
@@ -9174,6 +9192,21 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>E-29</td>
 <td><strong>Supervisor removes a direct report who owns open work on a project</strong></td>
 <td>The TM-04 prompt runs for the supervisor as it would for the PM: reassign the person's open items within the project or leave them assigned with an "Inactive on project" indicator; the PM is notified with the list of affected items; all logged.</td>
+</tr>
+<tr>
+<td>E-30</td>
+<td><strong>Leave overlaps a holiday or another absence</strong></td>
+<td>Apply RES-03 once per daily hour. Deduplicate stable source keys; ambiguous overlapping partial-day source rows require reconciliation, never a guessed aggregate. Allocation hours remain intact.</td>
+</tr>
+<tr>
+<td>E-31</td>
+<td><strong>HR export is stale, incomplete or cancelled</strong></td>
+<td>Reject older/conflicting rows and stale previews atomically; missing rows never mean cancellation. Retain last successful source/import times and history; explicit cancellations recompute affected old dates.</td>
+</tr>
+<tr>
+<td>E-32</td>
+<td><strong>Calendar event loses visibility or is reassigned</strong></td>
+<td>Emit a stable-UID cancellation tombstone without former content. Active feed queries enforce current permissions; revoke capabilities on deactivation. Client polling may delay display changes.</td>
 </tr>
 </tbody>
 </table></div>
@@ -9303,7 +9336,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>Q3</td>
 <td>Approval for Graph <code>User.Read.All</code> (directory sync) and <code>Mail.Send</code> (service mailbox)</td>
 <td>Leaver detection and email delivery path</td>
-<td>Request both; fall back to manual deactivation and ACS Email</td>
+<td>Request both; fall back to manual deactivation and an SMTP relay; homedev runs with email in log mode until one is approved</td>
 </tr>
 <tr>
 <td>Q4</td>
@@ -9373,9 +9406,9 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </tr>
 <tr>
 <td>Q15</td>
-<td>CI/CD platform (GitHub Actions vs Azure DevOps)</td>
+<td>CI/CD platform</td>
 <td>Tooling alignment</td>
-<td>Whichever the organisation already uses</td>
+<td>GitHub Actions, with deployment to homedev under §43</td>
 </tr>
 <tr>
 <td>Q16</td>
@@ -9391,9 +9424,9 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </tr>
 <tr>
 <td>Q18</td>
-<td>Weekly capacity default and whether under-assignment should be shown (P2)</td>
-<td>Workload view sensitivity</td>
-<td>40 h; show with caveats</td>
+<td>Weekly capacity default and whether under-assignment should be shown</td>
+<td>Workload and planner sensitivity</td>
+<td>40 h (<code>default_weekly_capacity_hours</code>, §10.4), an organisation setting; the v1.1 draft's 37.5 h was not adopted (§39.11, decision 1); show under-assignment with caveats</td>
 </tr>
 <tr>
 <td>Q19</td>
@@ -9412,393 +9445,6 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>Meaning of the Time navigation entry in the six-view image: task-hour entry or reserved route</td>
 <td>Determines whether §3.2, §6, §12.15, and §30's time-tracking exclusion changes, and whether a new first-release workflow and packet are needed</td>
 <td><strong>Decided by user:</strong> enter actual hours against tasks in the first release; no billing or payroll workflow is implied.</td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2 id="35-recommended-development-sequence"><span class="num">35</span><span class="ttl">Recommended Development Sequence</span></h2>
-<h2 id="32-edge-cases-and-recommended-handling-1"><span class="num">32</span><span class="ttl">Edge Cases and Recommended Handling</span></h2>
-<div class="tbl"><table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Edge case</th>
-<th>Handling</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>E-01</td>
-<td><strong>Employee leaves the company</strong></td>
-<td>Entra disable → sync marks Inactive within 24 h → cannot sign in → A-18 fires for every open task, deliverable, decision, review, and discipline lead role they hold → Supervisor and PMs use the Reassign-work tool (bulk, per project, logged) → historical references retained with "(Inactive)" suffix. Notifications to the inactive user stop.</td>
-</tr>
-<tr>
-<td>E-02</td>
-<td><strong>Project manager changes</strong></td>
-<td>PM (or Admin) sets a new <code>project_manager_id</code>; the new PM gets the PM role and notification; the old PM keeps membership as Team Member unless removed; attention items and digests re-route within one cycle; the change is logged. The Reassign-work dialog is offered for tasks assigned to the old PM (optional).</td>
-</tr>
-<tr>
-<td>E-03</td>
-<td><strong>Due date is changed</strong></td>
-<td>Log old → new with reason (required for non-PM/DL by Recommendation); notify assignee and reviewer if changed by someone else; increment <code>due_date_change_count</code>; re-evaluate Overdue/Due Soon/Blocked/Date Inconsistent for the task and its successors; if the task is a predecessor, successors with start dates before the new due date are flagged D-12.</td>
-</tr>
-<tr>
-<td>E-04</td>
-<td><strong>Predecessor is deleted</strong></td>
-<td>Soft-delete; all edges removed and listed in the log snapshot; successors re-evaluated (usually unblocked); successor assignees and PM notified with "dependency removed because 1234-T0031 was deleted"; PM may restore the task (Admin/PM restore action, Rec) which re-creates edges from the snapshot.</td>
-</tr>
-<tr>
-<td>E-05</td>
-<td><strong>Project is placed On Hold</strong></td>
-<td>Evaluation suspended (G-05); items keep their dates; portfolio shows On Hold; digests exclude the project; on resume, a "Date review" banner lists items whose dates passed while on hold with a bulk shift-by-N-days action (Rec).</td>
-</tr>
-<tr>
-<td>E-06</td>
-<td><strong>Task belongs to multiple disciplines</strong></td>
-<td>Not supported by design: one owning discipline for accountability. Handling: create the task under the leading discipline and add collaborators from the other; or create two linked tasks with a dependency; a "Coordination" task typically belongs to Project Management or the discipline that owns the deliverable. Documented in user guidance.</td>
-</tr>
-<tr>
-<td>E-07</td>
-<td><strong>Multiple people collaborate on a task</strong></td>
-<td>Single assignee plus collaborators (T-15); collaborators can update progress/status and comment; notifications go to assignee and collaborators; if the work is genuinely separable, split into tasks under the deliverable.</td>
-</tr>
-<tr>
-<td>E-08</td>
-<td><strong>Reviewer is also the assignee</strong></td>
-<td>Refused unless <code>allow_self_review</code> is on (R-02). If a DL must review their own work on a small project, the PM may change the reviewer to themselves or the org may enable self-review (logged setting change).</td>
-</tr>
-<tr>
-<td>E-09</td>
-<td><strong>Milestone moves</strong></td>
-<td>M-02 to M-04: log, notify DLs, flag inconsistent deliverables, optional cascade preview; slip visible on milestone; portfolio "next submission" updates; if moved earlier, deliverables now due after the milestone are flagged.</td>
-</tr>
-<tr>
-<td>E-10</td>
-<td><strong>Task is reopened</strong></td>
-<td>T-14: reason required; progress 90; successors re-evaluated (may re-block; notified); deliverable progress recalculated; if the deliverable is Issued, "Issued with open work" indicator (DL-12) — the deliverable status is never auto-reverted.</td>
-</tr>
-<tr>
-<td>E-11</td>
-<td><strong>Completed project needs correction</strong></td>
-<td>Complete status stays editable for the PM (P-05); Archived requires Admin unarchive → PM edits with reasons → re-archive; all logged; corrected items remain in original snapshot history.</td>
-</tr>
-<tr>
-<td>E-12</td>
-<td><strong>Template changes after projects were created</strong></td>
-<td>Snapshot semantics: no propagation. Projects record template id and version. "Add from template" allows pulling specific new items. A "Compare with template" view is deliberately not built.</td>
-</tr>
-<tr>
-<td>E-13</td>
-<td><strong>Duplicate project numbers</strong></td>
-<td>Unique constraint with case-insensitive collation; clear error linking to the existing project; Admin can renumber with logging; if the business uses sub-project suffixes (e.g., <code>1234-02</code>), the format regex allows them and each is a distinct project.</td>
-</tr>
-<tr>
-<td>E-14</td>
-<td><strong>External parties own actions/decisions but have no accounts</strong></td>
-<td><code>ExternalParty</code> records; owner shown with organisation; no outbound notifications; requester/PM receive attention and digests; Weekly Coordination lists "Waiting on client/external" items; P3 may add emailed action lists.</td>
-</tr>
-<tr>
-<td>E-15</td>
-<td><strong>Task with no deliverable and no milestone</strong></td>
-<td>Allowed (e.g., "Book kickoff room"); shows under "Other tasks" in grouped views; excluded from milestone readiness; A-09 applies if In Progress with no due date.</td>
-</tr>
-<tr>
-<td>E-16</td>
-<td><strong>Deliverable retargeted to another milestone</strong></td>
-<td>Logged; both milestones re-evaluated; if the new milestone date is earlier than the deliverable due date, flag A-17.</td>
-</tr>
-<tr>
-<td>E-17</td>
-<td><strong>Cancelled milestone with linked deliverables</strong></td>
-<td>Deliverables flagged "Milestone cancelled — retarget"; excluded from readiness; PM prompted with a bulk retarget dialog.</td>
-</tr>
-<tr>
-<td>E-18</td>
-<td><strong>Discipline deactivated organisation-wide while in use</strong></td>
-<td>Deactivation hides it from pickers only; existing project disciplines and items remain valid; Admin sees the count of affected projects before deactivating.</td>
-</tr>
-<tr>
-<td>E-19</td>
-<td><strong>Same person is PM, DL, and assignee on one project</strong></td>
-<td>Permissions are the union; UI never asks to switch roles; self-review still governed by R-02; attention items routed once per user (de-duplicated).</td>
-</tr>
-<tr>
-<td>E-20</td>
-<td><strong>Bulk action partially fails</strong></td>
-<td>Row-by-row with a results summary (updated / skipped with reason); no rollback of successful rows; single summary notification per recipient.</td>
-</tr>
-<tr>
-<td>E-21</td>
-<td><strong>Clock/time-zone differences</strong></td>
-<td>Dates are calendar dates; "today" is the organisation time zone; a user in another time zone may see an item become Overdue an hour "early" or "late" — accepted and documented; per-project time zone is a future capability.</td>
-</tr>
-<tr>
-<td>E-22</td>
-<td><strong>Very large project (5,000+ tasks)</strong></td>
-<td>Whole-project evaluation still completes within seconds; lists are virtualised and paginated; Kanban warns above 500 cards and suggests filtering.</td>
-</tr>
-<tr>
-<td>E-23</td>
-<td><strong>Two PMs edit Weekly Coordination items simultaneously</strong></td>
-<td>Optimistic concurrency per item; conflicts surfaced inline; no locking.</td>
-</tr>
-<tr>
-<td>E-24</td>
-<td><strong>Deliverable issued, then client returns comments</strong></td>
-<td>Set status Revision Required (from Issued, PM/DL) with a comment; <code>issued_date</code>/<code>revision</code> retained; the next issue records the new revision; P2 issue history lists both.</td>
-</tr>
-<tr>
-<td>E-25</td>
-<td><strong>Leave overlaps a holiday or another absence</strong></td>
-<td>Apply RES-03 once per daily hour. Deduplicate stable source keys; ambiguous overlapping partial-day source rows require reconciliation, never a guessed aggregate. Allocation hours remain intact.</td>
-</tr>
-<tr>
-<td>E-26</td>
-<td><strong>HR export is stale, incomplete or cancelled</strong></td>
-<td>Reject older/conflicting rows and stale previews atomically; missing rows never mean cancellation. Retain last successful source/import times and history; explicit cancellations recompute affected old dates.</td>
-</tr>
-<tr>
-<td>E-27</td>
-<td><strong>Calendar event loses visibility or is reassigned</strong></td>
-<td>Emit a stable-UID cancellation tombstone without former content. Active feed queries enforce current permissions; revoke capabilities on deactivation. Client polling may delay display changes.</td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2 id="33-risks-and-technical-considerations-1"><span class="num">33</span><span class="ttl">Risks and Technical Considerations</span></h2>
-<div class="tbl"><table>
-<thead>
-<tr>
-<th>Risk</th>
-<th>Impact</th>
-<th>Mitigation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Adoption</strong>: team members do not update tasks, so indicators are wrong and PMs stop trusting the tool.</td>
-<td>High</td>
-<td>My Work as the single list; minimal required fields; weekly coordination run from the tool creates the habit; digest reminders; pilot with 2–3 motivated PMs; measure update frequency.</td>
-</tr>
-<tr>
-<td><strong>Data quality</strong>: missing due dates, unassigned tasks, no estimates.</td>
-<td>Medium</td>
-<td>Attention rules A-08/A-09/A-13 make gaps visible; the first-release Resource View shows unestimated counts rather than hiding them; templates (P2) seed structure.</td>
-</tr>
-<tr>
-<td><strong>Notification fatigue</strong> leads to filters that hide everything.</td>
-<td>Medium</td>
-<td>Digest-first defaults; transition-based immediate notifications only; per-user preferences; monitor unsubscribe rates in pilot and adjust defaults.</td>
-</tr>
-<tr>
-<td><strong>Rule tuning</strong>: thresholds produce too many or too few attention items.</td>
-<td>Medium</td>
-<td>All thresholds configurable; start with defaults; review attention volume per project weekly during pilot; keep the rule set small.</td>
-</tr>
-<tr>
-<td><strong>Over-reliance on health colours</strong> by management.</td>
-<td>Medium</td>
-<td>Computed and reported shown together; "why" always available; override expiry; training message: health summarises indicators, it does not predict.</td>
-</tr>
-<tr>
-<td><strong>Permission model perceived as restrictive</strong> (e.g., DL cannot move a milestone).</td>
-<td>Low</td>
-<td>Clear hover explanations; PMs can grant roles quickly; revisit after pilot rather than pre-emptively loosening.</td>
-</tr>
-<tr>
-<td><strong>Entra/Graph permission approvals</strong> delay SSO or sync.</td>
-<td>Medium</td>
-<td>Start the IT approval process in the discovery sprint; SSO works without Graph; sync has a documented fallback.</td>
-</tr>
-<tr>
-<td><strong>Supervisor data is incomplete</strong> (Entra <code>manager</code> not populated), so My Staff shows the wrong people and the wrong managers can staff them.</td>
-<td>Medium</td>
-<td>Sync <code>manager</code> from Entra where populated (Q3); Admin maintenance otherwise; "No supervisor" filter for Admins.</td>
-</tr>
-<tr>
-<td><strong>Staffing conflicts</strong>: a supervisor adds or removes people on a project without the PM's agreement.</td>
-<td>Low</td>
-<td>The PM is notified of every change (ASG-10); supervisors can only add their own direct reports as Team Members; the PM controls all other roles and can remove anyone.</td>
-</tr>
-<tr>
-<td><strong>Email deliverability</strong> (spam filtering of digests).</td>
-<td>Low</td>
-<td>Send from a corporate mailbox via Graph; SPF/DKIM already handled by Exchange Online; plain formatting.</td>
-</tr>
-<tr>
-<td><strong>Evaluation performance</strong> at higher-than-assumed scale.</td>
-<td>Low</td>
-<td>Whole-project evaluation is O(items) per project; per-project debounce; profile in test with synthetic 5,000-task projects; state tables keep reads cheap.</td>
-</tr>
-<tr>
-<td><strong>Time-zone and working-day expectations</strong> differ by office.</td>
-<td>Low</td>
-<td>Calendar days and one organisation time zone in MVP, stated plainly; working-day calendars in P2.</td>
-</tr>
-<tr>
-<td><strong>Bilingual requirement discovered late.</strong></td>
-<td>High if late</td>
-<td>Externalise all strings from the first commit; decide the language requirement before development (§34).</td>
-</tr>
-<tr>
-<td><strong>Small team bus factor.</strong></td>
-<td>Medium</td>
-<td>Mainstream stack; modular monolith; ADRs; runbooks; tests on rules; avoid exotic libraries.</td>
-</tr>
-<tr>
-<td><strong>Template maintenance</strong> becomes a bottleneck (P2).</td>
-<td>Low</td>
-<td>Template Editor flag; versioning; snapshot semantics avoid propagation complexity.</td>
-</tr>
-<tr>
-<td><strong>Scope creep</strong> toward scheduling, documents, or chat.</td>
-<td>High</td>
-<td>Section 30 and the "do not build yet" list; product principle 1 applied at every ticket.</td>
-</tr>
-<tr>
-<td><strong>Optimistic concurrency confusion</strong> during meetings.</td>
-<td>Low</td>
-<td>Clear conflict messages; per-field autosave reduces collision windows.</td>
-</tr>
-</tbody>
-</table></div>
-<hr />
-<h2 id="34-open-decisions-questions-1"><span class="num">34</span><span class="ttl">Open Decisions / Questions</span></h2>
-<div class="tbl"><table>
-<thead>
-<tr>
-<th>#</th>
-<th>Decision</th>
-<th>Why it matters</th>
-<th>Default assumption if undecided</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Q1</td>
-<td>Backend stack: ASP.NET Core vs Node/TypeScript</td>
-<td>Team skills and hiring; scheduling library choice</td>
-<td>ASP.NET Core (.NET 8)</td>
-</tr>
-<tr>
-<td>Q2</td>
-<td>System roles via Entra app roles/groups vs in-app assignment (or both)</td>
-<td>IT ownership of access; audit expectations</td>
-<td>App roles on groups + in-app manual additions</td>
-</tr>
-<tr>
-<td>Q3</td>
-<td>Approval for Graph <code>User.Read.All</code> (directory sync) and <code>Mail.Send</code> (service mailbox)</td>
-<td>Leaver detection and email delivery path</td>
-<td>Request both; fall back to manual deactivation and ACS Email</td>
-</tr>
-<tr>
-<td>Q4</td>
-<td>Open-by-default visibility vs Restricted projects</td>
-<td>Permission enforcement, search, portfolio</td>
-<td>Open by default; Restricted column enforced, toggle hidden</td>
-</tr>
-<tr>
-<td>Q5</td>
-<td>Project number format and source (manual now; ERP later?)</td>
-<td>Validation regex, uniqueness, future sync</td>
-<td>Manual entry, free format with uniqueness</td>
-</tr>
-<tr>
-<td>Q6</td>
-<td>Organisation time zone; date format</td>
-<td>All date rules and display</td>
-<td>Single org time zone; ISO dates</td>
-</tr>
-<tr>
-<td>Q7</td>
-<td>Bilingual UI requirement (e.g., English/French)</td>
-<td>i18n architecture from day one</td>
-<td>Externalised strings; English only at launch</td>
-</tr>
-<tr>
-<td>Q8</td>
-<td>Thin Decision Register in MVP: yes/no</td>
-<td>Blocked-by-decision rule; workflow 11</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>Q9</td>
-<td>Availability/HA and backup retention targets</td>
-<td>Database tier and cost</td>
-<td>99.5% business hours; 14-day PITR; no zone-redundant HA</td>
-</tr>
-<tr>
-<td>Q10</td>
-<td>Official browser list; iPad support</td>
-<td>Testing matrix</td>
-<td>Edge, Chrome current; Safari iPadOS</td>
-</tr>
-<tr>
-<td>Q11</td>
-<td>Reason required for due-date changes by non-PM/DL?</td>
-<td>Friction vs traceability</td>
-<td>Required</td>
-</tr>
-<tr>
-<td>Q12</td>
-<td><code>allow_self_review</code> default</td>
-<td>QA policy</td>
-<td>False</td>
-</tr>
-<tr>
-<td>Q13</td>
-<td>Who can create projects (PM role holders only vs all staff)</td>
-<td>Governance vs friction</td>
-<td>PM system role holders and Admins</td>
-</tr>
-<tr>
-<td>Q14</td>
-<td>Retention policy for archived projects and logs</td>
-<td>Storage, compliance</td>
-<td>Indefinite</td>
-</tr>
-<tr>
-<td>Q15</td>
-<td>CI/CD platform (GitHub Actions vs Azure DevOps)</td>
-<td>Tooling alignment</td>
-<td>Whichever the organisation already uses</td>
-</tr>
-<tr>
-<td>Q16</td>
-<td>Pilot group and success metrics</td>
-<td>Rollout plan</td>
-<td><strong>Decided:</strong> 50 people. Proposed operational default remains 3 PMs, 6 projects, 8 weeks, subject to project selection; the 50-person count is not a concurrency or server-capacity claim.</td>
-</tr>
-<tr>
-<td>Q17</td>
-<td>Idle session timeout</td>
-<td>Security vs convenience</td>
-<td>8 hours</td>
-</tr>
-<tr>
-<td>Q18</td>
-<td>Weekly capacity default</td>
-<td>Planner</td>
-<td>37.5 h (product scope §12); org setting</td>
-</tr>
-<tr>
-<td>Q19</td>
-<td>Product name in the UI: "Hub" or "Tuesday"?</td>
-<td>Branding, URL <code>pm.engcalchub.com</code>, Entra app name</td>
-<td>Tuesday, pending confirmation; this document keeps "the Hub" until renamed</td>
-</tr>
-<tr>
-<td>Q20</td>
-<td>May an employee edit a Published or Confirmed manager allocation?</td>
-<td>Trust model §8.6</td>
-<td>No; comment only, or add their own entry</td>
-</tr>
-<tr>
-<td>Q21</td>
-<td>Does Confirmed visibility need the employee to accept?</td>
-<td>Workflow weight</td>
-<td>No; manager action only (product scope §17)</td>
 </tr>
 <tr>
 <td>Q22</td>
@@ -9830,11 +9476,30 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <td>Capability URL handling and refresh/cancellation acceptance</td>
 <td>Outlook first under company IT policy; read-only dated events; no two-way sync in MVP</td>
 </tr>
+<tr>
+<td>Q27</td>
+<td>Product name in the UI: "Hub" or "Tuesday"?</td>
+<td>Branding, URL <code>pm.engcalchub.com</code>, Entra app name</td>
+<td>Tuesday, pending confirmation; this document keeps "the Hub" until renamed</td>
+</tr>
+<tr>
+<td>Q28</td>
+<td>May an employee edit a Published or Confirmed manager allocation?</td>
+<td>Trust model §8.6</td>
+<td>No; comment only, or add their own entry</td>
+</tr>
+<tr>
+<td>Q29</td>
+<td>Does Confirmed visibility need the employee to accept?</td>
+<td>Workflow weight</td>
+<td>No; manager action only (product scope §17)</td>
+</tr>
 </tbody>
 </table></div>
 <hr />
-<h2 id="35-recommended-development-sequence-1"><span class="num">35</span><span class="ttl">Recommended Development Sequence</span></h2>
+<h2 id="35-recommended-development-sequence"><span class="num">35</span><span class="ttl">Recommended Development Sequence</span></h2>
 <h3 id="351-overall-sequence"><span class="num">35.1</span> Overall sequence</h3>
+<p>This section is the original v1.0 to v1.2 sequence, kept for the epic names that early packets cite. The current build order and status are in <code>specs/README.md</code>. Stage 4b and epic E15 list the v1.1 resource-planning design (Manager Home, People and Person Profile, <code>person_capacity</code>, <code>leave</code>, RES-01…20), which was not adopted in that form; §27.2 items 16 and 17 and §39 state what was built. The diagram below labels E15 "Six-View Workspace", which is §36, not the table's E15.</p>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -9846,7 +9511,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tbody>
 <tr>
 <td><strong>0. Discovery &amp; design sprint</strong></td>
-<td>Confirm decisions Q1–Q13 and Q18–Q26; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination, Team Planner, Vacation &amp; Coverage, Manager Home; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists</td>
+<td>Confirm decisions Q1–Q13 and Q18–Q29; wireframes for My Work, Project Dashboard, Task List/Panel, Weekly Coordination, Team Planner, Vacation &amp; Coverage, Manager Home; validate rules with 3 PMs using real project data on paper; finalise discipline and deliverable type lists</td>
 <td>Decisions recorded as ADRs; wireframes approved; test data set prepared (DCC Dundurn Roads-style project)</td>
 </tr>
 <tr>
@@ -9904,7 +9569,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 <tbody>
 <tr>
 <td><strong>E0 Platform &amp; Foundations</strong></td>
-<td>Repos, CI/CD, Bicep, environments, App Insights, database, migrations framework, design system skeleton, OpenAPI + client generation, feature flags</td>
+<td>Repos, CI/CD, homedev Compose stacks and activation scripts, environments, application logs, database, migrations framework, design system skeleton, OpenAPI + client generation, feature flags</td>
 <td>—</td>
 <td>M</td>
 </tr>
@@ -9958,7 +9623,7 @@ Personal calendar subscription (§12.19); External Parties; project-derived dema
 </tr>
 <tr>
 <td><strong>E9 Notifications</strong></td>
-<td>Event mapping, in-app centre, preferences, email adapter (Graph/ACS), digest, suppression/collapse; project following (follow on assignment, levels), Following feed, Project updates and My staff digest sections</td>
+<td>Event mapping, in-app centre, preferences, email adapter (Graph or SMTP relay), digest, suppression/collapse; project following (follow on assignment, levels), Following feed, Project updates and My staff digest sections</td>
 <td>E7, E8</td>
 <td>L</td>
 </tr>
@@ -15339,7 +15004,7 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <tr>
 <td>9</td>
 <td>Passwords</td>
-<td>The product has no local passwords (FR-AUTH-01); review environments use a file-backed verifier only (§48, FR-OPS-17). The item is a question back to the author: does the pilot host lack Entra sign-in, or is this a request to keep sign-in password-free? (051-D13).</td>
+<td>The homedev stacks sign people in with individual user IDs and passwords issued by an operator; the product keeps only a salted verifier, never the password (FR-AUTH-01, §23.6; §48, FR-OPS-17). The item is a question back to the author about what they need changed (051-D13).</td>
 </tr>
 <tr>
 <td>10</td>
@@ -15636,12 +15301,1450 @@ Only labels and descriptions change. No value, sort, filter, indicator or export
 <tr>
 <td>D13</td>
 <td>"Passwords" (item 9)?</td>
-<td>Question back to the author; FR-AUTH-01 stands (no local passwords in pilot or production)</td>
+<td>Question back to the author; FR-AUTH-01 stands (individual local-password accounts on homedev, verifiers only)</td>
 </tr>
 <tr>
 <td>D14</td>
 <td>Pilot scope (items 11 and 12): one operating centre (OC54) and one discipline first?</td>
 <td>Proposed amendment to Q16; Jay decides; no product change needed</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="56-visual-system-and-navigation-amendment"><span class="num">56</span><span class="ttl">Visual System and Navigation Amendment</span></h2>
+<p>Proposed scope: drafted on 2026-10-31 from the visual direction discussed and recorded in the research session while reviewing a 33-screen static prototype of the whole application. This section states that direction as requirements a developer can build without the prototype open. Packet 052 delivers it. No approval is claimed here; the scope awaits Jay's approval (052-D1).</p>
+<p>The prototype is the visual reference: <code>.review/2026-10-31-unslop-home/proto/</code> (untracked). Its <code>kit/kit.css</code> holds every token, <code>home.html</code> is the reference screen and <code>index.html</code> lists every screen. It is not a design specification, a source of scope or application code. Where it and this section differ, this section governs; where its wording and the application's labels (<code>web/src/i18n/en.ts</code>) differ, the labels govern (052-D8). Until 052-D7 is decided, <code>docs/reference/coordination-hub-v2/</code> stays the repository's only visual-cue prototype for other work.</p>
+<p>The amendment is additive. It changes how screens look and where navigation items sit, not what any screen contains: every route, tab, count, column, filter, action, permission, status name, role name and label stays. Data, rules, permissions and the API are unchanged, except a stored project identity colour (FR-VSN-07) and an <code>asOf</code> time on responses that lack one (FR-VSN-14), both released only with the flag. No interface library is added, and the icon family stays the application's own.</p>
+<p>Where this section adds to §9.4 (navigation), §13.0 (layout, density, typography, status colour language, responsive and accessibility conventions) and §36.1 (FR-VIS-01, the shell), this section governs. It would also change two §41 rules: R8 (colour budget) and R4 with decision E2 (sidebar with a More group). Those two changes are proposed through decisions 052-D2 and 052-D3, stated precisely in FR-VSN-09 and FR-VSN-16, and take effect only when Jay decides them. Until then §41 stands as written, and the flag of §56.11 is not turned on in pilot.</p>
+<h3 id="561-scope-and-boundary"><span class="num">56.1</span> Scope and boundary</h3>
+<ul>
+<li>Tokens, type and spacing: §56.2.</li>
+<li>Colour with one meaning: §56.3.</li>
+<li>Shell, top bar and band: §56.4.</li>
+<li>The title block: §56.5.</li>
+<li>Count cards: §56.6.</li>
+<li>The one-list sidebar: §56.7.</li>
+<li>Workspace and project tab rows: §56.8.</li>
+<li>Phone behaviour: §56.9.</li>
+<li>Accessibility: §56.10.</li>
+</ul>
+<p>§56.11 sets how it ships. Out of scope: the "calm" variant and the grid texture, both rejected by Jay; a dark theme; per-user or per-project themes; gradients between hues, glows, coloured shadows, emoji, uppercase letter-spaced labels, italic text and looping animation; any change to a label, status name or role name; and the screen content of §57.</p>
+<p>The following conflicts and approval gates are explicit; none is silently resolved by this amendment:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Existing contract or uncertainty</th>
+<th>Proposed treatment</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>052-D1</td>
+<td>§56 is a new amendment, not an approved implementation scope</td>
+<td>Approve §56 with its listed defaults</td>
+<td>Open; no approval claimed</td>
+</tr>
+<tr>
+<td>052-D2</td>
+<td>§41 R8 and AC-CALM-05 cap chromatic fills at six, while the fixed-meaning palette measures about fourteen on the reference Home</td>
+<td>Replace only the colour portions as FR-VSN-09 states; keep the chrome-word measure</td>
+<td>Open; §41 remains authoritative until decided</td>
+</tr>
+<tr>
+<td>052-D3</td>
+<td>§41 R4/E2 uses a More group, while the agreed direction uses one eight-item list and a foot group</td>
+<td>Replace only the sidebar wording as FR-VSN-16 states</td>
+<td>Open; E2 and §41 remain authoritative until decided</td>
+</tr>
+<tr>
+<td>052-D4</td>
+<td>§41 E1 puts Activity and Settings under More</td>
+<td>Use two right-aligned links, or retain More if Jay declines</td>
+<td>Open; no route is removed either way</td>
+</tr>
+<tr>
+<td>052-D5</td>
+<td>Current project accents are derived; the proposed identity colour is stored and editable</td>
+<td>Store one of five identity colours, distinct from every status and metric hue</td>
+<td>Open; no migration or API field is implemented by this spec</td>
+</tr>
+<tr>
+<td>052-D6</td>
+<td>The current build may not bundle the proposed font family</td>
+<td>Bundle IBM Plex Sans and Mono from the application origin, subject to the served-file/font licence check</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>052-D7</td>
+<td><code>CLAUDE.md</code> names <code>docs/reference/coordination-hub-v2/</code> as the visual-cue prototype</td>
+<td>Keep the 33-screen prototype outside <code>docs/reference/</code>; this amendment remains buildable without it</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>052-D8</td>
+<td>Prototype wording can differ from application labels</td>
+<td>Canonical labels in <code>web/src/i18n/en.ts</code> win; no label or status rename is implied</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>052-D9</td>
+<td>One flag versus several flags affects release control</td>
+<td>Use one <code>flag.visual_system</code> for this amendment</td>
+<td>Open</td>
+</tr>
+<tr>
+<td>052-D10</td>
+<td>§13.0 already defines a phone bottom bar</td>
+<td>Keep it and add the drawer/menu behavior</td>
+<td>Open</td>
+</tr>
+</tbody>
+</table></div>
+<p>Until a gate is decided, the older contract wins for that conflict and the proposed behavior remains dark behind the flag. The proposed defaults are design inputs, not approvals.</p>
+<h3 id="562-tokens-type-and-spacing"><span class="num">56.2</span> Tokens, type and spacing</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-01.</strong> Colours, type and spacing MUST be defined once, as named tokens in one stylesheet, and every screen MUST use the tokens instead of literal values. Names and values are those of the prototype's <code>kit/kit.css</code> and the tables in §56.2 and §56.3, with one correction: muted text (<code>--ink-3</code>) is <code>#646d81</code>, because the prototype's <code>#687185</code> falls below 4.5:1 on the page, sidebar and raised surfaces.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--page</code></td>
+<td><code>#f4f5f8</code></td>
+<td>Page background below the band</td>
+</tr>
+<tr>
+<td><code>--side</code></td>
+<td><code>#f1f2f5</code></td>
+<td>Sidebar</td>
+</tr>
+<tr>
+<td><code>--card</code></td>
+<td><code>#ffffff</code></td>
+<td>Cards, tables, panels, count cards</td>
+</tr>
+<tr>
+<td><code>--raised</code></td>
+<td><code>#f3f4f7</code></td>
+<td>Group rows, tracks, quiet fills</td>
+</tr>
+<tr>
+<td><code>--ink</code></td>
+<td><code>#161a23</code></td>
+<td>Text and figures</td>
+</tr>
+<tr>
+<td><code>--ink-2</code></td>
+<td><code>#465063</code></td>
+<td>Secondary text</td>
+</tr>
+<tr>
+<td><code>--ink-3</code></td>
+<td><code>#646d81</code></td>
+<td>Muted text, column headers, item keys</td>
+</tr>
+<tr>
+<td><code>--line</code>, <code>--line-2</code>, <code>--line-3</code></td>
+<td><code>--ink</code> at 9 %, 6 % and 16 %</td>
+<td>Decorative hairlines, card outlines, dividers</td>
+</tr>
+<tr>
+<td><code>--input</code></td>
+<td><code>#7c8491</code></td>
+<td>The boundary of an input or control (3:1), kept from today's application</td>
+</tr>
+<tr>
+<td><code>--navy</code></td>
+<td><code>#1b2a4e</code></td>
+<td>Top bar, band, primary buttons</td>
+</tr>
+<tr>
+<td><code>--brand</code></td>
+<td><code>#385cac</code></td>
+<td>Links, focus ring, selection, today</td>
+</tr>
+<tr>
+<td><code>--brand-tint</code></td>
+<td><code>#eaf0fd</code></td>
+<td>Selected sidebar item, today's column</td>
+</tr>
+</tbody>
+</table></div></li>
+<li><p><strong>FR-VSN-02.</strong> The interface MUST use IBM Plex Sans, and IBM Plex Mono for item keys, dates, hours and figures in tables. Both are bundled with the build under their SIL Open Font License and served from the application's own origin, with today's system stacks as fallbacks; no font is requested from another host (052-D6). Weights are 400 and 500, with 600 only for small emphasis such as avatar initials. Figures use tabular numerals.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Text</th>
+<th>Size / line height</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Page title (one <code>h1</code>, in the band)</td>
+<td>28/36 px, weight 500; 24/32 px below 768 px</td>
+</tr>
+<tr>
+<td>Card heading</td>
+<td>15/24 px, weight 500</td>
+</tr>
+<tr>
+<td>Body and controls</td>
+<td>14/20 px</td>
+</tr>
+<tr>
+<td>Table text</td>
+<td>13 px; row height follows §13.0's density setting, unchanged</td>
+</tr>
+<tr>
+<td>Labels, legends, meta lines</td>
+<td>12/16 px</td>
+</tr>
+<tr>
+<td>Count-card figure</td>
+<td>32/40 px, weight 500; 28/36 px below 768 px</td>
+</tr>
+<tr>
+<td>Smallest text anywhere</td>
+<td>11 px</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dates in data are ISO (<code>2026-11-02</code>) in Mono, with a relative helper beside them where it helps ("In 4 days", "Mon 2 Nov"), as §13.0's time display already allows. Widget and column names stay in the Title Case the application uses; labels and buttons carry no trailing period and no exclamation mark; titles carry no greeting.</p>
+</li>
+<li>
+<p><strong>FR-VSN-03.</strong> Spacing MUST follow a 4 px grid: 20 to 24 px inside cards (16 px below 768 px), 24 px between cards, 16 px between count cards. Cards are white with a 14 px radius, a 1 px outline and a 1 to 2 px shadow; count cards use a deeper shadow; controls use an 8 px radius. Equal things get equal sizes. Motion is limited to hover and press transitions of 120 to 150 ms on named properties (never <code>all</code>) and one entrance on page load, in which content rises 8 px over 400 ms, lightly staggered. Nothing loops. <code>prefers-reduced-motion</code> removes both.</p>
+</li>
+</ul>
+<h3 id="563-colour-with-one-meaning"><span class="num">56.3</span> Colour with one meaning</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-04.</strong> Each semantic colour token below MUST keep its documented meaning within its visual domain and MUST NOT be repurposed within that domain. The metric/project domain and the task-lane/status domain are separate, so a hue may be reused only where the tables explicitly assign it (for example, Blue for project metrics and Done lanes). A figure, chart segment, icon chip or bar takes the colour of what it counts. Project identity colours are a separate domain and never encode status, health or a metric. Each hue has a strong value for marks, icons and large figures and a tint for chip and card backgrounds.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Colour</th>
+<th>Strong</th>
+<th>Tint</th>
+<th>Means</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blue</td>
+<td><code>#2f6fe0</code></td>
+<td><code>#e8f0fe</code></td>
+<td>Projects (links use the brand blue <code>#385cac</code>)</td>
+<td>Active Projects card, project counts</td>
+</tr>
+<tr>
+<td>Violet</td>
+<td><code>#6a52d1</code></td>
+<td><code>#efebfd</code></td>
+<td>Open work, In Progress</td>
+<td>Open Tasks card</td>
+</tr>
+<tr>
+<td>Red</td>
+<td><code>#d6334a</code></td>
+<td><code>#fde9ec</code></td>
+<td>Overdue, blocked, critical</td>
+<td>Overdue Tasks card, the runway's "Before today" cell, hours beyond 100 %</td>
+</tr>
+<tr>
+<td>Amber</td>
+<td><code>#c77d0a</code></td>
+<td><code>#fdf1dc</code></td>
+<td>Due soon, review, at risk</td>
+<td>Due Within n Days card</td>
+</tr>
+<tr>
+<td>Green</td>
+<td><code>#18915f</code></td>
+<td><code>#e3f5ec</code></td>
+<td>On track, done well</td>
+<td>On Track card, a good trend</td>
+</tr>
+<tr>
+<td>Teal</td>
+<td><code>#0f8a96</code></td>
+<td><code>#def3f4</code></td>
+<td>People, capacity, hours</td>
+<td>Team Members card, capacity bars, free hours</td>
+</tr>
+</tbody>
+</table></div></li>
+<li><p><strong>FR-VSN-05.</strong> Wherever task status is drawn as a bar, donut, column header or card edge, the four §36.3 buckets and On Hold MUST use the lane colours at full strength: To Do <code>#94a0b4</code>, In Progress <code>#6a52d1</code>, Review and revision <code>#f0a42b</code>, Done <code>#2f6fe0</code>, On Hold the hatch (FR-VSN-06). Status pills keep §13.0's colour language, symbol and text, with these values, and never take a lane or metric colour:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>§13.0 meaning</th>
+<th>Symbol</th>
+<th>Text on background</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>On Track / Normal</td>
+<td>●</td>
+<td><code>#386953</code> on <code>#eaf5ef</code></td>
+</tr>
+<tr>
+<td>Attention / Warning</td>
+<td>▲</td>
+<td><code>#7a5817</code> on <code>#fff4db</code></td>
+</tr>
+<tr>
+<td>Critical / Blocked / Overdue</td>
+<td>■</td>
+<td><code>#b42332</code> on <code>#fff0f1</code></td>
+</tr>
+<tr>
+<td>Not Started / Inactive / Not Evaluated</td>
+<td>○</td>
+<td><code>#59606c</code> on <code>#f1f2f4</code></td>
+</tr>
+<tr>
+<td>Complete / Issued</td>
+<td>✓</td>
+<td><code>#37589a</code> on <code>#edf2fd</code></td>
+</tr>
+<tr>
+<td>In Progress / In Review</td>
+<td>◐</td>
+<td><code>#574e87</code> on <code>#f0effa</code></td>
+</tr>
+</tbody>
+</table></div></li>
+<li><p><strong>FR-VSN-06.</strong> The hatch (135° stripes, 3 px <code>#94a0b4</code> and 3 px <code>#d5dae3</code>) MUST mean time away and on-hold work and nothing else: time off in capacity bars and planner cells, On Hold in status charts, days away on the Time grid. A faint variant (stripes of <code>--ink</code> at 3.5 %) marks non-working days, such as weekend columns, and nothing else. Every use of either hatch is named in its legend or label.</p>
+</li>
+<li>
+<p><strong>FR-VSN-07.</strong> Each project MUST have one identity colour from five, kept clear of the lane hues: coral <code>#ec6a3e</code>, mint <code>#20a36d</code>, rose <code>#d9467b</code>, cyan <code>#1597cc</code> and lime <code>#84a32a</code>. It appears as a 10 px swatch, or as the fill of the project's item marks on timelines, calendars and the deadline runway, always beside the project number, so it is never read as a status. The colour is stored on the project only when <code>flag.visual_system</code> is on. While the flag is off, create and update paths do not set or change the field; stored colours survive flag rollback, and existing derived accents remain the displayed fallback. When the flag first turns on, existing non-deleted projects of every lifecycle are backfilled in project-number order using the least-used colour among Setup and Active projects, ties broken in the listed order; a new project then gets the least-used colour by the same rule. The Project Manager may change it only where existing project edit permissions allow, with optimistic concurrency, and the change writes one activity entry. Colours are not unique and never encode health, lifecycle status or any metric (052-D5).</p>
+</li>
+<li>
+<p><strong>FR-VSN-08.</strong> Item types MUST keep one 10 px shape wherever they are drawn: a task is a circle, a deliverable a square with 2 px corners and a milestone a diamond. The shape is filled with the project colour on timelines, calendars and the runway, otherwise with <code>--ink-2</code>. Every legend that shows the shapes names them.</p>
+</li>
+<li>
+<p><strong>FR-VSN-09.</strong> Chromatic fills, borders and text colours MUST come only from the §56.2 and §56.3 tokens. When Jay confirms 052-D2, this replaces the colour budget of §41 R8 and the colour half of AC-CALM-05, as follows:
+  - R8 would read: "<strong>Colour with fixed meaning</strong>: every chromatic fill is a §56 token used only for its meaning (§56.3); brand navy carries the band and primary buttons; colour is never the only signal (§13.0)." The limit of six distinct fill colours above the fold is removed. The research measured about fourteen on the reference Home screen.
+  - The colour half of AC-CALM-05 would count chromatic fills above the fold that are not §56 tokens (target 0) and record, with no limit, the number of distinct token fills on each of the 17 screens of §41.1, so a later decision can set a ceiling from measurements. The chrome-word half of AC-CALM-05 is unchanged.</p>
+<p>Until 052-D2 is decided, R8 and AC-CALM-05 stand as written.</p>
+</li>
+</ul>
+<h3 id="564-shell-top-bar-and-band"><span class="num">56.4</span> Shell, top bar and band</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-10.</strong> The desktop shell MUST be a light sidebar (<code>--side</code>, 240 px, collapsible to today's 76 px icon rail) beside a navy top bar and a navy band that read as one block. The 56 px top bar stays in place while the page scrolls and holds, in this order: breadcrumbs, search with its <code>/</code> hint, the workspace scope selector (FR-VIS-02), New (white on navy; FR-VIS-01's permission-filtered quick-create), the notification bell with its unread count, and the user menu. Each control keeps today's behaviour.</p>
+</li>
+<li>
+<p><strong>FR-VSN-11.</strong> Every screen MUST open with the navy band: one <code>h1</code> page title, at most one plain subtitle line (§41 R5), actions on the right as quiet buttons, the title block where §56.5 applies, and then the screen's tab row (§56.8). Lists and registers use the plain band and start their content on the light page below it. On Home, the project Dashboard, Portfolio and My Staff, whose first row is count cards, the cards overlap the band's bottom edge by 72 px (64 px below 768 px). The band carries no texture or image.</p>
+</li>
+<li>
+<p><strong>FR-VSN-12.</strong> The project header in the band MUST follow §41 R6: the project number in Mono, the name on one line, truncated with the full name on hover and focus, the status pill and the health pill; then one meta line with Project Manager, Client and Target date. It is at most 72 px high. The prototype's two-line name is not adopted.</p>
+</li>
+<li>
+<p><strong>FR-VSN-13.</strong> Primary actions on light surfaces MUST be navy-filled buttons with white text, replacing today's black; on navy, New is white-filled and other actions are quiet buttons. Secondary buttons are white with a <code>--input</code> outline. Every input and control whose boundary identifies it keeps a 3:1 boundary (<code>--input</code>), never a decorative hairline. A segmented control (view switch, role preset) shows the selected option as a white segment marked with <code>aria-pressed</code> or <code>aria-current</code>. The focus ring is 2 px <code>--brand</code>, or <code>#9bb8ff</code> on navy, offset 2 px.</p>
+</li>
+</ul>
+<h3 id="565-title-block"><span class="num">56.5</span> Title block</h3>
+<ul>
+<li><strong>FR-VSN-14.</strong> A screen that shows computed counts or totals MUST show a <strong>title block</strong> in its band: a small two-column box whose first row is "Current values" with the date and time the server computed the figures, followed by one row for each other reference time the screen uses (for example "Trends compare with" and the snapshot time, §57 FR-SCR-10). This applies to Home, the project Dashboard, Portfolio, Workload, the Weekly Planner, My Staff, an open report and Time's totals. Each time is ISO date and 24-hour time in <code>org_time_zone</code>, in Mono, taken from the response's <code>asOf</code>, never from the browser clock; a response that lacks <code>asOf</code> today adds it behind the flag. Screens without computed figures (registers, panels, forms) show no title block. The block is how a screen states that snapshot totals are current values (FR-VIS-07).</li>
+</ul>
+<h3 id="566-count-cards"><span class="num">56.6</span> Count cards</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-15.</strong> A count card MUST show, top to bottom:
+  1. an icon chip in its metric colour (§56.3) and, where the screen has a comparison, a trend chip (§57 FR-SCR-10);
+  2. its label, underlined with dots, whose definition appears on hover and on focus;
+  3. the figure (32/40 px, tabular numerals);
+  4. a "where" line naming where the count sits (§57 FR-SCR-08) or its numerator and denominator;
+  5. an optional meta line.</p>
+<p>The whole card is one link to the filtered list that reproduces the count (§49.3, FR-RCV-07). Its accessible name reads label, figure and where line. The figure of a red metric is red only when it is above zero, and then the meta line carries "Needs attention" with a square symbol, so the alert is never colour alone. Cards in a row are equal in size: up to six per row on desktop, three below 1180 px and two below 768 px.</p>
+</li>
+</ul>
+<h3 id="567-sidebar-one-list"><span class="num">56.7</span> Sidebar: one list</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-16.</strong> The sidebar MUST be one list of eight items in this order: My Work, Home, Projects, Tasks, Resources, Time, Reports, Team. After a gap, a foot group holds the rare destinations: Files, My Staff, Templates, Admin. There is no More group (052-D3).
+  - Every item follows role permissions as today (FR-VIS-01): Resources needs Workload access, My Staff the Supervisor capability, Templates and Admin their roles. A hidden item leaves no gap.
+  - Notifications stays only in the top bar's bell (E2).
+  - Views of another page are tabs on their parent and highlight its item. Board, Timeline and Calendar are workspace tabs that highlight Tasks; the workspace Dashboard tab is Home. Portfolio is a Projects tab. Workload and Vacation &amp; Coverage are Resources tabs.
+  - Every route still loads for a permitted user and highlights exactly one sidebar item (AC-CALM-06, unchanged).</p>
+<p>When Jay confirms 052-D3, decision E2, §41 R4, the sidebar half of AC-CALM-04 and FR-VIS-01 would change as follows. E2 is replaced by this list. R4 and AC-CALM-04 would read "at most 8 items in the main list and at most 4 in the foot group, for any role, with no More group". In FR-VIS-01, "More holds permitted lower-frequency routes" would read "the foot group holds permitted lower-frequency routes". A System Administrator who is also a Supervisor then sees 12 sidebar rows, where E2 shows six primary items and a collapsed More. Until 052-D3 is decided, E2, R4, AC-CALM-04 and FR-VIS-01 stand as written.</p>
+</li>
+</ul>
+<h3 id="568-tab-rows"><span class="num">56.8</span> Tab rows</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-17.</strong> Workspace views MUST share one tab row in the band, in this order: Dashboard, Board, List, Timeline, Calendar, Files, Team, Workload, then the plus control that opens the view switcher (FR-VIS-01), and Copy link at the right end. Each tab keeps the selected scope (FR-VIS-02). The current tab carries <code>aria-current="page"</code> and a lighter fill; icons are 16 px, in the text's colour. Tabs a role cannot open are hidden. Projects (list, board, Portfolio) and Resources (Weekly Planner, Workload, Vacation &amp; Coverage) show their own tab rows in the same style.</p>
+</li>
+<li>
+<p><strong>FR-VSN-18.</strong> Project pages MUST show the six §41 E1 groups as their tab row: Overview, Work, Deliverables, Coordination, People and Files, each with its pages unchanged (People keeps Team &amp; Disciplines, Allocations and Workload). The active group, when it has more than one page, shows a second-level switch below the row (§41 R3). Activity and Settings sit at the right end of the row as two quiet links instead of under a More menu (052-D4). If 052-D4 keeps E1's More, they stay under More. Every existing project route and deep link keeps working and highlights its group.</p>
+</li>
+</ul>
+<h3 id="569-phone"><span class="num">56.9</span> Phone</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-19.</strong> Below 768 px:
+  - the sidebar is hidden, and a menu button at the left of the top bar opens the same list, foot group included, as a drawer that keeps focus inside until it closes and returns focus to the button;
+  - the §13.0 bottom bar (My Work, Search, Notifications) stays (052-D10);
+  - the top bar keeps the menu button, search as an icon, the scope selector, New, the bell and the user menu, and drops the breadcrumbs;
+  - the band keeps its order with 16 px side gutters, the title block takes the full width and tab rows scroll sideways inside the band;
+  - count cards sit two per row, grids collapse to one column, tables either scroll inside their card or drop the columns marked secondary, and side panels take the full width;
+  - no screen scrolls sideways at 375 px wide.</p>
+<p>§13.0's phone action scope is unchanged: screens that are desktop and tablet only keep their notice.</p>
+</li>
+</ul>
+<h3 id="5610-accessibility"><span class="num">56.10</span> Accessibility</h3>
+<ul>
+<li>
+<p><strong>FR-VSN-20.</strong> Status MUST never be shown by colour alone. Pills carry text and symbol (§13.0). Count cards name their metric. Chart segments, runway marks and capacity bars are links or images whose accessible names state the label and value ("250101, In Progress: 3"), and every chart has its values as visible text beside it, as legend totals or a list. Both hatches are named in their legend. Health pills carry their word.</p>
+</li>
+<li>
+<p><strong>FR-VSN-21.</strong> Text under 24 px regular or 18.66 px bold MUST meet 4.5:1 against its actual background, text on navy included. Large text and non-text marks that carry meaning without a text equivalent MUST meet 3:1. The WCAG 2.1 relative-luminance calculation MUST use the rendered foreground and background, not a token's contrast against white by assumption. For the strong metric hues on white, the measured ratios are Blue 4.70:1, Violet 5.61:1, Red 4.74:1, Amber 3.30:1, Green 4.00:1 and Teal 4.12:1. Therefore Blue, Violet and Red MAY be normal-size metric text on white; Amber, Green and Teal are restricted to figures at least 24 px, icons and non-text marks unless the actual pairing passes 4.5:1. Smaller coloured text uses the status-pill tones only, each measured between 5.66:1 and 6.48:1 on its stated tint.
+  - Muted text uses <code>#646d81</code>.
+  - The To Do and Review lane colours (below 3:1 on white) appear only where the value is also given as text (FR-VSN-20).
+  - Focus is always visible: <code>#9bb8ff</code> on navy is 7.2:1.</p>
+</li>
+<li>
+<p><strong>FR-VSN-22.</strong> No text MAY be smaller than 11 px. At 200 % browser zoom and with WCAG 2.1 text-spacing overrides, no content or control is hidden. Controls are real <code>button</code> and <code>a</code> elements; icon-only controls have accessible names; decoration is hidden from assistive technology; keyboard order follows visual order. An automated accessibility scan reports no serious or critical issue on any screen (as AC-CALM-08).</p>
+</li>
+</ul>
+<h3 id="5611-shipping-dark"><span class="num">56.11</span> Shipping dark</h3>
+<ul>
+<li><strong>FR-VSN-23.</strong> The amendment MUST merge dark behind <code>flag.visual_system</code> under §43's flag rules (FR-DLV-07 to FR-DLV-10). The flag sets one attribute on the document root that selects the §56 token set and the §56.7 sidebar; both token sets live in the one stylesheet until the flag's cleanup removes the old one. With the flag off, every screen looks and navigates as before this amendment, responses carry neither the identity colour nor any new <code>asOf</code> field, and existing browser suites pass unchanged. The flag is turned on in pilot only after 052-D2 and 052-D3 are decided.</li>
+</ul>
+<h3 id="5612-acceptance-criteria"><span class="num">56.12</span> Acceptance criteria</h3>
+<ul>
+<li>
+<p><strong>AC-VSN-01.</strong> Given the flag is on, when Home, project Tasks, Workload and the Weekly Planner render at 1440×900, then a token census reports no chromatic fill, border or text colour outside the §56 tokens, body text is IBM Plex Sans, item keys and table dates are IBM Plex Mono, and no font request leaves the application's origin.</p>
+</li>
+<li>
+<p><strong>AC-VSN-02.</strong> Given Home with one overdue task, then the Overdue Tasks card's chip and figure are red and its meta line reads "Needs attention" with a square symbol; with no overdue task, the figure is ink and the flag is absent. The other five cards use the colours of FR-VSN-04: Active Projects blue, Open Tasks violet, Due Within n Days amber, On Track green, Team Members teal.</p>
+</li>
+<li>
+<p><strong>AC-VSN-03.</strong> Given a project with tasks in every bucket and one On Hold, then Tasks by Status draws To Do grey, In Progress violet, Review and revision amber, Done blue and On Hold hatched, each named in the legend with its count; and a planner cell with time away shows the hatch labelled "Time off".</p>
+</li>
+<li>
+<p><strong>AC-VSN-04.</strong> Given five Active projects coloured coral, mint, rose, cyan and lime, when a sixth project is created, then it is coral (the first of the least used); when its PM changes it to cyan, one activity entry records the change, and the swatch beside its number on Home, the Timeline and the Calendar is cyan.</p>
+</li>
+<li>
+<p><strong>AC-VSN-05.</strong> Given project 250101 whose name is 120 characters long, then the band header shows the number, the name on one truncated line with the full name on focus, the status and health pills and the meta line, within 72 px.</p>
+</li>
+<li>
+<p><strong>AC-VSN-06.</strong> Given Home whose response says <code>asOf</code> 2026-10-31T14:24:05 in <code>org_time_zone</code>, then the title block reads "Current values 2026-10-31 14:24" even when the browser clock differs; the Risks register shows no title block.</p>
+</li>
+<li>
+<p><strong>AC-VSN-07.</strong> Given the Overdue Tasks card has keyboard focus, then its definition is shown, its accessible name reads its label, figure and where line, and Enter opens the task list whose row count equals the figure.</p>
+</li>
+<li>
+<p><strong>AC-VSN-08.</strong> Given a System Administrator who is also a Supervisor, then the sidebar lists My Work, Home, Projects, Tasks, Resources, Time, Reports and Team, then Files, My Staff, Templates and Admin in the foot group, with no More group; a Read Only user without Workload access sees seven items and Files. Opening <code>/boards</code>, <code>/portfolio</code>, <code>/workload</code> and <code>/vacation</code> highlights Tasks, Projects, Resources and Resources.</p>
+</li>
+<li>
+<p><strong>AC-VSN-09.</strong> Given Home, then the workspace tab row lists Dashboard, Board, List, Timeline, Calendar, Files, Team and Workload in order, the plus control, and Copy link at the right; on a project's Reviews page the Deliverables group is current with its second-level switch, Activity and Settings sit at the right end of the row, and every former project route loads and highlights its group.</p>
+</li>
+<li>
+<p><strong>AC-VSN-10.</strong> Given a 375×812 viewport, then the menu button opens the drawer with focus inside and Escape closes it and returns focus to the button, the bottom bar still shows My Work, Search and Notifications, Home shows two count cards per row, and no screen scrolls sideways.</p>
+</li>
+<li>
+<p><strong>AC-VSN-11.</strong> Given the flag is on, then the automated scan reports no serious or critical issue on the 17 screens of §41.1, a contrast census finds no text under 24 px below 4.5:1, and each Tasks by Project segment's accessible name states its project, bucket and count.</p>
+</li>
+<li>
+<p><strong>AC-VSN-12.</strong> Given <code>flag.visual_system</code> is off, then existing browser suites and the §41 census pass unchanged, the sidebar follows E2, and no response carries the identity colour or a new <code>asOf</code> field.</p>
+</li>
+</ul>
+<h3 id="5613-decisions"><span class="num">56.13</span> Decisions</h3>
+<p>Each decision below states a proposed default; it is not an approval. The rows are also in <code>specs/DECISIONS.md</code> as 052-D1 to 052-D10.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Approve this amendment's scope</td>
+<td>Approve with the listed defaults</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Colour budget: replace §41 R8's six-fill limit and the colour half of AC-CALM-05?</td>
+<td>Yes, as FR-VSN-09 states: every chromatic fill a §56 token with one meaning; the census counts non-token fills (target 0) and records token fills with no limit</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>Sidebar: replace decision E2's More group, §41 R4 and the sidebar half of AC-CALM-04 with one list of eight and a foot group of up to four?</td>
+<td>Yes, as FR-VSN-16 states; Vacation &amp; Coverage becomes a Resources tab; FR-VIS-01's "More" becomes the foot group</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Project tab row: Activity and Settings as two right-aligned links instead of E1's More menu?</td>
+<td>Yes; six group tabs and two links; AC-CALM-04's project half reads "at most 7 group tabs plus at most 2 page links"</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Project identity colours: stored per project, or derived from a hash of the project number as today?</td>
+<td>Stored; least used of five among Setup and Active projects at creation; PM may change; never status</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Font delivery</td>
+<td>IBM Plex Sans and Mono bundled with the build and served from the application's origin; no third-party font host</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Add the 2026-10-31 prototype (21 MB with screenshots) to <code>docs/reference/</code>?</td>
+<td>No. §56 is written to be built without it; it stays outside <code>docs/reference/</code>, and <code>coordination-hub-v2</code> stays the only visual-cue prototype CLAUDE.md names</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Prototype wording that differs from the application's labels (for example its spreadsheet export label)</td>
+<td>The application's labels in <code>web/src/i18n/en.ts</code> win; prototype wording is not adopted</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>How many flags?</td>
+<td>One, <code>flag.visual_system</code>, covering tokens, type, band, title block, count cards, sidebar and tab rows</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Phone navigation</td>
+<td>Keep today's bottom bar and add the menu drawer of FR-VSN-19</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="57-screen-completeness-amendment"><span class="num">57</span><span class="ttl">Screen Completeness Amendment</span></h2>
+<p>Proposed scope: drafted on 2026-10-31 from the dashboard and screen research of that date (kept outside the repository). The research compared the 33-screen prototype of §56 with the specification and with observed behaviour of other planning and document-control tools, screen by screen. Jay accepted its Home ideas and five patterns from a second prototype the same day. Packet 053 delivers this section. The scope awaits Jay's approval (053-D1).</p>
+<p>The amendment is additive only: nothing in this section removes, hides, narrows or freezes a current feature, screen, route, report, setting or rule. Where an addition touches existing behaviour, today's behaviour stays the default.</p>
+<p>The research items fall into three groups:</p>
+<ul>
+<li><strong>Already specified.</strong> These items are not restated. Packet 053 lists them as build and prototype gaps against their existing IDs.</li>
+<li><strong>Partly specified or new.</strong> These are the requirements below, with acceptance criteria in §57.10.</li>
+<li><strong>In conflict with an existing rule.</strong> These are open decisions with recommended defaults (§57.1). Where a default adopts an item, the requirement that embodies it names the decision.</li>
+</ul>
+<p>Every addition is deterministic and explainable (constitution II): each figure, flag and marker traces to one rule stated here, and the interface shows that rule. The following are excluded throughout: AI, machine-learning and LLM features of any kind; money (rates, budgets, costs, margins, invoices); timesheet submission, approval, locking or completeness scoring; per-person comparisons, rankings or scores; critical-path calculation; file storage; and custom roles, fields or statuses (§30).</p>
+<p>Where this section adds to §12.3, §12.4, §12.10, §12.14, §13.1 to §13.21, §17.4, §18.1, §18.4, §19, §36 and §37 to §55, this section governs.</p>
+<p><strong>Data, permission and validation boundary.</strong> This amendment introduces no unscoped
+schema, role, status or permission. A retained concept is an additive, nullable or
+project-scoped record/setting with a row version, server-side permission check, and
+same-transaction activity entry under §§8, 10 and 20; derived display values are read
+functions and are never stored. New organisation vocabularies are Admin-managed,
+validated against their list, and retain an <code>Other</code> value where the decision table says
+so. New person facts (certification, type and responsibility note) are optional and
+display-only unless a requirement explicitly names a command. If implementation finds
+that a concept needs a non-additive change to the §10 canonical model, its slice stops
+and records an OPEN decision; it does not silently reinterpret §10. All new commands
+use the existing optimistic-concurrency and permission contracts, and all new reads
+apply project, people-scope and partial-view rules before calculating figures.</p>
+<p>The task table in §57.2 uses <strong>Blocked</strong> and <strong>Waiting</strong> only as the canonical derived
+indicators of §10.3/§15 D-05/D-06; neither is a workflow status. A next actor is resolved
+from the canonical owner/assignee/reviewer/resolver/verifier field or an <code>ExternalParty</code>.
+If the field is absent or the actor is not an internal user, the UI says so explicitly
+(for example “Reviewer missing” or “External party — no account”) and never guesses the
+viewer or another person. A drilldown link always targets the exact blocker/child record;
+the parent record is shown only as context. Review-comment closure remains split between
+the resolver and the independent verifier under §10; “originator” is not silently used as
+the verifier. Canonical verification is the recorded verifier, or the originator where FR-MRV-03 assigns it and no reassignment exists; FR-MRV-04 still applies.</p>
+<p>Each requirement names one accountable owner role, the role that answers for that screen outcome, and a size from the research: S is one slice, M two. Thresholds are organisation settings (§10.4), never hard-coded.</p>
+<h3 id="571-priority-parts-and-dispositions"><span class="num">57.1</span> Priority, parts and dispositions</h3>
+<p>The parts are listed in priority order. Parts A and B come first because Jay accepted them on 2026-10-31. Each part ships dark behind its own flag (§57.9), as §51 to §55 do.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Covers</th>
+<th>Requirements</th>
+<th>Flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Cross-screen patterns (§57.2)</td>
+<td>FR-SCR-01 to FR-SCR-06</td>
+<td><code>flag.screen_patterns</code></td>
+</tr>
+<tr>
+<td>B</td>
+<td>Home (§57.3)</td>
+<td>FR-SCR-07 to FR-SCR-14</td>
+<td><code>flag.home_overview</code></td>
+</tr>
+<tr>
+<td>C</td>
+<td>My Work, task lists, Boards, Timeline, Calendar, task panel (§57.4)</td>
+<td>FR-SCR-15 to FR-SCR-27</td>
+<td><code>flag.work_screens</code></td>
+</tr>
+<tr>
+<td>D</td>
+<td>Projects, Portfolio, project Dashboard (§57.5)</td>
+<td>FR-SCR-28 to FR-SCR-38</td>
+<td><code>flag.project_screens</code></td>
+</tr>
+<tr>
+<td>E</td>
+<td>Reports, planning, Workload, My Staff, Allocations, Time (§57.6)</td>
+<td>FR-SCR-39 to FR-SCR-55</td>
+<td><code>flag.capacity_screens</code></td>
+</tr>
+<tr>
+<td>F</td>
+<td>Deliverables, Reviews, Milestones, Weekly Coordination, registers (§57.7)</td>
+<td>FR-SCR-56 to FR-SCR-71</td>
+<td><code>flag.register_screens</code></td>
+</tr>
+<tr>
+<td>G</td>
+<td>Team, Files, Notifications, Search, Preferences, Templates, Admin (§57.8)</td>
+<td>FR-SCR-72 to FR-SCR-83</td>
+<td><code>flag.people_screens</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The research named ten conflicts. They and the additional specification conflicts below remain open decisions with recommended defaults:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Conflict</th>
+<th>Rule it touches</th>
+<th>Decision and default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>About fourteen fill colours above the fold</td>
+<td>§41 R8, AC-CALM-05</td>
+<td>052-D2: fixed-meaning tokens replace the six-fill limit</td>
+</tr>
+<tr>
+<td>One-list sidebar with no More group</td>
+<td>Decision E2, §41 R4, AC-CALM-04, FR-VIS-01</td>
+<td>052-D3: adopt the list of eight and a foot group</td>
+</tr>
+<tr>
+<td>Charts on Reports, Portfolio and dashboards (donut, report chart)</td>
+<td>§19 "not built: charts beyond the milestone strip", §41 R8, R9</td>
+<td>053-D2: Home's two FR-VIS-07 charts in the prototype's forms; one chart per report and one summary row per planner group, each from the same read as its table; no new chart on Portfolio or the project Dashboard</td>
+</tr>
+<tr>
+<td>My Staff six-week strip; this week split by project</td>
+<td>§42.5 D1, §13.19, FR-SUP-01, FR-SUP-05</td>
+<td>053-D3: not built; §42 stands</td>
+</tr>
+<tr>
+<td>Estimated against logged hours per discipline; template hours against actual</td>
+<td>039-DEF1, §29 item 5, §30, §39.12</td>
+<td>053-D4: not built; stays parked</td>
+</tr>
+<tr>
+<td>Over-capacity chip on board cards</td>
+<td>§41 R7, R8</td>
+<td>053-D5: not built; the person picker (FR-PICK-02) and Workload keep showing it</td>
+</tr>
+<tr>
+<td>Open roles outside Allocations and Workload</td>
+<td>FR-ROLE-04</td>
+<td>053-D6: allowed as separate, labelled figures that never enter a person's figures (FR-SCR-28, FR-SCR-34, FR-SCR-37, FR-SCR-47, FR-SCR-73)</td>
+</tr>
+<tr>
+<td>Elapsed % beside progress %</td>
+<td>§30 (earned value)</td>
+<td>053-D7: two plain facts, no ratio or index (FR-SCR-32)</td>
+</tr>
+<tr>
+<td>Project identity colours (hashed today, so they collide)</td>
+<td>§41 R8</td>
+<td>052-D5: stored per project (FR-VSN-07)</td>
+</tr>
+<tr>
+<td>Person panel and optional person facts</td>
+<td>§39.12 deferred People/Person Profile</td>
+<td>053-D21: narrow read-only panel and fixed optional facts only; the full screen stays deferred</td>
+</tr>
+<tr>
+<td>Holding immediate email while away</td>
+<td>§42.5 deferred hold/redirect</td>
+<td>053-D10: propose hold only, no deputy redirection; existing daily-digest behaviour stays</td>
+</tr>
+<tr>
+<td>Report FTE unit basis</td>
+<td>Existing reports use hours; the research did not settle a denominator</td>
+<td>053-D22: standard full-time hours over the exact displayed period</td>
+</tr>
+<tr>
+<td>Prototype wording that differs from the application's labels</td>
+<td><code>web/src/i18n/en.ts</code></td>
+<td>052-D8: the application's labels win</td>
+</tr>
+</tbody>
+</table></div>
+<p>The following are recorded and not specified:</p>
+<ul>
+<li><strong>Under 053-D4:</strong> planned hours beside logged hours on Time, which is FR-RES-17 and stays Phase 3; a task estimate against logged hours bar; template hours against actual. The task panel's actual total beside its estimate is already §13.3.1.</li>
+<li><strong>Excluded as per-person comparisons:</strong> report charts grouped by person.</li>
+<li><strong>Under 053-D10:</strong> redirecting notices to a deputy while away.</li>
+<li><strong>Not research findings:</strong> prototype ideas outside the research findings, such as suggesting the colleague with the most free hours, are not specified.</li>
+</ul>
+<h3 id="572-part-a-cross-screen-patterns"><span class="num">57.2</span> Part A: Cross-screen patterns</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-01.</strong> Every item panel (task, deliverable, milestone, decision, risk, issue, meeting action, handoff, change notice, constraint, review comment, submission package) and every Weekly Coordination card MUST show four facts together at the top: <strong>owner</strong> (the item's one accountable owner), <strong>next actor</strong>, <strong>needed by</strong> and <strong>next action</strong>. Next actor and next action are derived on read by one pure function from the item's type and state, as the table below gives; needed by is the item's due, required-by or needed-by date. When the next actor is the viewer the line says "You". Terminal states retain the owner, needed date and explicit "No next action"; the next actor is absent. Owner never changes to match the next actor. Nothing is stored. Links reuse the existing application route and registered entity kind plus stable ID/key, not the prototype's review-only hashes. Related records are only explicit stored source/target/blocker/review relationships, deduplicated by kind and ID and ordered by relationship kind, key and ID. Keep project, filters, sort and scroll when opening/closing a panel; a copied link reopens that exact record under the recipient's current permissions. Missing, inaccessible or deleted records follow existing authorization/recovery behaviour without exposing their existence or substituting a parent. Unknown, inactive, unassigned or multiple eligible next actors are labelled explicitly; the UI never guesses an actor or grants a command that the server's permission response refuses. <em>Owner: Project Manager. Size M.</em></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Item and state</th>
+<th>Next actor</th>
+<th>Next action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task Not Started or In Progress, not Waiting/Blocked</td>
+<td>Assignee</td>
+<td>Start or Complete</td>
+</tr>
+<tr>
+<td>Task Waiting or Blocked</td>
+<td>Owner of the first blocking input (FR-SCR-02)</td>
+<td>Resolve the input</td>
+</tr>
+<tr>
+<td>Task On Hold</td>
+<td>Assignee</td>
+<td>Resume</td>
+</tr>
+<tr>
+<td>Task Ready for Review or In Review</td>
+<td>Reviewer</td>
+<td>Review</td>
+</tr>
+<tr>
+<td>Task Revision Required</td>
+<td>Assignee</td>
+<td>Revise</td>
+</tr>
+<tr>
+<td>Deliverable not Issued</td>
+<td>Deliverable owner</td>
+<td>Its canonical permitted next transition; name any required review gate</td>
+</tr>
+<tr>
+<td>Milestone not Complete or Cancelled</td>
+<td>Project Manager</td>
+<td>Review prerequisites or the permitted milestone transition; never bypass M-09</td>
+</tr>
+<tr>
+<td>Change notice with pending assessments</td>
+<td>Recorded affected owners of pending assessments</td>
+<td>Assess the change; show each pending assessment and its actor</td>
+</tr>
+<tr>
+<td>Change notice with required updates</td>
+<td>Recorded owner of each follow-up/verification step</td>
+<td>Complete or verify that recorded step</td>
+</tr>
+<tr>
+<td>Handoff Draft</td>
+<td>Sending owner</td>
+<td>Submit</td>
+</tr>
+<tr>
+<td>Decision not decided</td>
+<td>Decision owner, internal or external</td>
+<td>Decide</td>
+</tr>
+<tr>
+<td>Handoff Submitted</td>
+<td>Receiving owner</td>
+<td>Accept, request clarification or return</td>
+</tr>
+<tr>
+<td>Handoff Accepted</td>
+<td>Receiving owner</td>
+<td>Incorporate</td>
+</tr>
+<tr>
+<td>Handoff Clarification Requested or Returned</td>
+<td>Sending owner</td>
+<td>Respond and resubmit</td>
+</tr>
+<tr>
+<td>Constraint Open</td>
+<td>Removal owner</td>
+<td>Remove</td>
+</tr>
+<tr>
+<td>Constraint Resolution Proposed</td>
+<td>Affected work owner</td>
+<td>Verify removal</td>
+</tr>
+<tr>
+<td>Review comment Open</td>
+<td>Resolution owner</td>
+<td>Respond</td>
+</tr>
+<tr>
+<td>Review comment Responded</td>
+<td>Canonical verifier: originator unless reassigned under FR-MRV-03; independent-review setting still applies</td>
+<td>Verify closure</td>
+</tr>
+<tr>
+<td>Submission package Draft</td>
+<td>Coordinator</td>
+<td>Start checking</td>
+</tr>
+<tr>
+<td>Submission package Checking</td>
+<td>Checking owner of the first failed/pending check, otherwise coordinator</td>
+<td>Resolve that check or run the current checks; Ready remains derived under FR-SUB-03</td>
+</tr>
+<tr>
+<td>Submission package Ready</td>
+<td>Authorised Project Manager</td>
+<td>Issue after the canonical server-side recheck</td>
+</tr>
+<tr>
+<td>Risk, issue or meeting action, open</td>
+<td>Owner</td>
+<td>Review, Resolve or Complete</td>
+</tr>
+</tbody>
+</table></div>
+<p>Derived Waiting/Blocked takes precedence over a task's ordinary next action, except a terminal state. Select the primary input from required Fail checks before Pending, then earliest known needed-by date (undated last), stable kind and ID; all remaining inputs stay visible. Resolve each input's next actor from its own canonical state (for example a Submitted handoff needs its receiving owner, a Resolution Proposed constraint its affected work owner). An unmapped or ambiguous state says "Next action not assessed" with a link to the exact record, never a guessed transition.</p>
+</li>
+<li>
+<p><strong>FR-SCR-02.</strong> A task that is Blocked or Waiting MUST show a "Waiting on" block in its panel, listing each blocking input from the existing blocker list (§10.3): predecessor task, handoff, decision, constraint or manual block. Each input shows its key, title, the person who must resolve it, its needed-by date and the other open tasks it holds up. One input that holds up several tasks is one entry, "Also holds up n tasks", and appears once on Weekly Coordination. Independently, whenever the task has a Source Use record, the panel shows its exact source key and revision used, current registered revision and assessment status, including Not Started tasks (FR-CHG-07). Everything is derived on read. <em>Owner: Discipline Lead. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-03.</strong> My Work's Today view (§41 E3) MUST open with its focus list first and My Week (§13.10) collapsed to one line, "My Week: n h planned, m h free", with Show. My Week opens expanded on the planning and Overview views. A person's choice to expand it is kept on that device. Today's membership is unchanged. <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-04.</strong> The task panel, review assignment rows and board review cards MUST name the performer (assignee) and the independent reviewer as two labelled facts. A task that requires review and has no reviewer shows "Reviewer missing" (▲ with text) in its panel and as its row's signal under §41 R7. While <code>allow_self_review</code> is off, the reviewer picker leaves out the performer and says why; while it is on, a same-person review is labelled "Self-review (allowed by setting)". A review package shows "Reviewer missing" on each required discipline without a reviewer, and Start round stays disabled with that reason (FR-MRV-01). The server's refusals (FR-MRV-04, AC-MRV-04, FR-SUB-04) are unchanged; this makes them visible before saving. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-05.</strong> The Submissions screen and each package MUST lead with blockers. Checks appear in the order Fail, then Pending, then Pass and Not Applicable. Failed and Pending checks are grouped by checking owner (FR-SUB-02) and discipline, and each shows its reason and the exact next action as a link, for example "Verify comment 250101-RC014 closed" or "Accept handoff 250101-H003". The package header shows state, target date, coordinator and "n blockers". Deliverable progress (counts by status) follows the checks and never as a percentage that implies Ready (FR-SUB-02). The revision manifest opens in place, showing each required deliverable's manifest revision beside its current registered revision, with a mismatch marked. Summary-only or partial captures/read responses must label unavailable checklist/manifest/issue details explicitly; never infer Pass, package membership or a per-deliverable failure from package totals. Each check links its recorded source or exact review finding, not an enclosing package as a substitute. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-06.</strong> The Readiness screen (FR-RDY-07) MUST list work that is Not Ready or Needs Assessment first, followed by Proceed under Assumption and then Ready. For each item it shows the missing inputs of FR-RDY-01, grouped by the state-based next actor from FR-SCR-01 (Submitted handoff: receiving owner; Resolution Proposed constraint: affected work owner; open decision: decision owner; applicability: authorised Project Manager or Discipline Lead) and by discipline, each with its reason and exact next action. <em>Owner: Discipline Lead. Size M.</em></p>
+</li>
+</ul>
+<h3 id="573-part-b-home"><span class="num">57.3</span> Part B: Home</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-07.</strong> Home (FR-VIS-07) MUST be laid out in this order:
+  1. The count-card row (§56.6), overlapping the band: Active Projects, Open Tasks, Overdue Tasks, Due Within n Days (FR-SCR-09), On Track and Team Members.
+  2. Tasks by Project as the main chart, two thirds wide, beside Tasks by Status, one third wide (053-D2).</p>
+<ul>
+<li>Tasks by Project has one horizontal bar per project in lane colours, with swatch, number and name, the total at the right and a shared axis. Its legend carries each lane's total.</li>
+<li>Tasks by Status is a donut in lane colours with On Hold as its own hatched slice and the total in the centre, beside the status list with counts. Below it a check line, "Open tasks: a + b + c + d on hold = n", equals the Open Tasks card.
+  3. This Week's Capacity (FR-SCR-11).
+  4. Upcoming Deadlines, with a runway above its list: a "Before today" cell holding the overdue task count, then one column per day of the selected range (up to 14 days). Today is marked, non-working days are faintly hatched, and each due item shows its mark (FR-VSN-08) and key suffix, at most four per day, then "+n".</li>
+</ul>
+<p>Every bar segment, slice, mark and count opens its records (FR-VIS-07). Edit Dashboard still reorders and hides every widget, the new ones included. Below 1180 px the two charts stack. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-08.</strong> Each Home count card MUST name where its count sits, computed in the same read as the figure:
+  - <strong>Open Tasks and Overdue Tasks:</strong> "n in <project number>" for the project with the most (ties to the lowest number).
+  - <strong>Due Within n Days:</strong> the busiest day ("2 on Sat 31 Oct") and the split by item type.
+  - <strong>Active Projects:</strong> "of N projects in scope".
+  - <strong>On Track:</strong> "g Green / e evaluated", each part a link, plus "Critical: <numbers>" for Red projects.
+  - <strong>Team Members:</strong> "across n disciplines" (distinct home disciplines, with Not set counted once).</p>
+<p><em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-09.</strong> Home MUST add a <strong>Due Within n Days</strong> card: open tasks, deliverables and milestones in scope due from today to today plus <code>home_due_window_days</code> (organisation setting, default 7), by the Upcoming Deadlines rules, with a meta line splitting it by type. Under its check line, Tasks by Status MUST show "n open tasks have no due date", a link to the task list filtered to open tasks without a due date; it shows when n is 0 too. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-10.</strong> Home count cards MUST show the change since a comparison snapshot.
+  - <strong>Snapshot:</strong> each project's daily snapshot (<code>ProjectHealthSnapshot</code>, §10.1) adds the counts the cards sum: open tasks, overdue tasks and items due within the window, beside the health and status it already holds.
+  - <strong>Comparison:</strong> the latest snapshot at or before today minus <code>trend_compare_days</code> (organisation setting, default 7; 053-D8). The title block shows its time as "Trends compare with" (FR-VSN-14).
+  - <strong>Display:</strong> a chip reads "↑ n", "↓ n" or "± 0", in percentage points for On Track. It is green when the change is good for the metric (fewer overdue, more on track), red when it is bad, and grey for unchanged values and for the neutral metrics Active Projects, Open Tasks and Due Within n Days.
+  - <strong>Missing snapshots:</strong> projects without a snapshot on the comparison day are left out of both sides, and the chip's description says how many.
+  - <strong>Same scope:</strong> historical and current values must use identical metric definitions, selected project cohort, status/discipline/people filters, deadline-window basis and current permission scope. Per-project totals alone do not support discipline or supervisor presets. Store sufficient permission-safe dimensions or reconstruct from the activity history; otherwise show "Trend unavailable for this scope". Do not compare a filtered current count with a whole-project historical count. Show both values, the comparison cohort and excluded-project count on inspection; never reveal hidden historic records.
+  - <strong>Team Members</strong> shows no trend, because a distinct count cannot be summed from per-project snapshots.</p>
+<p><em>Owner: Executive. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-11.</strong> For viewers with Workload access, Home MUST show <strong>This Week's Capacity</strong> for the people in their planner scope (PLN-14) for the current ISO week. The card states that its scope is people, not Home's projects. It shows:
+  - the share of available hours planned: <code>100 × P / A</code>, where P is Confirmed plus Expected and A is the planner's effective capacity after availability overrides, time away and holidays; time away is never subtracted twice;
+  - a bar of Planned (Confirmed plus Expected, the PLN-09 basis), Time off (PLN-06, hatched) and Free, with Gross capacity beside it;
+  - "n people above 100 % this week" (PLN-10), linking to the planner filtered to them;
+  - one row per home discipline (FR-GRP-01, with Not set), giving people count, a bar against a 100 % mark and the percentage, with the part beyond 100 % in red.</p>
+<p>Every figure comes from the Weekly Planner's own read (FR-PLN-11), counting the viewer's own drafts as the planner does. Free is the signed <code>A − P</code>; Possible is shown separately and never subtracted. Gross is <code>A + time away</code> on this planner basis. A zero/unknown denominator shows "Percentage unavailable". A partial view carries the PLN-15 label: the percentage describes visible planned hours only and Free is unavailable or explicitly "at most N h" under FR-FIG-01/02, never a spare-capacity claim. Unknown and excluded people/weeks are disclosed. Viewers without Workload access see no card. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-12.</strong> Home's band MUST show the active scope as chips under the subtitle: Projects (selection and count), Project status, Deadlines (date range) and every other active filter. Each chip opens its control, and "+ Filter" adds one. The chips are the URL's filter state, so they state exactly what the counts include. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-13.</strong> An Upcoming Deadlines row MUST show at most one short note when one applies. An item in review shows "in review n days" (days since it entered Ready for Review or In Review, whichever came first, from the activity log). Otherwise, a milestone or deliverable later than its baseline shows "n days later than baseline" (§50.5, under <code>slip_display_days</code>). <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-14.</strong> Home MUST offer a preset for each of these roles the viewer holds:
+  - <strong>Project Manager:</strong> projects the viewer manages.
+  - <strong>Discipline Lead:</strong> projects where the viewer leads a discipline, with task, deliverable and deadline figures narrowed to those disciplines.
+  - <strong>Supervisor:</strong> all permitted projects, with task and deadline figures narrowed to work owned by the viewer's people scope (direct reports, or §54 scope when it is on).</p>
+<p>A preset only sets the scope and filters that the chips then show; no definition changes. The choice is kept with the person's preferences (§17.4). No preset applies until one is chosen. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+</ul>
+<h3 id="574-part-c-work-screens"><span class="num">57.4</span> Part C: Work screens</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-15.</strong> My Work rows and the workspace task list MUST show the Last activity cell of FR-INT-19 and, on rows with comments, a comment count that opens the panel at Comments, read once per page. <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-16.</strong> My Work MUST mark "New" (text, not colour alone) on items assigned to the viewer, or on which they became reviewer, after their previous My Work visit. The visit time is stored with their preferences. Opening an item clears its marker, and Mark all seen sets the time to now (053-D20). <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-17.</strong> When a task list (project Task List, workspace list or My Work) is grouped, each group header MUST show the row count, the overdue count, estimated hours with "n unestimated", progress by the DL-07 rule over the group's tasks (by hours when every task is estimated, otherwise by count, with the basis named) and the next due date, all under the current filters. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-18.</strong> The workspace task list MUST offer the project Task List's grouping by Discipline, Deliverable and Milestone, with Project as the outer group when several projects are selected. It MUST also offer the columns Deliverable, Reviewer, Est. hrs, Last activity and Submission date (the target date of the earliest open submission package whose manifest holds the task's deliverable, FR-SUB-01) in its column chooser. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-19.</strong> The workspace task list MUST allow selecting rows across projects and applying the bulk actions the project Task List offers today.
+  - Each row is checked with its own project's permissions and row version.
+  - The confirmation states how many rows will change and lists the refused rows with reasons.
+  - Only the permitted rows change, each with its activity entry.
+  - From a departing user's record, the Reassign work tool (FR-ADM-02) can open this list filtered to that person's open work.</p>
+<p><em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-20.</strong> After a change made from a list, board or panel (a field edit, status change, reassignment, date shift or bulk action), the confirmation MUST offer <strong>Undo</strong> naming the action ("Undo: reassign 6 tasks to Pat") for 10 seconds, as §13.0's undo toast does (053-D9).
+  - Undo applies the reverse change through the same commands and permissions, writing its own activity entries marked "Undo of" the original. It never edits or deletes a log entry.
+  - Undo is refused, with the reason, when the item has changed since (G-07) or the reverse is not permitted.
+  - Notifications already sent are not recalled.</p>
+<p><em>Owner: Team Member. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-21.</strong> Board cards in Ready for Review or In Review MUST name the reviewer and "n days waiting" since the task entered Ready for Review. From <code>review_stale_days</code> the waiting time shows ▲ and amber text. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-22.</strong> Board lane headers MUST show the count, estimated hours and overdue count of their cards. Swimlane headers on grouped boards (§36.2) show the swimlane's lead (the Discipline Lead for a discipline, the PM for a project), hours and overdue count. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-23.</strong> The workspace and project Timelines MUST support saved views (§18.4) holding filters, grouping, zoom, columns and shown layers, personal or shared with a project, as lists do. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-24.</strong> Calendar (FR-VIS-06) MUST add a <strong>Time away</strong> toggle, person and discipline filters, and saved views.
+  - The toggle shows an all-day "Away", or "Away 4 h" for reduced hours (PLN-06), on each affected day for each person the viewer could see in Workload or the Weekly Planner. No reason is shown or stored (§42).
+  - The person and discipline filters and the saved views follow §18.4.</p>
+<p><em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-25.</strong> On Calendar, a viewer who may change a project deadline's date MUST be able to drag it to another day. The move goes through the Timeline's confirmation and reason rules (FR-INT-11). An <strong>Undated</strong> tray beside the calendar lists open tasks and deliverables in scope without a due date; dropping one on a day sets its due date through the same confirmation. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-26.</strong> The task panel MUST show a strip of section links (Details, Dependencies, Review, Time, Comments, Links, History) that scrolls to each section and marks the one in view. History adds a filter by person. <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-27.</strong> A collaborator on a task (§12.5) MUST be able to mark <strong>My part done</strong>, with an optional note of up to 200 characters, and withdraw the mark later. The mark shows beside their name with its time and writes one activity entry. It never changes the task's status, assignee or indicators: the assignee stays the one accountable owner and completes the task. This is not a checklist or subtask (§30). <em>Owner: Team Member. Size M.</em></p>
+</li>
+</ul>
+<h3 id="575-part-d-projects-portfolio-and-project-dashboard"><span class="num">57.5</span> Part D: Projects, Portfolio and project Dashboard</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-28.</strong> The project list MUST show a <strong>Staffing</strong> cell per project (053-D6):
+  - "n open roles", counting the project's Open roles (FR-ROLE-01) and opening its Allocations open roles;
+  - "m people over capacity", counting team members with an Over-planned week (PLN-10) in the next <code>staffing_lookahead_weeks</code> (organisation setting, default 4) and opening the planner filtered to them.</p>
+<p>People outside the viewer's planner scope are not counted, and the PLN-15 label says so. Open roles never enter a person's figures (FR-ROLE-04). <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-29.</strong> The project list MUST offer filters for Project Manager, Client, Phase, Project type, Priority and, with <code>flag.org_structure</code> on, Lead unit (FR-UNT-14). It MUST offer grouping by Project Manager, Client or Office with per-group counts, under §41 R1's Filters and Group controls. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-30.</strong> Each project row MUST open a <strong>peek</strong> without leaving the list, showing the next three open milestones with date and status, each discipline's lead with that discipline's overdue task count, and the status note (FR-PRO-16) with its author and time. It is read on opening and filtered by permission. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-31.</strong> Each project row MUST show the project's span from start to target completion as a thin bar with a today marker, and "n milestones left" (open milestones). A project without a target shows "No target". <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-32.</strong> The project list and Portfolio row detail MUST show two separate plain facts (053-D7). "Elapsed n %" is days from start to today over days from start to target. "Progress m %" is the project's progress (§36.2). There is no ratio, index or colour between them, and neither feeds health (§30 earned value stays excluded). <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-33.</strong> Project list rows MUST be selectable for a <strong>bulk set</strong> of Priority, Phase or, with <code>flag.org_structure</code> on, Lead unit, through the project edit command. Each project is checked for the viewer's edit right and row version, refused rows are listed with reasons, and each change writes one activity entry. Status is not bulk-set. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-34.</strong> Each Portfolio row MUST show the FR-SCR-28 staffing figures as text (053-D6). The "Capacity by discipline" link (FR-INT-24) stays. <em>Owner: Executive. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-35.</strong> Portfolio MUST show one line above its table: "Moved in the last n days: a projects changed health, b milestones slipped, c projects changed status". The window is <code>trend_compare_days</code>; the figures come from daily snapshots and the activity log, and each part opens the list of those projects. <em>Owner: Executive. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-36.</strong> Portfolio MUST print for the weekly review: landscape, the band with its title block and read time, the tiles, then the grouped table with status notes, repeated table headers and no navigation. <em>Owner: Executive. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-37.</strong> The project Dashboard MUST show <strong>Staffing until the next submission</strong> (053-D6). The window runs from today to the target date of the next open submission package, or to the next milestone when there is none. For each discipline it shows three figures side by side, never summed:
+  - remaining estimate hours of open tasks due in the window;
+  - confirmed allocated hours (the FR-CAP-04 basis);
+  - open-role hours (the FR-ROLE-04 spread).</p>
+<p>When the remaining hours exceed allocated hours, it adds "Remaining exceeds allocated by n h". <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-38.</strong> The project Dashboard's attention section (§13.1) MUST group items by kind with a chip per kind and its count, show the first five of the chosen kind, and offer "Show all (n)". <em>Owner: Project Manager. Size S.</em></p>
+</li>
+</ul>
+<h3 id="576-part-e-reports-planning-and-time"><span class="num">57.6</span> Part E: Reports, planning and time</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-39.</strong> Each task, workload or capacity report MUST show beside its table "n unestimated tasks" and "m open tasks with no due date" within its parameters, each linking to the list. This reuses Workload's unscheduled-estimates rule (§13.11). <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-40.</strong> A report's parameters MUST be savable as a named view (§18.4), personal or shared with a project. Copy link copies a URL carrying the parameters, which reopens the report under the recipient's own permissions. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-41.</strong> A report MAY show one chart drawn from its own rows, after its counts row and beside its table, which always stays (053-D2). The chart groups by discipline or by project, never by person. Where the report has supply and demand, it adds a deficit bar "short by n h". The chart and table come from one read, and the export is unchanged. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-42.</strong> The report catalogue (§13.18) MUST list each report under the question it answers (for example "Who has room in the coming weeks?" or "What is late on my projects?") and offer search over titles, questions and descriptions. The catalogue stays beside an open report. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-43.</strong> Reports with week columns MUST offer month grouping and a unit switch, hours (default) or FTE (053-D22). The proposed FTE basis is standard full-time hours: for a cell spanning k ISO weeks, <code>FTE = sum(exact visible hours) / (k × default_weekly_capacity_hours)</code>. Use the same denominator for every person and aggregate so row and column totals reconcile; do not divide by an individual's reduced/custom availability. Capacity utilisation is a separate percentage using the planner's effective capacity. Each ISO week belongs to the month of its Thursday, and a partial month uses only its displayed weeks. Recompute from unrounded hours; never sum weekly FTE to label a month. A zero/unknown standard denominator shows "FTE unavailable"; unknown hours stay unknown and partial totals retain their coverage label. Exports state the standard hours, week count, scope and missing inputs. Each report keeps its own horizon and Workload keeps 8 weeks (051-D9). <em>Owner: Supervisor. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-44.</strong> The Weekly Planner MUST offer <strong>Find room</strong>. Its inputs are hours per week (N), number of weeks (W, within <code>planning_horizon_weeks</code>), a start week and an optional discipline. It lists, by name, only people in the viewer's planner scope whose remaining capacity (PLN-09) is verified at least N h in every one of the W weeks, with their free hours per week. People whose partial view cannot verify that condition are excluded from matches or shown separately as Unavailable, never presented as spare room. It never orders people by free hours. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-45.</strong> Each Weekly Planner group (FR-GRP-02) MUST show a summary row with a small stacked bar per week of Confirmed, Expected and Possible hours against a capacity line, from the group's subtotals, with the values in its accessible name (053-D2). The numeric subtotal row stays. Planner and project Allocations week headers also show milestone and deliverable deadline markers from visible linked projects, by due week, with type, exact date and count; undated records remain in a separate tray. A marker opens the exact record or its same-scope dated list. This adds the week-header placement to §13.11's existing staffing/deadline context rather than changing its calculation. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-46.</strong> The Weekly Planner MUST offer cells in hours (the default) or as a percentage of capacity, and a Months zoom over the planning horizon. In the Months zoom each ISO week belongs to the month of its Thursday. There is no day zoom. The choices are kept in the URL. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-47.</strong> Workload MUST add, per home discipline and week, three figures side by side (053-D6): free hours of the discipline's people, unfilled-role hours of that discipline (FR-ROLE-04), and estimate hours of unassigned open tasks of that discipline due that week (FR-PRO-15). When unfilled-role hours plus unassigned-task hours exceed free hours, it adds "short by n h". None of these figures enters a person's row. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-48.</strong> Workload MUST offer a view-only switch, <strong>Show proposed as confirmed</strong>, that recomputes the cells counting Proposed allocations as confirmed (FR-CAP-04). While it is on, the band and every changed cell say "Includes proposed". Nothing is saved, and an export made in this state says so in its Parameters sheet. <em>Owner: Supervisor. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-49.</strong> Optional person skills MUST accept certification tags (053-D21) with an optional expiry date (for example P.Eng, EIT, Confined space). As a proposed fixed-fact permission under 053-D21, the active person (unless Read Only) or a System Administrator may edit them; administrative corrections follow the existing reason and activity rules. This does not assume the deferred Person Profile screen exists. My Staff cards and the Team list show them as chips. From <code>certification_warn_days</code> (organisation setting, default 30) before expiry a chip reads "Expires in n days", and after expiry "Expired". The Team list filters by tag. Tags are shown per person only, with no count, comparison or ranking between people. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-50.</strong> A System Administrator MAY set a person's type (Employee, Co-op, Contractor; 053-D11) and optional start and end dates. My Staff, Team and the person pickers show "Starts <date>" before the start date and "Ends <date>" within <code>availability_window_days</code> (organisation setting, default 60) of the end date. These are display only and change no capacity or planning rule. <em>Owner: System Administrator. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-51.</strong> The open role Fill dialog and the allocation Propose dialog MUST show, for the chosen person, available hours per week across the dates and the effect of the proposal on that person's load as before and after per week, with over-capacity weeks marked. Where §52.4 is on, they use its allocation preview read. People outside the viewer's planner scope show nothing. FR-CAP-07's confirmation is unchanged. <em>Owner: Discipline Lead. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-52.</strong> Allocations MUST show, per discipline and week, allocated hours (confirmed and proposed separately) beside the remaining estimate hours of that discipline's open tasks due that week (the FR-RES-11 context column). The figures are never summed. <em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-53.</strong> Allocations MUST offer <strong>Shift all</strong> for a selection or the whole project, by plus or minus N weeks.
+  - A preview lists each allocation's old and new dates and the people whose load changes.
+  - Confirmed allocations that move return to Proposed and go back through confirmation (FR-CAP-07).
+  - Each moved allocation writes its activity entry.</p>
+<p><em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-54.</strong> Time's week MUST show the person's own time away (PLN-06), hatched on its days, with the week's reduced capacity ("Capacity 32 h this week"). It is information only, and entries on those days stay allowed. <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-55.</strong> Time's week MUST offer rows prefilled with the person's assigned open tasks and the tasks they logged the previous week, with a cell per day.
+  - Typing hours in a cell creates or changes the person's own entry under FR-VIS-10's rules.
+  - No time is created unless the person types it.
+  - There is no timer, no reminder sent about other people, and no submit, lock or approval.</p>
+<p><em>Owner: Team Member. Size M.</em></p>
+</li>
+</ul>
+<h3 id="577-part-f-registers-and-delivery-records"><span class="num">57.7</span> Part F: Registers and delivery records</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-56.</strong> Each deliverable issue (§12.4 issue history) MUST record a <strong>purpose of issue</strong> from an organisation list (053-D12). When the recipient responds, it records a <strong>return code</strong> from a second organisation list, with the response date. Both show on the register row and in the issue history, and both are filters. Package purpose (FR-SUB-01) is unchanged. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-57.</strong> The Deliverables register MUST show a <strong>No due date</strong> tray, with its count and list, beside its date view, and a matching "No due date" filter. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-58.</strong> A deliverable MAY carry a <strong>client drawing number</strong>. When the project declares a numbering pattern (053-D17), a number that does not match is flagged "Does not match <pattern>" and is never refused. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-59.</strong> A Project Manager or Discipline Lead MAY import deliverables from a drawing list in CSV or XLSX.
+  - The import checks every row first and previews creates and errors.
+  - It commits all rows or none.
+  - It never updates or deletes an existing deliverable.
+  - It follows the pattern of the project import (FR-PRO-20, FR-PRO-21) and writes one activity entry per created deliverable.</p>
+<p><em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-60.</strong> The Deliverables register MUST offer a <strong>client export</strong> with number, client drawing number, title, revision, purpose of issue, issue date, return code and status. It leaves out hours, internal reviewers and internal notes, and names no person other than the PM. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-61.</strong> Reviews MUST add three things:
+  - a list of open review comments across all of the project's packages (FR-MRV-03), with discipline, severity, originator and resolution owner filters;
+  - a <strong>response outcome</strong> on each comment's response: Incorporated, Not incorporated (reason required), Clarified or Noted;
+  - a response-sheet export per package listing comment, originator, discipline, severity, response and outcome.</p>
+<p><em>Owner: Discipline Lead. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-62.</strong> A project member MAY record an <strong>external review</strong> of an issued revision (053-D16), but the recorder is not thereby its verifier. The PM designates an independent permitted verifier with a reason, applying FR-MRV-03/04 and the self-review rules.
+  - The originator is an <code>ExternalParty</code> (§10.1), with received date and return code.
+  - Its comments are review comments whose originator is that party; the Project Manager-designated independent permitted verifier verifies closure on the party's behalf with an evidence link.
+  - No external account is created (constitution VI).</p>
+<p><em>Owner: Project Manager. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-63.</strong> Reviews MUST show, per discipline over the project's approved packages, the rounds to approval (median and maximum) and the median days per round. Figures are at discipline level only, never per reviewer. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-64.</strong> A System Administrator MAY set default required review disciplines on a deliverable type. A new review package whose deliverables are of that type preselects them, and the coordinator may change them (FR-MRV-01). <em>Owner: System Administrator. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-65.</strong> Every milestone or deliverable date change MUST record a <strong>reason category</strong> from an organisation list (053-D13) beside the free-text reason, which stays. The Milestone View shows "Why dates moved": counts by category over the project's history, each opening the activity list filtered to them. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-66.</strong> The Milestone View MUST flag "Out of sequence" on a milestone dated before a milestone whose type comes earlier in the <code>milestone_type</code> order (§12.3, Other excluded), naming that milestone. A milestone with no date is flagged "No date". Both flags are information only. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-67.</strong> On Weekly Coordination and in the handoff panel, a handoff that is overdue or whose promised date is after its needed-by date (FR-HND-01) MUST state "Holds up n tasks; first due <date>", from its receiving tasks. <em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-68.</strong> Weekly Coordination MUST show, for the meeting's window, open constraints (FR-RDY-03) with removal owner and needed-by date, and Proposed commitments awaiting their performer (FR-RDY-05), each linking to Readiness. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-69.</strong> A decision MAY carry a category from an organisation list (053-D15), up to five options considered and, when it is decided, a rationale. The Decision Register shows <strong>decision lag by owner organisation</strong>: median days from requested to decided for each owner organisation (internal, or each <code>ExternalParty</code>), at organisation level only. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-70.</strong> A project template MAY include risks (title, probability, impact, mitigation, trigger). Creating a project from the template copies them as Open risks owned by the PM, under §12.14's snapshot rules. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-71.</strong> Resolving an issue MUST record a <strong>root-cause category</strong> from an organisation list (053-D14). The Issue Register shows counts by cause over resolved issues, each opening its list. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+</ul>
+<h3 id="578-part-g-people-files-and-settings"><span class="num">57.8</span> Part G: People, files and settings</h3>
+<ul>
+<li>
+<p><strong>FR-SCR-72.</strong> The workspace Team list and the project Team &amp; Disciplines tab MUST offer the columns home discipline (FR-GRP-01), office and supervisor, with grouping and filtering by each, and by unit when <code>flag.org_structure</code> is on (FR-UNT-13). <em>Owner: Supervisor. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-73.</strong> The project Team &amp; Disciplines tab MUST show an <strong>Unfilled roles</strong> strip: each Open role with label, discipline, dates and hours, and a Fill link where the viewer may fill it (053-D6). Open roles never enter a person's figures (FR-ROLE-04). <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-74.</strong> Selecting a person's name MUST open a read-only <strong>person panel</strong> showing:
+  - name, job title, home discipline, office, supervisor and, when on, unit;
+  - skills and certifications (FR-SCR-49);
+  - type and dates (FR-SCR-50);
+  - the projects and project roles the viewer can see;
+  - this week's free and away hours (FR-PICK-01 read), only for viewers with Workload access who have the person in their planner scope.</p>
+<p>This narrow read-only panel and the optional person facts are proposed under 053-D21 against §39.12's deferred People/Person Profile; they do not adopt that full screen. It shows only permitted directory/project-member facts, no private allocations, performance data, utilisation history or comparison between people. <em>Owner: Supervisor. Size M.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-75.</strong> The project Team tab's Add a person picker MUST show "N h free" and "N h away" for the current week, as FR-PICK-02 does for the task owner picker. <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-76.</strong> A project member MAY carry a free-text <strong>responsibility note</strong> of up to 80 characters (for example "checker" or "storm lead"), set by the PM or that member's Discipline Lead and shown on the Team tab and the person panel. It grants no permission and is not a project role (§8.3). <em>Owner: Project Manager. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-77.</strong> Files (FR-VIS-09) MUST add three things:
+  - "Deliverables with no link": open deliverables in scope that have no document link;
+  - a flag on any link whose declared revision differs from the deliverable's current registered revision ("Declared C, current D", the FR-MDC-05 metadata);
+  - filters by discipline, by the person who added the link, and "Added this week".</p>
+<p><em>Owner: Discipline Lead. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-78.</strong> The notification centre (§13.17) MUST add three things:
+  - a <strong>Needs your action</strong> filter, for notifications whose item's next actor (FR-SCR-01) is the viewer;
+  - a follow-level menu (All activity, My items only, Muted; §17.4) on each row's project chip;
+  - a delivery line per row ("Emailed 07:00", "Held: away", "Not sent: muted").</p>
+<p><em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-79.</strong> The search results page (§18.1) MUST offer filters on each type tab (project, status, and discipline where the type has one) and find people by job title and home discipline. It shows the person's last ten searches, kept in this browser only, with Clear. <em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-80.</strong> Preferences (§17.4) MUST offer every user three things:
+  - a digest frequency of Daily or Weekly, the weekly digest sent on Monday;
+  - <strong>Hold emails while away</strong>: on days with no available hours, as §42 defines them, immediate emails are held and listed in the next digest. There is no redirect to a deputy (053-D10).
+  - an opt-in reminder, to oneself only, to enter time at a chosen weekday and time.</p>
+<p><em>Owner: Team Member. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-81.</strong> Templates MUST show, for each version, the projects created from it, and a project shows "Created from <template> v3; v5 exists". This is information only; nothing changes the project (§12.14 snapshot rules). A draft version shows its changes against the version it was copied from: items added, removed and changed. <em>Owner: System Administrator. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-82.</strong> Admin's user list MUST add the columns home discipline, weekly capacity and template editor, and, for supervisors, the number of people in their people scope (FR-UNT-08 when on, otherwise direct reports). Deactivating a user who owns open items MUST show the count and a link to Reassign work (FR-ADM-02) before confirming; it does not block. <em>Owner: System Administrator. Size S.</em></p>
+</li>
+<li>
+<p><strong>FR-SCR-83.</strong> Admin MUST show a plain-language explainer for each system and project role, generated from the same §8 permission matrix the server enforces, so the text cannot drift from the rules. <em>Owner: System Administrator. Size S.</em></p>
+</li>
+</ul>
+<h3 id="579-shipping-dark"><span class="num">57.9</span> Shipping dark</h3>
+<ul>
+<li><strong>FR-SCR-84.</strong> Each part MUST merge dark behind its own flag (§57.1) under §43's flag rules (FR-DLV-07 to FR-DLV-10), and Jay turns each one on. With a flag off, every screen, response, report and export of that part is as it was before this amendment, and the new organisation settings (<code>home_due_window_days</code>, <code>trend_compare_days</code>, <code>staffing_lookahead_weeks</code>, <code>certification_warn_days</code>, <code>availability_window_days</code>) are not offered. A part whose screens read §56's tokens works with <code>flag.visual_system</code> off. No existing feature is put behind a flag. <em>Owner: Project Manager. Size S.</em></li>
+</ul>
+<h3 id="5710-acceptance-criteria"><span class="num">57.10</span> Acceptance criteria</h3>
+<p>Each AC-SCR-nn verifies FR-SCR-nn.</p>
+<p><strong>Part A</strong></p>
+<ul>
+<li><strong>AC-SCR-01.</strong> Given task 250101-T0013 In Review with reviewer Diane, when Alex opens it, then the panel shows owner Alex, next actor Diane, needed by its due date and next action Review; when Diane opens it, next actor reads "You". A link to a review finding opens that exact finding, never its package; closing restores the source view. A recipient without access gets the normal non-disclosing unavailable result. Missing/inactive actors are labelled. Milestones, Draft handoffs, change assessments and Ready submissions follow the canonical table, and a blocked task with two inputs shows deterministic primary input plus both links.</li>
+<li><strong>AC-SCR-02.</strong> Given handoff 250101-H003 not yet accepted blocks tasks T0005 and T0010, and T0002 is Not Started with Source Use revision 2025A while the registered revision is 2026B, then each exact handoff link appears with receiving owner/needed-by and "Also holds up 1 task", Weekly Coordination shows the handoff once, and T0002 shows 2025A → 2026B with assessment state even though it is not blocked.</li>
+<li><strong>AC-SCR-03.</strong> Given Alex opens My Work, then Today shows the focus list first and My Week as one line; Show expands it, and after a reload on the same device it stays expanded.</li>
+<li><strong>AC-SCR-04.</strong> Given a review-required task with no reviewer and <code>allow_self_review</code> off, then its row and panel show "Reviewer missing", the reviewer picker leaves out the assignee and says why, and a package with a required discipline lacking a reviewer keeps Start round disabled with that reason.</li>
+<li><strong>AC-SCR-05.</strong> Given a package with one Fail, two Pending and five Pass checks, then the Fail check is first, the two Pending checks follow grouped by checking owner, each shows its next action as a link, the header reads "3 blockers", and no percentage is shown. A check linked to D001 does not attach its failure to unrelated D002; absent manifest, passing-check and issue-history detail remains unavailable rather than fabricated.</li>
+<li><strong>AC-SCR-06.</strong> Given three tasks, one Ready, one Not Ready waiting on a decision and one Needs Assessment, then Readiness lists Not Ready and Needs Assessment first, the decision appears under its owner with "Decide", and the Ready task is last. A Submitted handoff is grouped under its receiving owner; a Resolution Proposed constraint is grouped under its affected work owner, with the removal owner retained as a separate fact.</li>
+</ul>
+<p><strong>Part B</strong></p>
+<ul>
+<li><strong>AC-SCR-07.</strong> Given Home for five projects, then the six count cards come first, Tasks by Project (two thirds) sits beside the Tasks by Status donut (one third) whose check line equals Open Tasks, the runway shows a "Before today" cell and 14 day columns with today marked, and Edit Dashboard can hide This Week's Capacity.</li>
+<li><strong>AC-SCR-08.</strong> Given 13 of 32 open tasks are in 250101, then the Open Tasks card reads "13 in 250101", and On Track reads "3 Green / 4 evaluated" with "Critical: 250101".</li>
+<li><strong>AC-SCR-09.</strong> Given six items due in the next 7 days (two on 2026-11-06) and three open tasks without a due date, then Due Within 7 Days shows 6 with "2 on Fri 6 Nov" and its split by type, and the no-due-date link shows 3 and opens exactly those tasks.</li>
+<li><strong>AC-SCR-10.</strong> Given the comparison snapshot from 2026-10-24 counted 3 overdue tasks and today counts 1, then the Overdue Tasks chip reads "↓ 2" in green, the title block reads "Trends compare with 2026-10-24" and its time, and Team Members shows no trend. A discipline-only preset compares only the matching historical discipline cohort; if the stored snapshot cannot reproduce it, the chip says "Trend unavailable for this scope", rather than comparing the whole-project count. Changed project membership/permissions use the disclosed common visible cohort or unavailable state.</li>
+<li><strong>AC-SCR-11.</strong> Given Lena with Workload access and 648 h gross, 36 h time off and 529 h planned this week, then A is 612 h, the percentage is 529/612 = 86 % rounded, and Free is 83 h, not a second subtraction of time off. A partial view never claims that 83 h is verified spare capacity; zero/unknown available hours show unavailable. A user without Workload access sees no card.</li>
+<li><strong>AC-SCR-12.</strong> Given Home filtered to Active projects and a date range, then the chips show Projects, Project status and Deadlines with those values, and removing a chip changes the URL and the counts together.</li>
+<li><strong>AC-SCR-13.</strong> Given deliverable 250101-D001 in review for 5 days and milestone 250101-M02 3 days later than baseline, then their rows show "in review 5 days" and "3 days later than baseline", and no row shows two notes.</li>
+<li><strong>AC-SCR-14.</strong> Given Priya is a Project Manager and Discipline Lead but not a Supervisor, then Home offers only the Project Manager and Discipline Lead presets, and choosing Project Manager sets the Projects chip to the projects she manages, keeps every count definition and is restored on her next visit.</li>
+</ul>
+<p><strong>Part C</strong></p>
+<ul>
+<li><strong>AC-SCR-15.</strong> Given a task last changed by Pat 2 hours ago with three comments, then its My Work row reads "2 h ago · Pat" and a comment count of 3 that opens the panel at Comments.</li>
+<li><strong>AC-SCR-16.</strong> Given a task was assigned to Alex after his last My Work visit, then it shows "New" until he opens it, and Mark all seen clears every marker.</li>
+<li><strong>AC-SCR-17.</strong> Given a discipline group of four tasks, every one estimated (10, 10, 15 and 5 h) with the first two Complete and one overdue, then its header shows 4 tasks, 1 overdue, 40 h, progress 50 % by hours, and the next due date.</li>
+<li><strong>AC-SCR-18.</strong> Given the workspace list over three projects grouped by Deliverable, then rows group by project then deliverable, and the column chooser offers Deliverable, Reviewer, Est. hrs, Last activity and Submission date.</li>
+<li><strong>AC-SCR-19.</strong> Given Marc selects eight tasks on three projects and reassigns them, while he may edit only six, then the confirmation lists two refused rows with reasons, six change, and six activity entries exist.</li>
+<li><strong>AC-SCR-20.</strong> Given Pat reassigns six tasks and chooses Undo within 10 seconds, then the six return to their previous assignees with six entries marked "Undo of"; if one task changed in between, that row is refused with the reason and the others are undone.</li>
+<li><strong>AC-SCR-21.</strong> Given a card entered Ready for Review 6 days ago with <code>review_stale_days</code> 5, then it names its reviewer and shows "▲ 6 days waiting".</li>
+<li><strong>AC-SCR-22.</strong> Given an In Progress lane with five cards (12 h estimated, one overdue), then its header shows 5, 12 h and 1 overdue; a discipline swimlane names its Discipline Lead.</li>
+<li><strong>AC-SCR-23.</strong> Given Priya saves a project Timeline view with a discipline filter, Months zoom and dependencies shown and shares it, then Marc opens it with the same filter, zoom and layers.</li>
+<li><strong>AC-SCR-24.</strong> Given Alex has a full day away on 2026-11-04 and Lena may see him in the planner, then with Time away on, the Calendar shows "Away" on that day for Alex with no reason, and a user without that visibility sees nothing.</li>
+<li><strong>AC-SCR-25.</strong> Given task 260105-T0011 due 2026-11-02, when Priya drags it to 2026-11-05, then the Timeline confirmation lists any successors made inconsistent and asks for the reason; dropping an undated task from the tray onto a day sets its due date after the same confirmation.</li>
+<li><strong>AC-SCR-26.</strong> Given a long task panel, when Comments is chosen in the strip, then the panel scrolls there and marks Comments; filtering History to Pat shows only Pat's entries.</li>
+<li><strong>AC-SCR-27.</strong> Given Jill is a collaborator on Alex's task, when she marks "My part done", then her mark and time show beside her name, one activity entry is written, and the task's status and assignee are unchanged.</li>
+</ul>
+<p><strong>Part D</strong></p>
+<ul>
+<li><strong>AC-SCR-28.</strong> Given 250101 has two Open roles and one team member Over-planned in week 46, then its Staffing cell reads "2 open roles · 1 over capacity", each part opens its list, and no person's figures change.</li>
+<li><strong>AC-SCR-29.</strong> Given the project list grouped by Client and filtered to Priority High, then each group shows its count, and the URL keeps both settings.</li>
+<li><strong>AC-SCR-30.</strong> Given 250101 has a status note, when its row peek opens, then it shows the next three open milestones, each discipline lead with an overdue count, and the note with author and time.</li>
+<li><strong>AC-SCR-31.</strong> Given a project from 2026-01-05 to 2027-02-28 with four open milestones, then its row shows the span bar with today marked and "4 milestones left"; a project without a target shows "No target".</li>
+<li><strong>AC-SCR-32.</strong> Given a project 60 % through its dates with 13 of 26 non-cancelled tasks Complete, then it shows "Elapsed 60 %" and "Progress 50 %" with no third figure, colour or index, and health is unchanged.</li>
+<li><strong>AC-SCR-33.</strong> Given Marc selects three projects and sets Priority High while he may edit two, then two change with one entry each and the third is listed as refused.</li>
+<li><strong>AC-SCR-34.</strong> Given the Portfolio, then each row shows its open roles and over-capacity people as text, and the Capacity by discipline link still opens the planner grouped by home discipline.</li>
+<li><strong>AC-SCR-35.</strong> Given one project went from Yellow to Red and two milestones slipped in the last 7 days, then the line reads "1 project changed health, 2 milestones slipped", and each part opens those projects.</li>
+<li><strong>AC-SCR-36.</strong> Given Portfolio is printed, then the output is landscape with the title block's read time, tiles, grouped rows, status notes and repeated table headers, and no navigation.</li>
+<li><strong>AC-SCR-37.</strong> Given Civil has 120 h of remaining estimates due before the next submission, 80 h confirmed allocated and 24 h of open roles, then the three figures show side by side with "Remaining exceeds allocated by 40 h" and no sum.</li>
+<li><strong>AC-SCR-38.</strong> Given 12 attention items of four kinds, then four chips show their counts, the chosen kind lists five items, and "Show all (n)" lists the rest.</li>
+</ul>
+<p><strong>Part E</strong></p>
+<ul>
+<li>
+<p><strong>AC-SCR-39.</strong> Given the Workload by Person report for Civil with four unestimated tasks and two without a due date, then the report shows "4 unestimated tasks" and "2 open tasks with no due date", each opening its list.</p>
+</li>
+<li>
+<p><strong>AC-SCR-40.</strong> Given Lena saves Team Capacity for Civil over 12 weeks and copies its link, when Sam opens the link, then the report opens with those parameters under Sam's permissions.</p>
+</li>
+<li>
+<p><strong>AC-SCR-41.</strong> Given a capacity report with a chart grouped by discipline, then every bar equals its table row, a deficit bar shows "short by n h" where demand exceeds supply, grouping by person is not offered, and the export is unchanged.</p>
+</li>
+<li>
+<p><strong>AC-SCR-42.</strong> Given the catalogue, when "room" is searched, then the reports under "Who has room in the coming weeks?" are listed, and opening one keeps the catalogue beside it.</p>
+</li>
+<li>
+<p><strong>AC-SCR-43.</strong> Given four displayed ISO weeks and standard weekly hours 40, one person with 160 visible hours shows 1.0 FTE and another with 120 h shows 0.75 FTE, even when the second person's custom capacity is 32 h; the aggregate is 1.75 FTE. A two-week partial month containing 80 h is 1.0 FTE. Zero/unknown standard hours show unavailable; partial/missing inputs remain labelled, the export states denominator and week count, and Workload keeps 8 weeks.</p>
+</li>
+<li>
+<p><strong>AC-SCR-44.</strong> Given Find room with 8 h per week for 4 weeks in Civil, then only Civil people with verified at least 8 h free in every week are listed by name; a partial-view person whose hidden work prevents verification is excluded or shown separately as Unavailable, never counted as a match.</p>
+</li>
+<li>
+<p><strong>AC-SCR-45.</strong> Given a planner group of three people, then its summary row draws Confirmed, Expected and Possible per week against capacity, each bar's accessible name states its values, and the numeric subtotal row is still present. In Planner and Allocations, one milestone and two deliverables due in week 46 appear as dated type markers in that week header; clicking them opens exactly those permitted records, and an undated deliverable remains in the separate tray.</p>
+</li>
+<li>
+<p><strong>AC-SCR-46.</strong> Given the planner in % mode and Months zoom, then a cell with 32 h planned against 40 h capacity reads 80 %, a week from Monday 2026-11-30 to Sunday 2026-12-06 counts in December, and the URL keeps both choices.</p>
+</li>
+<li>
+<p><strong>AC-SCR-47.</strong> Given Civil with 40 h free, a 30 h unfilled role and 20 h of unassigned Civil tasks due in week 46, then Workload shows the three figures and "short by 10 h", and no person's row changes.</p>
+</li>
+<li>
+<p><strong>AC-SCR-48.</strong> Given a Proposed 16 h allocation for Alex in week 46, when Show proposed as confirmed is on, then his week includes it with "Includes proposed"; turning it off restores the figure, and nothing is saved.</p>
+</li>
+<li>
+<p><strong>AC-SCR-49.</strong> Given Omar's Confined space certification expires in 20 days, then his My Staff card and Team row show "Expires in 20 days", the Team list filters by that tag, and no count by person appears.</p>
+</li>
+<li>
+<p><strong>AC-SCR-50.</strong> Given an Admin sets Jill as Co-op ending 2026-12-18, then within 60 days of that date My Staff and the pickers show "Ends 2026-12-18", and her capacity is unchanged.</p>
+</li>
+<li>
+<p><strong>AC-SCR-51.</strong> Given Lena fills an open role from 2026-11-09 to 2026-11-27 with Alex, then the dialog shows Alex's available hours for each of the three weeks and his load before and after, with any over-capacity week marked.</p>
+</li>
+<li>
+<p><strong>AC-SCR-52.</strong> Given Civil with 60 h confirmed, 16 h proposed and 90 h of remaining estimates due in week 47, then Allocations shows 60, 16 and 90 h separately and no total of them.</p>
+</li>
+<li>
+<p><strong>AC-SCR-53.</strong> Given three allocations, one Confirmed, when Shift all +2 weeks is applied after the preview, then all three move, the Confirmed one becomes Proposed and awaits confirmation, and three activity entries exist.</p>
+</li>
+<li>
+<p><strong>AC-SCR-54.</strong> Given Alex is away 8 h on Wednesday, then his Time week shows Wednesday hatched and "Capacity 32 h this week", and he can still add an entry on Wednesday.</p>
+</li>
+<li>
+<p><strong>AC-SCR-55.</strong> Given Alex logged on two tasks last week and has three assigned, then his week offers those rows; typing 2 in Tuesday's cell creates one entry of 2 h owned by Alex, and no other entry exists.</p>
+</li>
+</ul>
+<p><strong>Part F</strong></p>
+<ul>
+<li><strong>AC-SCR-56.</strong> Given deliverable 250101-D001 is issued For review and later returned with code B, then the register row and the issue history show both, and filtering by return code B lists it.</li>
+<li><strong>AC-SCR-57.</strong> Given four open deliverables without a due date, then the tray shows 4 and lists them, and the No due date filter returns the same four.</li>
+<li><strong>AC-SCR-58.</strong> Given the project pattern <code>C-###</code> and a client number "C12", then the deliverable saves with "Does not match C-###".</li>
+<li><strong>AC-SCR-59.</strong> Given a drawing list of 40 rows with one missing title, then the preview lists the error and nothing is created; the corrected file creates 40 deliverables with 40 entries.</li>
+<li><strong>AC-SCR-60.</strong> Given a client export of the register, then it holds the listed columns and no hours, internal reviewer or internal note, and names no person other than the PM.</li>
+<li><strong>AC-SCR-61.</strong> Given open comments on two packages, then the cross-package list shows both with filters; recording "Not incorporated" without a reason is refused; and the response sheet lists each comment with its outcome.</li>
+<li><strong>AC-SCR-62.</strong> Given an issued revision, when Priya records a client review with code C and two comments from that client, then both comments carry the client as originator, a separately designated independent verifier records closure with evidence and reason, and no account is created for the client.</li>
+<li><strong>AC-SCR-63.</strong> Given Civil packages approved after 1, 2 and 3 rounds, then Civil shows a median of 2 and a maximum of 3 rounds, with no figure per reviewer.</li>
+<li><strong>AC-SCR-64.</strong> Given the Drawing Package type defaults to Civil and Geotechnical, when a review package is created for two drawing packages, then both disciplines are preselected and can be changed.</li>
+<li><strong>AC-SCR-65.</strong> Given a milestone date moved with category "Waiting on input" and a reason, then the activity entry holds both, and "Why dates moved" counts it under that category.</li>
+<li><strong>AC-SCR-66.</strong> Given an IFC milestone dated before the Design Submission milestone, then the IFC row shows "Out of sequence: before <Design Submission milestone>"; a milestone without a date shows "No date".</li>
+<li><strong>AC-SCR-67.</strong> Given a handoff promised three days after its needed-by date with two receiving tasks, the first due 2026-11-10, then its card reads "Holds up 2 tasks; first due 2026-11-10".</li>
+<li><strong>AC-SCR-68.</strong> Given two open constraints and one Proposed commitment in the meeting's window, then Weekly Coordination lists them with their owners and dates and links to Readiness.</li>
+<li><strong>AC-SCR-69.</strong> Given decisions owned by the client decided after 4, 10 and 12 days, then the register shows a median lag of 10 days for the client, with no figure per person.</li>
+<li><strong>AC-SCR-70.</strong> Given a template with two risks, when a project is created from it, then the project has two Open risks owned by its PM, and later template edits do not change them.</li>
+<li><strong>AC-SCR-71.</strong> Given an issue is resolved without a root-cause category, then the save is refused with the reason; with "Coordination gap", the register's count by cause includes it.</li>
+</ul>
+<p><strong>Part G</strong></p>
+<ul>
+<li><strong>AC-SCR-72.</strong> Given the Team list grouped by home discipline and filtered to the Halifax office, then each group lists only Halifax people, with Not set as its own group.</li>
+<li><strong>AC-SCR-73.</strong> Given 250101 has two Open roles, then the Team tab's strip lists both with a Fill link for Lena, and no member's figures change.</li>
+<li><strong>AC-SCR-74.</strong> Given Lena selects Alex's name, then the person panel shows his facts and this week's free and away hours; Rita (Read Only, without Workload access) sees the panel without hours.</li>
+<li><strong>AC-SCR-75.</strong> Given Priya adds a person to 250101, then the picker shows "N h free" and "N h away" for people in her planner scope and nothing for others.</li>
+<li><strong>AC-SCR-76.</strong> Given Priya sets Jill's note to "checker", then the Team tab and the person panel show it, and Jill gains no permission.</li>
+<li><strong>AC-SCR-77.</strong> Given a link declares revision C while the deliverable's registered revision is D, then Files flags "Declared C, current D"; "Deliverables with no link" lists open deliverables without a link.</li>
+<li><strong>AC-SCR-78.</strong> Given Alex has five notifications, two on items where he is next actor, then Needs your action shows two; setting a project to Muted from its chip changes his follow level, and a held email shows "Held: away".</li>
+<li><strong>AC-SCR-79.</strong> Given Alex searches three times, then the three searches show as recent searches on that device only, and Clear removes them; searching people by "EIT" finds people with that job title.</li>
+<li><strong>AC-SCR-80.</strong> Given Jill chooses Weekly and Hold emails while away, then on her day with no available hours an assignment email is held and listed in her next digest, and no one else receives it.</li>
+<li><strong>AC-SCR-81.</strong> Given 250101 was created from template v3 and v5 exists, then its settings read "Created from <template> v3; v5 exists", and the project is unchanged.</li>
+<li><strong>AC-SCR-82.</strong> Given Jordan deactivates a user who owns seven open items, then the dialog shows 7 with a link to Reassign work, and deactivation can still proceed.</li>
+<li><strong>AC-SCR-83.</strong> Given the explainer for Discipline Lead, then each listed permission matches the §8 matrix row the server enforces, and a matrix change changes the text with no separate edit.</li>
+</ul>
+<p><strong>Shipping</strong></p>
+<ul>
+<li><strong>AC-SCR-84.</strong> Given each part's flag is off, then existing API tests and browser suites pass unchanged, and no new setting, field, column or screen of that part is present.</li>
+</ul>
+<h3 id="5711-decisions"><span class="num">57.11</span> Decisions</h3>
+<p>Each decision below uses its default until Jay decides otherwise. The rows are also in <code>specs/DECISIONS.md</code> as 053-D1 to 053-D22.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Approve this amendment's scope (Parts A to G)</td>
+<td>Approve with the listed defaults</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Charts on Reports, Portfolio and dashboards (§19, §41 R8, R9)</td>
+<td>Home's two FR-VIS-07 charts take the prototype's forms (bars by project, donut by status); a report may show one chart from its own rows beside its table (FR-SCR-41); each planner group may show one summary row (FR-SCR-45); no new chart on Portfolio or the project Dashboard; §19's "not built" line gains these exceptions</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>My Staff six-week strip and this week split by project (§42.5 D1, FR-SUP-01, FR-SUP-05)</td>
+<td>Not built; §42 stands</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Estimated against logged hours per discipline, template hours against actual, planned beside logged on Time, a task estimate-against-logged bar (039-DEF1, §29 item 5, §30, FR-RES-17)</td>
+<td>Not built; 039-DEF1 stays parked and FR-RES-17 stays Phase 3</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Over-capacity chip on board cards (§41 R7, R8)</td>
+<td>Not built</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Open roles outside Allocations and Workload (FR-ROLE-04)</td>
+<td>Allowed as separate, labelled figures on the project list, Portfolio, project Dashboard, Workload discipline rows and project Team tab; never in a person's capacity, load, indicators or planner row</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Elapsed % beside progress % (§30 earned value)</td>
+<td>Two plain facts; no ratio, index, colour or health input</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>Trend comparison</td>
+<td>Latest snapshot at or before today minus <code>trend_compare_days</code> = 7; Team Members shows no trend</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Undo window</td>
+<td>10 seconds, as §13.0; the reverse is written as new entries</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Lift §42.5's deferral to hold immediate notices while away, or redirect to a deputy?</td>
+<td>Propose hold only (FR-SCR-80), no redirection; existing daily-digest hold remains unchanged</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>Person types</td>
+<td>Employee, Co-op, Contractor; set by a System Administrator</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>Purpose-of-issue and return-code lists</td>
+<td>Purposes: For review, For approval, For construction, For tender, For information. Codes: A Accepted, B Accepted with comments, C Revise and resubmit, D Rejected. Both organisation-managed</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>Date-move reason categories</td>
+<td>Client request, Waiting on input, Scope change, Resource availability, Technical problem, Correction, Other; organisation-managed</td>
+</tr>
+<tr>
+<td>D14</td>
+<td>Issue root-cause categories</td>
+<td>Design error, Coordination gap, Missing input, Client change, Site condition, Other; organisation-managed</td>
+</tr>
+<tr>
+<td>D15</td>
+<td>Decision categories</td>
+<td>Design, Scope, Schedule, Method, Client, Other; organisation-managed</td>
+</tr>
+<tr>
+<td>D16</td>
+<td>External reviews</td>
+<td>Recorded by a project member against an <code>ExternalParty</code>; no external account</td>
+</tr>
+<tr>
+<td>D17</td>
+<td>Client drawing numbers</td>
+<td>Optional per-project pattern; a mismatch is flagged, never refused</td>
+</tr>
+<tr>
+<td>D18</td>
+<td>Warning windows</td>
+<td><code>certification_warn_days</code> = 30; <code>availability_window_days</code> = 60; <code>staffing_lookahead_weeks</code> = 4; <code>home_due_window_days</code> = 7</td>
+</tr>
+<tr>
+<td>D19</td>
+<td>How many flags?</td>
+<td>One per part: <code>flag.screen_patterns</code>, <code>flag.home_overview</code>, <code>flag.work_screens</code>, <code>flag.project_screens</code>, <code>flag.capacity_screens</code>, <code>flag.register_screens</code>, <code>flag.people_screens</code></td>
+</tr>
+<tr>
+<td>D20</td>
+<td>What counts as "New to me"?</td>
+<td>Assigned, or made reviewer, after the person's previous My Work visit; cleared on opening or by Mark all seen</td>
+</tr>
+<tr>
+<td>D21</td>
+<td>Narrow person panel and optional skills/certifications despite §39.12's deferred People/Person Profile?</td>
+<td>Adopt only FR-SCR-49, FR-SCR-50, FR-SCR-74 and FR-SCR-76 with explicit self/Admin facts editing and permission-scoped reads; full People/Person Profile stays deferred</td>
+</tr>
+<tr>
+<td>D22</td>
+<td>FTE denominator for report unit and month grouping</td>
+<td>Standard full-time hours: period hours divided by displayed ISO weeks times <code>default_weekly_capacity_hours</code>; personal custom capacity affects utilisation only; never sum weekly FTE as monthly FTE</td>
 </tr>
 </tbody>
 </table></div>

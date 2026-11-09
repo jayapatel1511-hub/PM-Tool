@@ -151,7 +151,7 @@ use the frame with the keyboard only and at phone width.
 
 ### Functional Requirements
 
-- **FR-001**: System MUST authenticate users only through the organisation's corporate single sign-on and MUST NOT store passwords. *(FR-AUTH-01, §21, T2)*
+- **FR-001**: System MUST authenticate each user through the deployment's selected sign-in mode (local-password accounts on homedev, Social, or Entra) and MUST NOT store passwords, only salted verifiers. *(FR-AUTH-01, §21, T2)*
 - **FR-002**: System MUST create or update a user record at first sign-in with display name, email, directory identity, job title, and office when available. *(FR-AUTH-02)*
 - **FR-003**: System MUST treat every signed-in active employee as a Standard User. *(§8.2)*
 - **FR-004**: System MUST derive the System Administrator, Executive, Supervisor, Project Manager, and Read Only roles from directory groups at each sign-in, allow Admins to add roles manually, and show each role's source. *(FR-AUTH-03, §8.8, Q2)*

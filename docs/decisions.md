@@ -9,13 +9,13 @@ changes, `spec-parts/`.
 |---|---|---|---|
 | Q1 | Backend stack | ASP.NET Core on .NET 10 (current LTS, supported to November 2028), EF Core 10 with Npgsql, PostgreSQL 17 | Default (§23.1; .NET 8 support ends November 2026) |
 | Q2 | System roles | Entra app roles `Hub.Admin`, `Hub.Executive`, `Hub.Supervisor`, `Hub.ProjectManager`, `Hub.ReadOnly` assigned to security groups; refreshed on every sign-in as source `Group`; Admins add roles in the Hub as source `Manual` | Default |
-| Q3 | Graph permissions | Adapters for `User.Read.All` directory sync and `Mail.Send` from one shared mailbox. Without them: Admin deactivation, and an SMTP relay (Azure Communication Services or corporate relay) for mail | Default |
+| Q3 | Graph permissions | Adapters for `User.Read.All` directory sync and `Mail.Send` from one shared mailbox. Without them: Admin deactivation, and an SMTP relay for mail; homedev runs with email in log mode until one is approved | Default |
 | Q4 | Visibility | Open by default. `visibility` stored and enforced; the Restricted control shows only when the organisation setting `restricted_projects_enabled` is on | Default |
 | Q5 | Project number | Manual entry, unique ignoring case and surrounding spaces, format regex in settings (default allows letters, digits and hyphens, 1–32 characters) | Default |
 | Q6 | Time zone and dates | One organisation time zone, default `America/Halifax` (the pilot clock), editable in settings; ISO dates (`2026-09-15`) | Default, zone assumed |
 | Q7 | Language | English at launch; all SPA text in `web/src/i18n/en.ts`, server text in `src/Hub.Api/Text.cs` | Default |
 | Q8 | Thin Decision Register | Yes | Default |
-| Q9 | Availability and backups | 99.5 % business hours, 14-day point-in-time restore, no zone-redundant HA (`infra/main.bicep`) | Default |
+| Q9 | Availability and backups | 99.5 % business hours as the target; on homedev, daily dumps plus the pilot WAL archive and no failover (`hosting/`) | Default |
 | Q10 | Browsers | Current and previous Edge and Chrome, current Safari on iPadOS, current Firefox | Default |
 | Q11 | Reason for due-date change by non-PM/DL | Required | Default |
 | Q12 | `allow_self_review` | false | Default |
@@ -43,7 +43,8 @@ changes, `spec-parts/`.
   `WebApplicationFactory`.
 - `web/`: React 19, TypeScript, Vite, Tailwind CSS 4 and shadcn/ui (Radix) components,
   TanStack Query, React Router, dnd-kit for board ordering, MSAL for Entra sign-in.
-- `infra/`: Bicep for App Service, PostgreSQL Flexible Server, Key Vault and Application Insights.
+- `hosting/`: Compose files, image and backup units for the homedev stacks.
+- `infra/`: earlier Bicep template for Azure; not the deployment path.
 
 ## Cross-cutting choices
 

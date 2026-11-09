@@ -182,6 +182,6 @@ Acceptance criteria: AC-PLN-01, AC-PLN-02, AC-PLN-03, AC-PLN-04, AC-PLN-05, AC-P
 ## Assumptions and dependencies
 
 - Depends on packets 001, 002, 006, 009, 017, 019, 021 and 029 being built (029's allocations, overrides and per-date versions; 017's people scope and forecast; 021's working-day calendars; 019's saved views).
-- Decisions: Q4 (restricted projects), Q18 (weekly capacity default, kept at 40 h), Q19 (direct reports only). The detailed defaults in §39.12 are authored design choices to confirm with Jay; they are not claims that the behaviour exists.
+- Decisions: Q4 (restricted projects), Q18 (weekly capacity default, kept at 40 h), Q19 (direct reports only), Q28 and Q29 (editing a manager entry and whether Confirmed needs acceptance; see PLN-03 and FR-PLN-07). The detailed defaults in §39.12 are authored design choices to confirm with Jay; they are not claims that the behaviour exists.
 - Presentation follows the Tuesday visual standard's resource-planning language; it supplies no rule or threshold.
 - No new infrastructure, background job, message broker or external credential is needed.

@@ -1,6 +1,6 @@
 # Decision log
 
-One table of the open product and process decisions for packets 038 to 050 and the build-approach report. Each row has a default.
+One table of the open product and process decisions for packets 038 to 053 and the build-approach report. Each row has a default.
 
 - Defaults apply while work ships dark. A pending row never blocks a merge or a review deployment; it blocks only a flag flip, that is, turning its addition on for pilot users.
 - Only Jay confirms or overrules a decision. Statuses: Open (the default applies), Decided, Done, Deferred (waits for its trigger).
@@ -192,5 +192,37 @@ One table of the open product and process decisions for packets 038 to 050 and t
 | 051-D10 | 051 | What does "PM template: security/seniority requirement?" (feedback item 3) mean? | Question back to the author; nothing specified. | Open |
 | 051-D11 | 051 | Admin-defined access levels (feedback item 4)? | Phase 2 candidate; not specified; roles stay as §8.8. | Open |
 | 051-D12 | 051 | Move the ERP (VTP) sync (feedback item 6) from Phase 3 to Phase 2? | No change until the ERP owner confirms capabilities (§29 item 3). | Open |
-| 051-D13 | 051 | "Passwords" (feedback item 9)? | Question back to the author; FR-AUTH-01 stands, no local passwords in pilot or production. | Open |
+| 051-D13 | 051 | "Passwords" (feedback item 9)? | Question back to the author; FR-AUTH-01 stands: individual local-password accounts on homedev, verifiers only. | Open |
 | 051-D14 | 051 | Pilot scope (feedback items 11 and 12): one operating centre (OC54) and one discipline first? | Proposed amendment to Q16; no product change needed. | Open |
+| 052-D1 | 052 | Approve this amendment's scope | Approve with the listed defaults | Open |
+| 052-D2 | 052 | Colour budget: replace §41 R8's six-fill limit and the colour half of AC-CALM-05? | Yes, as FR-VSN-09 states: every chromatic fill a §56 token with one meaning; the census counts non-token fills (target 0) and records token fills with no limit | Open |
+| 052-D3 | 052 | Sidebar: replace decision E2's More group, §41 R4 and the sidebar half of AC-CALM-04 with one list of eight and a foot group of up to four? | Yes, as FR-VSN-16 states; Vacation & Coverage becomes a Resources tab; FR-VIS-01's "More" becomes the foot group | Open |
+| 052-D4 | 052 | Project tab row: Activity and Settings as two right-aligned links instead of E1's More menu? | Yes; six group tabs and two links; AC-CALM-04's project half reads "at most 7 group tabs plus at most 2 page links" | Open |
+| 052-D5 | 052 | Project identity colours: stored per project, or derived from a hash of the project number as today? | Stored; least used of five among Setup and Active projects at creation; PM may change; never status | Open |
+| 052-D6 | 052 | Font delivery | IBM Plex Sans and Mono bundled with the build and served from the application's origin; no third-party font host | Open |
+| 052-D7 | 052 | Add the 2026-10-31 prototype (21 MB with screenshots) to `docs/reference/`? | No. §56 is written to be built without it; it stays outside `docs/reference/`, and `coordination-hub-v2` stays the only visual-cue prototype CLAUDE.md names | Open |
+| 052-D8 | 052 | Prototype wording that differs from the application's labels (for example its spreadsheet export label) | The application's labels in `web/src/i18n/en.ts` win; prototype wording is not adopted | Open |
+| 052-D9 | 052 | How many flags? | One, `flag.visual_system`, covering tokens, type, band, title block, count cards, sidebar and tab rows | Open |
+| 052-D10 | 052 | Phone navigation | Keep today's bottom bar and add the menu drawer of FR-VSN-19 | Open |
+| 053-D1 | 053 | Approve this amendment's scope (Parts A to G) | Approve with the listed defaults | Open |
+| 053-D2 | 053 | Charts on Reports, Portfolio and dashboards (§19, §41 R8, R9) | Home's two FR-VIS-07 charts take the prototype's forms (bars by project, donut by status); a report may show one chart from its own rows beside its table (FR-SCR-41); each planner group may show one summary row (FR-SCR-45); no new chart on Portfolio or the project Dashboard; §19's "not built" line gains these exceptions | Open |
+| 053-D3 | 053 | My Staff six-week strip and this week split by project (§42.5 D1, FR-SUP-01, FR-SUP-05) | Not built; §42 stands | Open |
+| 053-D4 | 053 | Estimated against logged hours per discipline, template hours against actual, planned beside logged on Time, a task estimate-against-logged bar (039-DEF1, §29 item 5, §30, FR-RES-17) | Not built; 039-DEF1 stays parked and FR-RES-17 stays Phase 3 | Open |
+| 053-D5 | 053 | Over-capacity chip on board cards (§41 R7, R8) | Not built | Open |
+| 053-D6 | 053 | Open roles outside Allocations and Workload (FR-ROLE-04) | Allowed as separate, labelled figures on the project list, Portfolio, project Dashboard, Workload discipline rows and project Team tab; never in a person's capacity, load, indicators or planner row | Open |
+| 053-D7 | 053 | Elapsed % beside progress % (§30 earned value) | Two plain facts; no ratio, index, colour or health input | Open |
+| 053-D8 | 053 | Trend comparison | Latest snapshot at or before today minus `trend_compare_days` = 7; Team Members shows no trend | Open |
+| 053-D9 | 053 | Undo window | 10 seconds, as §13.0; the reverse is written as new entries | Open |
+| 053-D10 | 053 | Lift §42.5's deferral to hold immediate notices while away, or redirect to a deputy? | Propose hold only (FR-SCR-80), no redirection; existing daily-digest hold remains unchanged | Open |
+| 053-D11 | 053 | Person types | Employee, Co-op, Contractor; set by a System Administrator | Open |
+| 053-D12 | 053 | Purpose-of-issue and return-code lists | Purposes: For review, For approval, For construction, For tender, For information. Codes: A Accepted, B Accepted with comments, C Revise and resubmit, D Rejected. Both organisation-managed | Open |
+| 053-D13 | 053 | Date-move reason categories | Client request, Waiting on input, Scope change, Resource availability, Technical problem, Correction, Other; organisation-managed | Open |
+| 053-D14 | 053 | Issue root-cause categories | Design error, Coordination gap, Missing input, Client change, Site condition, Other; organisation-managed | Open |
+| 053-D15 | 053 | Decision categories | Design, Scope, Schedule, Method, Client, Other; organisation-managed | Open |
+| 053-D16 | 053 | External reviews | Recorded by a project member against an `ExternalParty`; no external account | Open |
+| 053-D17 | 053 | Client drawing numbers | Optional per-project pattern; a mismatch is flagged, never refused | Open |
+| 053-D18 | 053 | Warning windows | `certification_warn_days` = 30; `availability_window_days` = 60; `staffing_lookahead_weeks` = 4; `home_due_window_days` = 7 | Open |
+| 053-D19 | 053 | How many flags? | One per part: `flag.screen_patterns`, `flag.home_overview`, `flag.work_screens`, `flag.project_screens`, `flag.capacity_screens`, `flag.register_screens`, `flag.people_screens` | Open |
+| 053-D20 | 053 | What counts as "New to me"? | Assigned, or made reviewer, after the person's previous My Work visit; cleared on opening or by Mark all seen | Open |
+| 053-D21 | 053 | Narrow person panel and optional skills/certifications despite §39.12's deferred People/Person Profile? | Adopt only FR-SCR-49, FR-SCR-50, FR-SCR-74 and FR-SCR-76 with explicit self/Admin facts editing and permission-scoped reads; full People/Person Profile stays deferred | Open |
+| 053-D22 | 053 | FTE denominator for report unit and month grouping | Standard full-time hours: period hours divided by displayed ISO weeks times `default_weekly_capacity_hours`; personal custom capacity affects utilisation only; never sum weekly FTE as monthly FTE | Open |

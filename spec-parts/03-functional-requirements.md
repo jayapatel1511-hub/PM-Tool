@@ -8,11 +8,11 @@ Classification codes: **R** = MVP-Required, **Rec** = MVP-Recommended, **P2** = 
 
 | ID | Requirement | Class | Detail |
 |---|---|---|---|
-| FR-AUTH-01 | Users sign in with their corporate Microsoft Entra ID account (OIDC/OAuth 2.0, PKCE). No local passwords. | R | §23.6 |
-| FR-AUTH-02 | A user record is created or updated on first sign-in (just-in-time provisioning) with display name, email, Entra object ID, job title, office (if available). | R | §23.6 |
-| FR-AUTH-03 | System roles are derived from Entra ID group membership at sign-in and/or assigned in-app by a System Administrator. | R | §8.8, §34 |
-| FR-AUTH-04 | Users disabled in Entra ID cannot sign in; a scheduled sync marks them Inactive in the Hub within 24 hours. | R | §23.6, §32 |
-| FR-AUTH-05 | Sessions use short-lived access tokens with silent renewal; idle sign-out after a configurable period. | R | §23.6 |
+| FR-AUTH-01 | Each user signs in with an individual account through the mode the deployment selects with `Auth:Mode` (§23.6): `LocalPassword`, a user ID and password issued by an operator, which the homedev review, pilot and production stacks use; `Social`, a Microsoft or Google account, switched on for a stack only by an activation Jay authorises; or `Entra`, single-tenant corporate sign-in (OIDC/OAuth 2.0, PKCE), kept as an alternative. No password is stored: `LocalPassword` keeps only a salted verifier in the stack's private files outside Git. Development header sign-in exists only in Development and Testing. | R | §23.6, §48.6 |
+| FR-AUTH-02 | In `Social` and `Entra` modes a user record is created or updated on first sign-in (just-in-time provisioning) with display name and email, plus Entra object ID, job title and office where Entra supplies them; a `Social` identity is keyed by provider and subject, never by email. In `LocalPassword` mode an operator maps each credential to one existing active user. A credential or provider claim grants no role by itself. | R | §23.6 |
+| FR-AUTH-03 | System roles are assigned in-app by a System Administrator in every mode; in `Entra` mode they are also derived from Entra ID group membership at sign-in. | R | §8.8, §34 |
+| FR-AUTH-04 | An Inactive user cannot sign in, in any mode. In `Entra` mode users disabled in Entra ID cannot sign in and a scheduled sync marks them Inactive in the Hub within 24 hours; in the other modes a System Administrator deactivates the user, and removing or rotating a verifier ends that user's sessions on their next request. | R | §23.6, §32 |
+| FR-AUTH-05 | `LocalPassword` and `Social` sessions are server-side, PostgreSQL-backed and expire eight hours after sign-in without sliding; sign-out revokes the session so a copied cookie is refused (FR-OPS-13). `Entra` sessions use short-lived access tokens with silent renewal. Idle sign-out after a configurable period applies in every mode. | R | §23.6 |
 | FR-ORG-01 | System Administrators maintain Disciplines (name, code, colour, active flag, sort order). | R | §12.2 |
 | FR-ORG-02 | System Administrators maintain Clients (name, short name, active flag). | R | §12.1 |
 | FR-ORG-03 | System Administrators maintain Offices (name, code, time zone). | R | §12.1 |

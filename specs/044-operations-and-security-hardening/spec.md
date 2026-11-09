@@ -52,7 +52,7 @@ Nothing about how Tuesday was built is served to the public. A backup leaves hom
 | D6 | Hosted social sign-out check | Server tests; hosted check is human-only. |
 | D7 | Idempotency in progress | 409 `idempotency_in_progress`, `Retry-After: 1`; abandon after 2 minutes; path-only comparison kept. |
 | D8 | Unknown outcome copy | 502/503 "was not saved"; 504 and no answer "may not have been saved". |
-| D9 | Product name in server text | Footers only. |
+| D9 | Product name in server text (Q27) | Footers only. |
 | D10 | Tab title; density | Notification count, "99+" cap, no page name; stored browser density wins. |
 | D11 | Visible changes without a flag | S03, S04, S10, S11, S12 and S13 ship unflagged as corrections and are Tier B. |
 

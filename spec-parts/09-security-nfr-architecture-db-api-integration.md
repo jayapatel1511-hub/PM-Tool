@@ -5,17 +5,17 @@ The Hub is an internal line-of-business application holding internal-confidentia
 | Area | Requirement | Class |
 |---|---|---|
 | Transport | HTTPS only; TLS 1.2+; HSTS; HTTP redirects to HTTPS. | MVP |
-| Authentication | Microsoft Entra ID via OpenID Connect / OAuth 2.0 with PKCE for the SPA; API accepts only bearer tokens issued for the Hub API audience; the optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No local accounts or passwords stored. | MVP |
+| Authentication | An individual account per person, through the mode `Auth:Mode` selects (FR-AUTH-01, §23.6). On homedev: `LocalPassword`, with a Secure, HttpOnly, SameSite=Lax session cookie, same-origin checks on writes and server-side sessions; `Social` (Microsoft and Google) only by an authorised activation. `Entra` (OpenID Connect / OAuth 2.0 with PKCE, bearer tokens for the Hub API audience) stays available. The optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No password is stored, only salted verifiers in private files outside Git; no shared accounts. | MVP |
 | Authorisation | Role-based access control per Section 8 enforced in the application service layer for every command and query; deny by default; permission tests derived from the matrix. | MVP |
-| Least privilege | App Service uses a system-assigned managed identity to reach Key Vault and (if Graph is used) Graph with the minimum application permissions (`User.Read.All` for sync; `Mail.Send` restricted to one mailbox via an Application Access Policy). Database role for the app has only the needed DML; `activity_log` INSERT/SELECT only (Rec). | MVP |
-| Secret management | No secrets in code or config files; connection strings and client secrets in Azure Key Vault referenced by App Service; rotate on schedule (TBD). Prefer Entra-authenticated PostgreSQL (managed identity) to avoid database passwords entirely. | MVP |
+| Least privilege | The API container runs as UID 1000 with a read-only root filesystem, no Linux capabilities and `no-new-privileges`, under memory and CPU limits (`hosting/homedev*.compose.yml`). If Graph is used, it gets the minimum application permissions (`User.Read.All` for sync; `Mail.Send` restricted to one mailbox via an Application Access Policy). The pilot application connects as the ordinary role `hub_pilot_app`, separate from the owner, migration and bootstrap roles; `activity_log` INSERT/SELECT only (Rec). | MVP |
+| Secret management | No secrets in code, images or Git. Each stack reads its database password, keys and credentials from its own owner-only `.runtime/` directory on homedev, outside the release tree; review, pilot and production never share them; rotate on schedule (TBD). | MVP |
 | Audit logging | Section 20; plus sign-in and export events. | MVP |
-| Backups | Azure Database for PostgreSQL automated backups with point-in-time restore (7–35 days; **TBD**); restore tested before go-live and quarterly (Rec). | MVP |
-| Database security | Private networking (VNet integration + private endpoint) or at minimum firewall restricted to App Service outbound IPs; TLS enforced; encryption at rest (platform default); no public admin access; separate credentials per environment. | MVP (private endpoint Rec) |
+| Backups | Daily logical dumps by the system timers `pm-tool-review-backup.timer` and `pm-tool-pilot-backup.timer`; WAL archiving and base backups on the pilot database for point-in-time restore; an encrypted off-host copy and a restore drill from it under §48.3 (FR-OPS-03 to FR-OPS-05); restore tested before go-live and quarterly (Rec). | MVP |
+| Database security | PostgreSQL runs in the stack's private Compose network with no published port; only the API container reaches it. The API listens on loopback only (`127.0.0.1:3080` review, `127.0.0.1:3081` pilot). No public admin access; separate credentials, volumes and networks per stack. Disk encryption at rest on homedev is **TBD**. | MVP |
 | Secure coding | Input validation on all API inputs (schema validation); parameterised queries via the ORM; output encoding in the SPA (React default); markdown rendering through a sanitising renderer with an allow-list; CSRF not applicable to bearer-token APIs but SameSite cookies if any are used; Content Security Policy, X-Content-Type-Options, Referrer-Policy, frame-ancestors headers. | MVP |
 | Dependency management | Automated dependency vulnerability scanning (Dependabot/Renovate or equivalent) with monthly update cadence and immediate action on critical CVEs; lockfiles committed; container/base image scanning if containers are used. | MVP |
 | Logging | Structured application logs with correlation IDs; no secrets, tokens, or comment bodies in logs; user identifiers as IDs not emails where possible; log retention 30–90 days (TBD). | MVP |
-| Environment separation | Separate Azure resource groups (and ideally subscriptions) for dev, test/UAT, prod; separate Entra app registrations per environment; no production data in dev; anonymised copy for test if needed (TBD). | MVP |
+| Environment separation | Separate Compose projects on homedev (`pm-tool-review`, `pm-tool-pilot`), each with its own base directory, database volume, network, port, `.runtime/` and backups. Review holds synthetic data only. Review data, credentials and protection keys are never copied into pilot or production. Accepted company production runs in the pilot stack (`docs/runbooks/environments.md`). | MVP |
 | Rate limiting | Basic per-user request rate limit on the API (e.g., 600 requests/minute) to protect against runaway clients. | Rec |
 | Data classification | All project data treated as internal-confidential; Restricted projects (if enabled) additionally limited to members. | MVP |
 | Leave and calendar privacy | Enforce §8.7 in queries, reports, notifications and feeds. Do not retain raw HR CSV files or private reasons. Calendar capability tokens are hashed, revocable and never logged; feed access rechecks account state and permissions. | MVP (calendar if shipped) |
@@ -30,21 +30,21 @@ Targets are realistic for an internal business application. Items marked TBD nee
 
 | Area | Requirement | Target | Notes |
 |---|---|---|---|
-| Performance — page load | Time to interactive for My Work, Project Dashboard, Task List (≤ 500 tasks) on the corporate network | ≤ 2 s p95 | Measured with App Insights browser SDK |
+| Performance — page load | Time to interactive for My Work, Project Dashboard, Task List (≤ 500 tasks) on the corporate network | ≤ 2 s p95 | Measured by the browser suites; aggregate load-time bands per route under §51.4 while `route_counter_enabled` is on |
 | Performance — API | List endpoints (page of 100) and item reads | ≤ 500 ms p95 at 100 concurrent users | |
 | Performance — evaluation | Re-evaluation of one project's derived states after a write | ≤ 2 s for a project with 2,000 tasks; asynchronous, never blocks the user's save | §23.5 |
 | Performance — nightly job | Full re-evaluation + snapshots for all Active projects | ≤ 30 minutes for 500 projects / 100,000 tasks | Assumption on scale |
 | Scale (assumption) | 300–500 users; 300–600 Active projects; 100,000 open tasks; 2,000,000 activity rows/year | Single PostgreSQL instance is sufficient | **TBD** actual numbers |
-| Availability | Business hours across the organisation's time zones | 99.5% monthly (≈ 3.5 h downtime) | Single-region; no HA database in MVP unless required (**TBD**) |
+| Availability | Business hours across the organisation's time zones | 99.5% monthly (≈ 3.5 h downtime) | One server, homedev, with no failover or battery backup; a power or network loss is downtime, so the target is unproven there (**TBD**) |
 | Reliability | No data loss on failure; jobs idempotent and resumable; notifications at-least-once with de-dup | RPO ≤ 15 min (PITR); RTO ≤ 8 h (**TBD**) | |
 | Maintainability | Modular monolith; ADRs for decisions; automated tests: rules engine ≥ 95% branch coverage, services ≥ 70%, critical UI flows end-to-end; CI on every PR | — | |
-| Scalability | Scale App Service plan vertically/horizontally; database tier upgrade; no architectural change needed up to 5× assumed scale | — | |
+| Scalability | Raise the container memory and CPU limits in the Compose file; one PostgreSQL instance; no architectural change needed up to 5× assumed scale, within homedev's hardware | — | |
 | Accessibility | WCAG 2.1 AA for all MVP screens | — | Automated checks in CI + manual audit before GA |
 | Browser support | Current and previous major versions of Microsoft Edge and Google Chrome; Safari on iPadOS (current); Firefox current (Rec) | — | **TBD** official list |
 | Responsiveness | Desktop primary (≥ 1280), tablet usable (768–1279), phone: My Work, task updates, notifications, search | — | §13.0 |
-| Backup/recovery | Automated daily backups + PITR; quarterly restore drill; infrastructure re-creatable from IaC in < 1 day | — | |
-| Monitoring | App Insights: availability test on `/health`, request/dependency telemetry, exceptions, job durations, queue depths; alerts on error rate, job failure, digest not sent | — | |
-| Logging | Structured JSON logs to App Insights/Log Analytics; 30–90 day retention (**TBD**) | — | |
+| Backup/recovery | Daily dumps, pilot WAL archive and off-host copy (§21, §48.3); quarterly restore drill; a stack re-creatable from the repository's `hosting/` files, `scripts/` and a backup in < 1 day | — | |
+| Monitoring | `/health` probed after every activation (`scripts/verify-homedev-review.py`, `scripts/verify-homedev-pilot.py`) and by the homedev watchdog; job durations, queue depths and errors in the application log and on the Admin Operations page (§48.4); alerts on error rate, job failure, digest not sent | — | |
+| Logging | Structured JSON logs to container stdout, kept by Docker with rotation (10 MB × 3 files per service); longer retention (30–90 days) is **TBD** | — | |
 | Localisation | UI strings externalised from day one; English at launch; second language (e.g., French) if required (**TBD — Business Decision Required**) | — | Retrofitting i18n is expensive; externalising strings is cheap |
 | Data export | Every list exportable; full project export at archive | — | Avoids lock-in |
 | Documentation | Admin guide, user quick guide, API reference (OpenAPI), runbook for jobs and restores | — | |
@@ -55,7 +55,7 @@ Targets are realistic for an internal business application. Items marked TBD nee
 
 ### 23.1 Recommendation in one paragraph
 
-**Recommendation:** Build a **modular monolith**: a React + TypeScript single-page application talking to a single **ASP.NET Core (.NET 8 LTS) Web API** backed by **PostgreSQL**, with background jobs hosted in the same application, authenticated by **Microsoft Entra ID**, deployed to **Azure App Service (Linux)** with **Azure Database for PostgreSQL Flexible Server**, **Key Vault**, and **Application Insights**, provisioned with **Bicep**, delivered via CI/CD. Node.js/TypeScript (NestJS + Prisma or Drizzle) is an acceptable alternative backend if the team's skills favour it; the rest of the architecture is unchanged.
+**Recommendation:** Build a **modular monolith**: a React + TypeScript single-page application talking to a single **ASP.NET Core (.NET 8 LTS) Web API** backed by **PostgreSQL**, with background jobs hosted in the same application, authenticated by **Microsoft Entra ID**, deployed to **homedev**, Jay's Ubuntu server, as **Docker Compose** stacks (one API container and **PostgreSQL 17** per stack) reached through a dedicated **Cloudflare tunnel**, activated from versioned releases by the repository's scripts and delivered via CI/CD (§23.7, §43). Node.js/TypeScript (NestJS + Prisma or Drizzle) is an acceptable alternative backend if the team's skills favour it; the rest of the architecture is unchanged.
 
 ### 23.2 Option evaluation
 
@@ -68,25 +68,26 @@ Targets are realistic for an internal business application. Items marked TBD nee
 | ORM / migrations | EF Core with Npgsql; mature migrations | Prisma (excellent DX) or Drizzle; mature |
 | Background jobs in-process | Hosted services + Quartz.NET or Hangfire | BullMQ needs Redis; node-cron simple but not durable |
 | Team skills | **TBD** — likely Microsoft-oriented in an engineering consulting firm | **TBD** — one language across front and back |
-| Hosting on App Service | Native | Native |
+| Hosting in a container on homedev | Native | Native |
 | Recommendation | **Preferred** for a Microsoft-ecosystem organisation and for durable in-process scheduling without extra infrastructure | Choose if the team is stronger in TypeScript |
 
 **Frontend**
 
 | Criterion | React + Vite SPA (TypeScript) | Next.js |
 |---|---|---|
-| Fit | Internal app behind SSO; no SEO; heavy tables and panels | SSR/ISR add complexity without benefit here |
+| Fit | Internal app behind sign-in; no SEO; heavy tables and panels | SSR/ISR add complexity without benefit here |
 | Auth | MSAL.js in browser | MSAL with server components adds complexity |
-| Hosting | Static files served by App Service or Azure Static Web Apps | Requires Node runtime |
+| Hosting | Static files served by the API container | Requires Node runtime |
 | Recommendation | **Preferred** | Acceptable if team already standardised on it |
 
 **Hosting**
 
-| Criterion | Azure App Service (Linux) | Azure Container Apps | AKS |
-|---|---|---|---|
-| Operational simplicity | Highest | Medium | Low |
-| Fit for one API + jobs | Excellent (WebJobs or in-process hosted services) | Good (scale-to-zero not needed) | Over-engineered |
-| Recommendation | **Preferred** for MVP | Revisit if containerised workloads multiply | Not recommended |
+| Criterion | Docker Compose on homedev | Managed cloud platform |
+|---|---|---|
+| Operational simplicity | High: one server, one Compose file per stack, scripted activation and rollback | Medium: more services to provision and pay for |
+| Fit for one API + jobs | Excellent (in-process hosted services) | Good |
+| Limits | One machine, no failover; Docker changes need Jay's sudo | Managed backups and failover |
+| Decision | **Used** for review and pilot | Not used. The earlier Azure Bicep template in `infra/` is kept for reference and is not the deployment path |
 
 **Supporting libraries (Recommendation, not mandatory)**: UI kit — Fluent UI React v9 (Microsoft look, accessible) or a headless kit with in-house styling; tables — TanStack Table with virtualisation; data fetching — TanStack Query; forms — React Hook Form + Zod; routing — React Router; charts — accessible SVG milestone strip, sparkline, and first-release overview task charts (§36.6); timeline — in-house SVG or a small MIT-licensed Gantt component; backend validation — FluentValidation; OpenAPI — Swashbuckle/NSwag with generated TypeScript client.
 
@@ -135,9 +136,19 @@ Layering inside each module: API endpoints (thin) → application services / com
 
 > **Design note.** This hybrid avoids the two classic failure modes. Pure compute-on-read puts rule logic in SQL views and again in application code for notifications, and the two drift. Pure nightly batch leaves a task showing "not blocked" all day after its predecessor slipped. Evaluating the whole project on every change through one pure function, then diffing against the last result, gives a single source of truth, near-real-time indicators, and transition-based notifications from the same code path. Whole-project recomputation sounds wasteful but a project rarely exceeds a few thousand tasks, and simplicity wins.
 
-Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process with a single-instance lock (database-based) so scaling out App Service instances does not duplicate jobs; job runs recorded in `job_run`. If the team prefers, jobs can run in a separate App Service WebJob using the same codebase — same deployable, different entry point.
+Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process with a single-instance lock (database-based) so a second API container would not duplicate jobs; job runs recorded in `job_run`. If the team prefers, jobs can run in a separate container from the same image — same deployable, different entry point.
 
 ### 23.6 Authentication and SSO
+
+**Sign-in modes.** `Auth:Mode` selects one mode per stack (FR-AUTH-01):
+
+| Mode | Who signs in | Where it runs |
+|---|---|---|
+| `LocalPassword` | A person with a user ID and password an operator issued and mapped to one active user. Only a salted verifier is kept, in the stack's owner-only `.runtime/` files | The homedev review, pilot and production stacks (`hosting/homedev*.compose.yml`). It runs under the Staging runtime name and refuses to start under Production (FR-OPS-17) |
+| `Social` | Anyone with a Microsoft or Google account; a new person gets an active profile with no system role and sees only Open projects. Identity is keyed by provider and subject | A homedev stack only when Jay authorises an activation with `hosting/social-auth.override.yml` (`docs/runbooks/social-sign-in.md`) |
+| `Entra` | Accounts in the organisation's tenant | Not used on homedev; kept as an alternative. The bullets below that name app registrations, MSAL, app roles, directory sync and security groups describe this mode only |
+| `Development` | Seeded people chosen from a list | Development and Testing only |
+
 
 - **App registrations**: one for the SPA (public client, redirect URIs per environment), one for the API (exposes scope `access_as_user`, defines **App Roles**: `Hub.Admin`, `Hub.Executive`, `Hub.Supervisor`, `Hub.ProjectManager`, `Hub.ReadOnly`). Recommendation: use App Roles assigned to Entra security groups (via the Enterprise Application) rather than raw group claims, which suffer from group-overage limits and leak group IDs into tokens.
 - **Sign-in**: MSAL.js authorization code flow with PKCE; access token for the API scope; silent renewal; token lifetime per tenant policy (~1 h). API validates issuer, audience, signature, and expiry with `Microsoft.Identity.Web`. Conditional Access and MFA are Entra concerns and apply automatically.
@@ -146,32 +157,31 @@ Scheduling implementation: Quartz.NET (or Hangfire) hosted in the API process wi
 - **Disabled accounts**: cannot obtain tokens (Entra); marked Inactive by sync; A-18 flags their work; the "Reassign work" tool lists everything they own.
 - **Security groups**: five groups mapped to app roles, managed by IT; membership changes take effect at next token issuance.
 - **Session management**: Entra bearer-token authentication is stateless. SPA sign-out clears MSAL cache and redirects to Entra logout. Individual local-password review sign-in uses eight-hour, non-sliding PostgreSQL-backed session tickets; sign-out removes the current ticket, so copied cookies are refused across API instances and restarts. Existing stateless review cookies require a fresh sign-in after activation. Idle timeout in the SPA (e.g., 8 h) forces re-authentication (**TBD**). No refresh tokens stored server-side.
-- **Service-to-service**: none in MVP other than the API's managed identity to Key Vault/Graph/PostgreSQL.
+- **Service-to-service**: none in MVP other than the API's connection to PostgreSQL and, if approved, Graph.
 
 ### 23.7 Environments, CI/CD, IaC
 
-- Environments: `dev` (shared, auto-deployed from main), `test` (UAT, deployed on release candidates), `prod` (approval-gated). Each has its own resource group, database, Key Vault, app registrations, and Entra groups.
-- IaC: Bicep modules for App Service plan and app, PostgreSQL Flexible Server (with private endpoint/VNet integration), Key Vault, App Insights/Log Analytics, and (if used) Static Web App. Parameter files per environment.
+- Environments, all on homedev: `review` (Compose project `pm-tool-review`, public at `https://pm.engcalchub.com` through the tunnel, synthetic data only) and `pilot` (Compose project `pm-tool-pilot`, loopback only). Each has its own base directory with `releases/<full-sha>`, a `current` link, `.runtime/` and `data/`. Local development runs on the Mac with `docker-compose.yml`. Accepted company production runs in the pilot stack (`docs/runbooks/environments.md`).
+- Infrastructure as code: `hosting/homedev.compose.yml`, `hosting/homedev-pilot.compose.yml`, `hosting/Dockerfile.review`, the backup units and `hosting/pm-tool-tunnel.service`. Docker and system units on homedev are changed only with Jay's sudo.
 - CI: build, unit tests, rules-engine tests, lint, dependency scan, OpenAPI generation, SPA build, accessibility checks on key pages; PR required for main.
-- CD: GitHub Actions or Azure DevOps Pipelines (**TBD** by existing tooling); database migrations run as a deployment step with backup-before-migrate in prod; blue/green via App Service deployment slots (Rec).
-- Configuration: environment variables from App Service settings referencing Key Vault; feature flags as organisation settings (§43.4).
+- CD: GitHub Actions builds one image per green main commit (FR-DLV-14). Releases are activated with `scripts/activate-homedev-review.sh` and `scripts/activate-homedev-pilot.sh`: a database backup first, then migrations and the API, then `/health` and the verification probes. If the probes fail, the review script prints the command that returns to the previous release. Review may also deploy by timer with an automatic return to the previous image (FR-DLV-18); pilot and production stay manual (FR-DLV-19).
+- Configuration: environment variables from each stack's `.runtime/` env file; feature flags as organisation settings (§43.4).
 
 ### 23.8 Observability
 
-Application Insights (browser + server): requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting `route_counter_enabled` is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), availability test on `/health` (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Dashboards and alerts: error rate > 2% for 10 min; outbox lag > 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU > 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).
+The application log and the Admin Operations page: requests, dependencies, exceptions, custom events (evaluation duration per project, attention items count, digest sent count, emails failed, and, while the organisation setting `route_counter_enabled` is on, aggregate daily screen-open counts and load-time bands per route with no user, item or text under §51.4), a `/health` probe (checks database and outbox lag; dead-lettered outbox events are left out of the lag, §48.4). Watchdog alerts on homedev: error rate > 2% for 10 min; outbox lag > 10 min; any dead-lettered outbox event (§48.4); nightly job failed; digest not sent by 08:00; database CPU > 80% sustained. Browser errors also reach the application log through the log-only client-error endpoint (§48.5).
 
-### 23.9 Azure services and sizing (assumptions)
+### 23.9 Homedev services and sizing
 
-| Service | Purpose | Initial size (Assumption) |
+| Service | Purpose | Size |
 |---|---|---|
-| App Service (Linux) — P1v3 or P2v3 | API + static SPA + in-process jobs | 1–2 instances |
-| Azure Database for PostgreSQL Flexible Server | Primary database | General Purpose 2–4 vCores, 128 GB, PITR 14 days; zone-redundant HA **TBD** |
-| Azure Key Vault | Secrets and certificates | Standard |
-| Application Insights + Log Analytics | Telemetry and logs | Pay-as-you-go, 30–90 day retention |
-| Azure Static Web Apps (optional) | SPA hosting with CDN | Standard; alternatively serve SPA from App Service |
-| Microsoft Graph | User sync, mail send | No cost; permissions approval |
-| Azure Communication Services Email (alternative) | Outbound email | If Graph mail is not approved |
-| Azure Storage | Not required (no files); optional for export staging | — |
+| API container (`hosting/Dockerfile.review`) | API + static SPA + in-process jobs | One per stack; pilot limit 1 GB memory, 2 CPUs |
+| PostgreSQL 17 container (`postgres:17-alpine`) | Primary database, one per stack on its own volume | Pilot limit 1 GB memory, 1 CPU; WAL archive and base backups on the pilot |
+| Cloudflare tunnel `pm-tool` (user unit `pm-tool-tunnel.service`) | Public HTTPS for `pm.engcalchub.com`, routed to the review API on loopback | 192 MB memory limit |
+| Backup timers (`pm-tool-review-backup.timer`, `pm-tool-pilot-backup.timer`) | Daily owner-only logical dumps | — |
+| Encrypted off-host backup copy | Recovery if homedev is lost (§48.3) | Pilot or company data joins it only with Jay's approval (044-D2) |
+| Microsoft Graph | User sync, mail send | Off on homedev until approved (Q3) |
+| File storage | Not required (no files) | — |
 
 ### 23.10 Architecture diagram
 
@@ -183,23 +193,24 @@ flowchart LR
   subgraph Entra[Microsoft Entra ID]
     IDP[(OIDC / OAuth2<br/>App Roles from Groups)]
   end
-  subgraph Azure[Azure — App Service (Linux)]
+  subgraph Homedev[homedev — Docker Compose stack]
     API[ASP.NET Core Web API<br/>Modules: Identity · Organisation · Projects · Work · Registers · Collaboration · Evaluation · Notifications · Reporting · Audit · Search]
     JOBS[In-process jobs<br/>Outbox consumer · Nightly evaluation · Digest · Graph sync]
     API --- JOBS
   end
-  PG[(Azure Database for PostgreSQL<br/>core tables · state tables · outbox · activity_log · FTS)]
-  KV[(Key Vault)]
-  AI[(Application Insights)]
+  PG[(PostgreSQL 17 container<br/>core tables · state tables · outbox · activity_log · FTS)]
+  CF[Cloudflare tunnel<br/>pm.engcalchub.com]
+  RT[(.runtime/ secrets<br/>owner-only)]
+  LOG[(Container logs)]
   GRAPH[Microsoft Graph<br/>Users · Mail.Send]
-  SPA -- bearer token --> API
+  SPA -- HTTPS --> CF
+  CF -- loopback --> API
   SPA -. sign-in .-> IDP
   API -. validate token .-> IDP
   API --> PG
   JOBS --> PG
-  API --> KV
-  API --> AI
-  SPA --> AI
+  API --> RT
+  API --> LOG
   JOBS --> GRAPH
 ```
 
@@ -636,9 +647,9 @@ Per-user rate limit (e.g., 600 requests/minute) returning `429` with `Retry-Afte
 
 | System | Direction | Purpose | Mechanism | Phase |
 |---|---|---|---|---|
-| Microsoft Entra ID | Inbound (auth) | SSO, app roles | OIDC/OAuth 2.0 | MVP |
+| Microsoft Entra ID | Inbound (auth) | SSO, app roles, in `Entra` mode only (§23.6); not used on homedev | OIDC/OAuth 2.0 | Optional |
 | Microsoft Graph — Users | Inbound (sync) | Active state, title, office, manager | Nightly job; `User.Read.All` application permission (**TBD approval**) | MVP (Rec) |
-| Microsoft Graph — Mail / ACS Email | Outbound | Notification emails and digests | `Mail.Send` scoped to one mailbox, or ACS | MVP (**TBD** provider) |
+| Microsoft Graph — Mail / SMTP relay | Outbound | Notification emails and digests | `Mail.Send` scoped to one mailbox, or an SMTP relay | MVP (**TBD** provider) |
 | SharePoint / OneDrive / Teams | Link only | Document links | URLs stored | MVP |
 | Microsoft Teams | Outbound | Chat/channel notifications | Graph chat messages or Workflows webhook | P3 |
 | SharePoint (Graph) | Read | Browse/pick documents from a project library | Graph Sites/Drives | P3 |

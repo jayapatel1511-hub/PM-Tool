@@ -18,7 +18,7 @@ Where this section adds to §12.5 (tasks), §13.3 (Task List and task panel), §
 | 6 | Connecting to VTP data (Phase 2) | Already Phase 3 scope, item 3 of §29 (ERP master-data sync, nothing assumed). Whether it moves to Phase 2 is 051-D12. |
 | 7 | Personalised view: tasks changing | Covered: My Work views (FR-MYW-01, FR-VIS-08), saved personal views (§18.4, packet 019), follow levels (FR-ASG-02) and change notifications (§17). |
 | 8 | Backlog | **Part B** (§55.3). |
-| 9 | Passwords | The product has no local passwords (FR-AUTH-01); review environments use a file-backed verifier only (§48, FR-OPS-17). The item is a question back to the author: does the pilot host lack Entra sign-in, or is this a request to keep sign-in password-free? (051-D13). |
+| 9 | Passwords | The homedev stacks sign people in with individual user IDs and passwords issued by an operator; the product keeps only a salted verifier, never the password (FR-AUTH-01, §23.6; §48, FR-OPS-17). The item is a question back to the author about what they need changed (051-D13). |
 | 10 | Employee list / OC list / Company (Atlantic) | Covered by §54 Company Structure (packet 050): named levels, unit tree, home unit, Organisation page. |
 | 11 | Start it with one discipline | Pilot scoping, not a feature. Recorded as an amendment proposal to Q16 (051-D14). |
 | 12 | OC54 use only | Pilot scoping, not a feature. Recorded with item 11 under 051-D14. |
@@ -168,5 +168,5 @@ Each decision below uses its default until Jay decides otherwise. The rows are a
 | D10 | What does "PM template · security/seniority requirement?" (item 3) mean? | Question back to the author; nothing specified |
 | D11 | Admin-defined access levels (item 4)? | Phase 2 candidate; not specified; roles stay as §8.8 |
 | D12 | Move the ERP (VTP) sync (item 6) from Phase 3 to Phase 2? | No change until the ERP owner confirms capabilities (§29 item 3) |
-| D13 | "Passwords" (item 9)? | Question back to the author; FR-AUTH-01 stands (no local passwords in pilot or production) |
+| D13 | "Passwords" (item 9)? | Question back to the author; FR-AUTH-01 stands (individual local-password accounts on homedev, verifiers only) |
 | D14 | Pilot scope (items 11 and 12): one operating centre (OC54) and one discipline first? | Proposed amendment to Q16; Jay decides; no product change needed |

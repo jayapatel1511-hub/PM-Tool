@@ -8,7 +8,7 @@ what changed. Users' tasks are in the [user guide](user-guide.md).
 
 - Everyone who signs in is a Standard User. System roles add abilities: **System Administrator**, **Executive**,
   **Supervisor**, **Project Manager** (may create projects) and **Read Only**. In the review release and the pilot, add
-  them by hand in **Users & roles** (shown as "added in the Hub"). After the move to Azure, the Entra app roles
+  them by hand in **Users & roles** (shown as "added in the Hub"). If Entra sign-in is enabled later, the Entra app roles
   `Hub.Admin`, `Hub.Executive`, `Hub.Supervisor`, `Hub.ProjectManager` and `Hub.ReadOnly` are synchronised at each
   sign-in (shown as "from directory group").
 - Inside a project, people are PM, Team Member, Reviewer or Viewer, and each discipline has one lead. The project's PM
@@ -23,7 +23,7 @@ what changed. Users' tasks are in the [user guide](user-guide.md).
 
 ## Review and pilot sign-in accounts
 
-Until the move to Azure, Tuesday runs on the temporary homedev host with individual password accounts. An account is a
+Tuesday runs on homedev with individual password accounts. An account is a
 login ID and password mapped to one existing, active person in Tuesday. Operators issue accounts on the host; the
 paths, private files and restart steps are in `docs/runbooks/homedev-review.md`.
 
@@ -120,7 +120,7 @@ and their temporary handoff stay outside Git. Do not copy synthetic review users
 Once signed in, **Users & roles → Create user** creates the person's active record. Credential setup remains a host
 operation: enter the returned GUID and individual user ID into the credential helper, then deliver the password privately.
 Rotating or removing the verifier ends that user's existing sessions on their next request. Deactivating the user also
-blocks access. Microsoft Entra provisioning replaces this local process when the Azure environment is available.
+blocks access. Microsoft Entra provisioning replaces this local process if Entra sign-in is enabled later.
 
 ## People
 

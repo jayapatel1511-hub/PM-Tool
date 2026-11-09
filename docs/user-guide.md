@@ -7,7 +7,7 @@ Administrators: see the [administrator guide](admin-guide.md).
 ## Sign in
 
 The review release and the pilot use an individual account: a user ID and a password issued to you personally.
-Microsoft sign-in comes later, with the move to Azure.
+Microsoft sign-in may be added later.
 
 1. Open the address you were given and select **Sign in**.
 2. Enter your **User ID** and **Password**, then select **Sign in**.

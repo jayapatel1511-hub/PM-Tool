@@ -8,7 +8,7 @@
 | Product | Engineering Project Coordination Hub (working name; "the Hub" in this document; candidate product name **Tuesday**, see Section 34) |
 | Version | 1.2 — Draft for stakeholder review |
 | Date | 2026-10-09 (v1.0: 2026-09-15) |
-| Status | Ready for architecture review, wireframing, and ticket breakdown |
+| Status | Base specification (§1–§35) with amendments §36–§57 added after v1.2. Where an amendment says it governs, it replaces the base text it names. Build status per packet is in `specs/README.md`. |
 | Audience | Product owner, engineering team, UX design, IT security, pilot project managers |
 
 ---
@@ -61,18 +61,18 @@ The product is built entirely from structured data and deterministic rules. Ever
 - A deterministic "PM Attention Required" engine with configurable thresholds.
 - A Project Dashboard, a personal My Work page, and a Weekly Coordination view designed to run a multidisciplinary coordination meeting directly from the application.
 - A thin Decision Register, because decisions are the most common non-task blocker in design projects. (Recommended for MVP; see Section 27 for the rationale and the fallback if it is cut.)
-- Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and corporate single sign-on.
-- A **Weekly Resource Planner**: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic rules flag over- and under-allocation, overlapping plans from two managers, leave conflicts and stale plans. A Manager Home exception dashboard answers "where does my team need attention" in about 30 seconds.
+- Comments with @mentions, document links to SharePoint/Teams/network folders, a full activity log, in-app and email notifications, and an individual sign-in for every person.
+- A **Weekly Resource Planner**: a manager-owned planning layer of person × week allocations that is informed by project data but not controlled by it. Managers and employees record hours against projects and against work that lives outside the Hub (proposals, admin, training, small projects); HR-approved leave reduces availability separately. Allocations carry a visibility state (Private Draft, Published, Confirmed) and a confidence (Confirmed, Expected, Possible). Deterministic indicators flag over-planned, under-planned and stale plans (§39). The v1.1 draft's Manager Home, People/Person Profile, Overlapping Plans and Leave Conflict rules were not adopted in that form; §27.2 items 16 and 17 state what was built.
 
 The planning workspace connects three views over the same records: **Team Planner** (weekly people and project staffing), **Vacation & Coverage** (a year of approved leave and coverage concerns), and **My Week** (each person’s published plan). HR approves leave; Tuesday imports availability and helps managers arrange coverage. Leave reduces capacity without reducing assigned work or counting the same absence twice. Personal calendar subscriptions can surface dated commitments; weekly hours do not become invented appointments.
 
 **What comes later**
 
-Risk and Issue registers, Meeting Actions, and Project Templates are Phase 2. The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
+Risk and Issue registers, Meeting Actions, and Project Templates were planned as Phase 2 and are built (packets 012, 014 and 015). The Resource/Workload view, Portfolio Dashboard, improved Gantt, and saved views move into the first release under §36. Teams and SharePoint integration, ERP/Vantagepoint integration, and financial or utilisation data are Phase 3.
 
 **Recommended technical approach**
 
-A modular monolith: a React + TypeScript single-page application, an ASP.NET Core Web API (with Node.js/TypeScript as an acceptable alternative if the team's skills favour it), PostgreSQL, Microsoft Entra ID single sign-on, hosted on Azure App Service with Azure Database for PostgreSQL. The system is sized for hundreds of active projects, tens of thousands of tasks, and a few hundred users, and is intended to be maintained by a small internal team.
+A modular monolith: a React + TypeScript single-page application, an ASP.NET Core Web API (with Node.js/TypeScript as an acceptable alternative if the team's skills favour it), PostgreSQL, individual sign-in (local-password accounts on homedev, with Microsoft and Google sign-in or Microsoft Entra ID as other modes, §23.6), hosted on homedev, Jay's Ubuntu server, as Docker Compose stacks (one API container and PostgreSQL 17 per stack) behind a Cloudflare tunnel (§23.7, §23.9). The system is sized for hundreds of active projects, tens of thousands of tasks, and a few hundred users, and is intended to be maintained by a small internal team.
 
 **What this document enables**
 
@@ -202,9 +202,9 @@ These principles are used to make design decisions throughout the specification 
 | ID | Goal |
 |---|---|
 | T1 | Deterministic rules are implemented as pure, unit-tested functions with near-complete test coverage. |
-| T2 | Corporate SSO from day one; no separate passwords. |
+| T2 | Individual sign-in from day one: no shared accounts and no stored passwords, only salted verifiers (FR-AUTH-01). |
 | T3 | Maintainable by a team of 2–4 developers after launch. |
-| T4 | Deployable to Azure with infrastructure as code and separate dev/test/prod environments. |
+| T4 | Deployable to homedev from versioned releases by scripted activation, with separate review and pilot stacks (§23.7, §43). |
 | T5 | All ownership, date, status, and deletion changes are captured in an immutable activity log. |
 
 ---

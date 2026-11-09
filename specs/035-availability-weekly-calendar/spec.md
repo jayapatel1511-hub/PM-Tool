@@ -17,4 +17,4 @@ Product specification §8.5, §9.4, §10.2, §10.9, §12.15, §12.18, §12.19, �
 
 Exercise whole-batch rejection, unmapped and stale source data, repeat apply, explicit cancellations, overlap/holiday arithmetic, effective schedules, legacy reconciliation, private project boundaries, selected copy/publish and notification batching, token rotation/revocation, stable event identity, UTF-8 folding and privacy-safe cancellation. Verify web build, lint, API/domain checks, browser workflows, accessibility, migration and spec traceability.
 
-Planning decisions Q22, Q23, Q24, Q25 and Q26 govern visibility, horizon, HR export mapping, working schedules and calendar-client acceptance.
+Planning decisions Q22, Q23, Q24, Q25 and Q26 govern visibility, horizon, HR export mapping, working schedules and calendar-client acceptance. The acceptance list above covers edge cases E-30 (leave overlapping a holiday or another absence), E-31 (stale, incomplete or cancelled HR export) and E-32 (a calendar event that loses visibility or is reassigned).

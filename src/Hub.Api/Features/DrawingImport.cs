@@ -85,9 +85,9 @@ public static class DrawingImportEndpoints
             var input = new DrawingImportPreviewBody(body.Format, body.ContentBase64, body.Worksheet, body.SourceReference, body.Defaults, body.Reason);
             var prepared = await DrawingImportRows.Prepare(projectId, input, access, db, store);
             if (!prepared.Preview.CanCommit)
-                throw new ApiException(400, "drawing_import_errors", Text.Get("drawingImport.rowErrors"), extra: new { preview = prepared.Preview });
+                throw new ApiException(400, "drawing_import_errors", Text.Get("drawingImport.rowErrors"), extra: new PreviewProblem(prepared.Preview));
             if (!string.Equals(body.PreviewFingerprint, prepared.Preview.PreviewFingerprint, StringComparison.Ordinal))
-                throw ApiException.Conflict("drawing_import_preview_changed", "drawingImport.previewChanged", new { preview = prepared.Preview });
+                throw ApiException.Conflict("drawing_import_preview_changed", "drawingImport.previewChanged", new PreviewProblem(prepared.Preview));
 
             // ALL rows, source references, permissions and restricted memberships were prepared before the first key.
             var batch = Guid.CreateVersion7(); var created = new List<DrawingImportCreatedRow>();
@@ -125,3 +125,6 @@ public static class DrawingImportEndpoints
         return TypedResults.Ok(result);
     }
 }
+
+// Problem-body extension: serialized with JsonOpts.Web as {"preview": ...}.
+file sealed record PreviewProblem(DrawingImportPreview Preview);

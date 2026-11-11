@@ -7,6 +7,7 @@ const { dashboardView } = require('./dashboard.fixture.cjs')
 const { emptyPortfolio } = require('./portfolio.fixture.cjs')
 const { timeRow, timeView } = require('./time.fixture.cjs')
 const { planningGrid, planningPerson, planningCell } = require('./planning.fixture.cjs')
+const { roles } = require('./admin-screen.fixture.cjs')
 const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://127.0.0.1:8853'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the coordinator local preview')
 
@@ -37,6 +38,8 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
       if (path === 'organisation') return route.fulfill({ json: f.organisation })
       if (path === 'organisation/placements') return route.fulfill({ json: f.organisation.people.map(p => ({ id: p.id, unitId: p.unitId })) })
       if (path === 'admin/users') return route.fulfill({ json: f.adminUsers })
+      // Admin Users shows the role examples with people_screens on (FR-SCR-83); off, the read stays unknown.
+      if (path === 'admin/role-explanations' && f.actor.flags.people_screens) { const q = Object.fromEntries(url.searchParams); return route.fulfill({ json: roles(q.role, q.scenario, q.membership, q.operation) }) }
       if (path === 'admin/organisation/levels') return route.fulfill({ json: f.organisation.levels })
       if (path === 'admin/organisation/units') return route.fulfill({ json: f.organisation.units.map(u => ({ ...u, rowVersion: 1 })) })
       if (path === 'certification-tags') return route.fulfill({ json: [] })

@@ -5,10 +5,11 @@ import { ItemMark } from '@/components/hub/item-mark'
 import { resolveIdentityColour } from '@/components/hub/identity-colour'
 import { scoped, type Scope } from '@/components/hub/workspace'
 import { useFlag } from '@/lib/auth-context'
-import { t, runtimeText } from '@/lib/i18n'
+import { t, textFor } from '@/lib/i18n'
 import './home-visual.css'
 
 type HomeData = components['schemas']['HomeRead']
+const RUNWAY_TYPES = { Task: 'itemType.Task', Deliverable: 'itemType.Deliverable', Milestone: 'itemType.Milestone' } as const
 export type HomeVisualLane = { lane: string; statuses: string; count: number; name: string; def: string; tone: string }
 
 /** One compound path also handles a single nonzero status without a degenerate 360° arc. */
@@ -69,7 +70,7 @@ export function HomeDeadlineRunway({ d, scope, projectStatus, openItem }: {
           <Link className="home-runway__date" to={dayLink(day.date)} aria-current={day.date === d.today ? 'date' : undefined} aria-label={t('home.runwayDay', { date: dayLabel(day.date), n: day.total })}>
             <span>{dayLabel(day.date)}</span><strong>{day.total}</strong>{day.date === d.today && <small>{t('home.runwayToday')}</small>}
           </Link>
-          <ul>{day.items.map(item => <li key={`${item.type}-${item.id}`}><button type="button" onClick={e => openItem(item.type, item.id, e.currentTarget)} aria-label={t('home.runwayItem', { project: item.projectNumber, type: runtimeText(`itemType.${item.type}`), key: item.key, name: item.name, date: dayLabel(day.date) })} title={`${item.projectNumber} · ${item.key} · ${item.name}`}>
+          <ul>{day.items.map(item => <li key={`${item.type}-${item.id}`}><button type="button" onClick={e => openItem(item.type, item.id, e.currentTarget)} aria-label={t('home.runwayItem', { project: item.projectNumber, type: textFor(RUNWAY_TYPES, item.type), key: item.key, name: item.name, date: dayLabel(day.date) })} title={`${item.projectNumber} · ${item.key} · ${item.name}`}>
             <ItemMark kind={item.type as 'Task' | 'Deliverable' | 'Milestone'} colour={resolveIdentityColour(visual, item.identityColour)} />
             <span><span className="home-runway__project">{item.projectNumber}</span><span className="home-runway__key">{item.key.startsWith(`${item.projectNumber}-`) ? item.key.slice(item.projectNumber.length + 1) : item.key}</span></span>
           </button></li>)}</ul>
@@ -78,7 +79,7 @@ export function HomeDeadlineRunway({ d, scope, projectStatus, openItem }: {
       </div>
     </div>
     <div className="home-runway__legend">
-      {(['Task', 'Deliverable', 'Milestone'] as const).map(kind => <span key={kind}><ItemMark kind={kind} />{runtimeText(`itemType.${kind}`)}</span>)}
+      {(['Task', 'Deliverable', 'Milestone'] as const).map(kind => <span key={kind}><ItemMark kind={kind} />{t(`itemType.${kind}`)}</span>)}
       <span><i className="home-chart-swatch home-runway__nonworking-key" aria-hidden="true" />{t('home.nonWorkingScope')}</span>
     </div>
     {runway.truncatedRange && <p className="home-runway__notice">{t('home.runwayLimited', { from: runway.from, to: runway.to })}</p>}

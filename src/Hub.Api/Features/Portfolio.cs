@@ -140,7 +140,7 @@ public static class PortfolioEndpoints
         var projects = rows.Select(r => new PortfolioChangedProject(Guid.Parse(r!["id"]!.GetValue<string>()), r["projectNumber"]!.GetValue<string>(), r["name"]!.GetValue<string>())).ToArray();
         var ids = projects.Select(p => p.Id).ToArray();
         var snapshots = (await db.HealthSnapshots.AsNoTracking().Where(s => ids.Contains(s.ProjectId) && s.SnapshotDate >= from && s.SnapshotDate <= today)
-            .Select(s => new { s.ProjectId, s.SnapshotDate, s.ComputedHealth }).ToListAsync()).ToLookup(s => s.ProjectId);
+            .Select(s => new HealthReading(s.ProjectId, s.SnapshotDate, s.ComputedHealth)).ToListAsync()).ToLookup(s => s.ProjectId);
         var current = await db.ProjectStates.AsNoTracking().Where(s => ids.Contains(s.ProjectId)).ToDictionaryAsync(s => s.ProjectId, s => s.ComputedHealth);
         // Activity is append-only. A retained project-creation record provides its
         // beginning; imported/legacy rows without that provenance remain incomplete.
@@ -152,7 +152,7 @@ public static class PortfolioEndpoints
         var broadFrom = asOf.AddDays(-days - 2);
         var activity = await db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && ids.Contains(a.ProjectId.Value)
             && (a.ItemType == ItemType.Project || a.ItemType == ItemType.Milestone) && a.OccurredAt >= broadFrom && a.OccurredAt <= asOf)
-            .Select(a => new { a.ProjectId, a.ItemType, a.ItemId, a.Action, a.Categories, a.Changes, a.OccurredAt }).ToListAsync();
+            .Select(a => new ChangeActivity(a.ProjectId, a.ItemType, a.ItemId, a.Action, a.Categories, a.Changes, a.OccurredAt)).ToListAsync();
         var healthMoved = new HashSet<Guid>(); var statusMoved = new HashSet<Guid>(); var slipped = new Dictionary<Guid, HashSet<Guid>>();
         var healthUnknown = new HashSet<Guid>(); var milestoneUnknown = ids.Where(id => !begun.Contains(id)).ToHashSet(); var statusUnknown = milestoneUnknown.ToHashSet();
         foreach (var project in projects)
@@ -223,3 +223,6 @@ public static class PortfolioEndpoints
             Metric(healthMoved, healthUnknown), Metric(slipped.Keys.ToHashSet(), milestoneUnknown, slipped.Values.Sum(s => s.Count)), Metric(statusMoved, statusUnknown));
     }
 }
+
+file sealed record HealthReading(Guid ProjectId, DateOnly SnapshotDate, string ComputedHealth);
+file sealed record ChangeActivity(Guid? ProjectId, string ItemType, Guid? ItemId, string Action, List<string> Categories, string Changes, DateTimeOffset OccurredAt);

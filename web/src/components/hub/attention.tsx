@@ -17,7 +17,7 @@ import { typedRequest } from '@/lib/api'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { t, tv } from '@/lib/i18n'
 import { itemTypeKeys } from '@/gen/registry.gen'
 import { cn } from '@/lib/utils'
 
@@ -54,7 +54,7 @@ export function AttentionPanel({ projectId, canSnooze, refused, limit, disciplin
     {groups.size > 0 && <div className="flex flex-wrap gap-2 border-b px-5 py-3" role="group" aria-label={t('dashboardScreens.attentionKinds')}>
       {[...groups].map(([kind, items]) => <Button key={kind} type="button" size="sm" variant={kind === selected ? 'secondary' : 'ghost'} aria-pressed={kind === selected} onClick={() => {
         const next = new URLSearchParams(sp); next.set('attentionKind', kind); next.delete('attentionAll'); setSp(next, { replace: true })
-      }}>{kind === '__other' ? t('dashboardScreens.unknownKind') : runtimeText(`itemType.${kind}`)} <span className="tabular-nums">{q.data.truncated ? t('dashboardScreens.atLeastCount', { n: items.length }) : items.length}</span></Button>)}
+      }}>{t(itemTypeKeys.find(key => key === `itemType.${kind}`) ?? 'dashboardScreens.unknownKind')} <span className="tabular-nums">{q.data.truncated ? t('dashboardScreens.atLeastCount', { n: items.length }) : items.length}</span></Button>)}
     </div>}
     {q.data.truncated && <p className="px-5 py-2 text-xs text-muted-foreground">{t('dashboardScreens.attentionTruncated')}</p>}
     <AttentionRows key={`${projectId}:${selected ?? ''}`} items={selected ? groups.get(selected) ?? [] : []} canSnooze={canSnooze} refused={refused} limit={5}

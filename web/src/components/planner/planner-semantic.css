@@ -1,6 +1,7 @@
 /* 052 dark presentation: availability, planning origin and confidence are separate facts. */
+/* FR-VSN-21: teal is for figures of 24 px and more; this 19 px figure is ink (the teal band beside it carries the hue). */
 :root[data-visual="v2"] .planner-semantic-quantity {
-  color: var(--metric-teal);
+  color: var(--ink);
   font-size: 19px;
   font-weight: 700;
   line-height: 24px;

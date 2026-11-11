@@ -13,7 +13,7 @@ import { HomeTrendChip, HomeTrendDefinition, HomeTrendInspection, HomeTrendRefer
 import { useItemPanel } from '@/components/hub/panel-host'
 import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
-import { scoped, useScope, WorkspaceSelector, WorkspaceTabs, type Scope } from '@/components/hub/workspace'
+import { HOME_PRESETS, scoped, useScope, WorkspaceSelector, WorkspaceTabs, type Scope } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -23,7 +23,7 @@ import { useFlag, useMe } from '@/lib/auth-context'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
 import { refreshHome } from '@/lib/keys'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
-import { plural, t, tv , runtimeText } from '@/lib/i18n'
+import { plural, t, tv, runtimeText, textFor } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 type Schemas = components['schemas']
@@ -259,10 +259,10 @@ export function HomePage() {
       bandFooter={homeOverview && <div className="flex flex-wrap items-center gap-2 text-sm" aria-label={t('home.scopeFilters')}>
         <div className="flex items-center gap-2 rounded-lg border border-current/50 px-2 py-1"><span>{t('home.scopeProjects', { n: context?.projectsInScope ?? '—' })}</span><WorkspaceSelector displayLabel={scope.kind === 'all' ? presetProjectsLabel : undefined} contextNote={homePreset ? t('home.preset.additionalFilter') : undefined} /></div>
         {((preset?.available.length ?? 0) > 0 || homePreset) && <Popover open={presetOpen} onOpenChange={setPresetOpen}><PopoverTrigger asChild><button type="button" className="rounded-lg border border-current/50 px-3 py-2" data-home-preset>
-          {t('home.preset.label')}: {homePreset ? runtimeText(`homeScope.${homePreset}`) : t('home.preset.none')}
+          {t('home.preset.label')}: {homePreset ? textFor(HOME_PRESETS, homePreset) : t('home.preset.none')}
         </button></PopoverTrigger><PopoverContent className="space-y-3"><Field label={t('home.preset.label')} htmlFor="home-preset"><select id="home-preset" className={selectCls} value={homePreset ?? ''} disabled={presetSaving} onChange={e => { void choosePreset(e.target.value || null); setPresetOpen(false) }}>
-          <option value="">{t('home.preset.none')}</option>{preset?.available.map(code => <option key={code} value={code}>{runtimeText(`homeScope.${code}`)}</option>)}
-          {homePreset && !preset?.available.includes(homePreset) && <option value={homePreset} disabled>{runtimeText(`homeScope.${homePreset}`)}</option>}
+          <option value="">{t('home.preset.none')}</option>{preset?.available.map(code => <option key={code} value={code}>{textFor(HOME_PRESETS, code)}</option>)}
+          {homePreset && !preset?.available.includes(homePreset) && <option value={homePreset} disabled>{textFor(HOME_PRESETS, homePreset)}</option>}
         </select></Field>{homePreset && <Button variant="outline" size="sm" disabled={presetSaving} onClick={() => { void choosePreset(null); setPresetOpen(false) }}>{t('home.preset.clear')}</Button>}</PopoverContent></Popover>}
         <Popover open={statusFilterOpen} onOpenChange={setStatusFilterOpen}><PopoverTrigger asChild><button type="button" className="rounded-lg border border-current/50 px-3 py-2">{t('home.scopeStatus')}: {projectStatus ? projectStatus.split(',').map(tv).join(', ') : t('home.liveStatuses')}</button></PopoverTrigger>
           <PopoverContent><Field label={t('home.scopeStatus')} htmlFor="home-project-status"><select id="home-project-status" className={selectCls} value={projectStatus ?? ''} onChange={e => set('projectStatus', e.target.value || undefined)}>

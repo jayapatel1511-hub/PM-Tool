@@ -37,7 +37,7 @@ public static class ListExportEndpoints
         var names = await VisibleNames(db, access, ids);
         if (issueRootCause)
             foreach (var category in await db.IssueRootCauseCategories.AsNoTracking().Where(category => ids.Contains(category.Id))
-                .Select(category => new { category.Id, category.Name }).ToListAsync())
+                .Select(category => new CategoryName(category.Id, category.Name)).ToListAsync())
                 names.TryAdd(category.Id, category.Name);
         return pairs.Select(p =>
         {
@@ -115,3 +115,5 @@ public static class ListExportEndpoints
         });
     }
 }
+
+file sealed record CategoryName(Guid Id, string Name);

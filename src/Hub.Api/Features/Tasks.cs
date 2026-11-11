@@ -309,7 +309,7 @@ public static partial class TaskEndpoints
         if (s.IsFlagOn("work_screens"))
         {
             var members = await db.Collaborators.AsNoTracking().Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id,
-                (c, u) => new { Membership = c, u.Id, u.DisplayName, u.IsActive }).ToListAsync();
+                (c, u) => new CollaboratorMember { Membership = c, Id = u.Id, DisplayName = u.DisplayName, IsActive = u.IsActive }).ToListAsync();
             var contributions = await TaskContributions.ReadMany(db, access, ctx, members.Select(m => m.Membership).ToArray());
             collaborators = members.Select(m => new TaskDetailCollaborator(m.Id, m.DisplayName, m.IsActive, contributions[m.Membership.Id])).ToList();
         }
@@ -844,4 +844,12 @@ public static partial class TaskEndpoints
         await team.EnsureMember(project, personId, ProjectRole.TeamMember);
     }
 
+}
+
+file sealed class CollaboratorMember
+{
+    public TaskCollaborator Membership { get; init; } = null!;
+    public Guid Id { get; init; }
+    public string DisplayName { get; init; } = "";
+    public bool IsActive { get; init; }
 }

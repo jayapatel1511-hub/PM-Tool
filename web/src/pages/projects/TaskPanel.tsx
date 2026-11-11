@@ -11,7 +11,7 @@ import { Ban, Check, ChevronDown, Eye, EyeOff, GitBranch, Link2, Lock, Plus, Rot
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Spinner, selectCls } from '@/components/hub/common'
+import { AccentDot, ConfirmDialog, Empty, ErrorBanner, Field, Loading, Notice, Page, Spinner, selectCls } from '@/components/hub/common'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar, useRecordTab } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Avatar, CapacityWeek, PeoplePicker, weekOf } from '@/components/hub/people'
@@ -39,7 +39,6 @@ import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { PRIORITIES, TaskIndicators, blockersOf, errorText, moveFrom, readableDisabled, useProjectLists, useTaskActions, type Blocker, type PendingTaskAction, type TaskRow } from './Tasks'
 import { TaskSection, TaskSectionNavigation } from './task-section-navigation'
 import { TaskContribution } from './task-contribution'
-import { runtimeText } from '@/lib/i18n'
 import { FormNavigationScope } from '@/components/hub/form-navigation-context'
 import { preservesTaskDetailNavigation } from '@/lib/drafts'
 
@@ -68,11 +67,16 @@ function taskActionAllowed(detail: TaskDetailData, action: PendingTaskAction) {
 
 /** Task detail (§13.3.1): header, blockers, fields grouped by purpose (people, details, dates, progress and hours), description,
  *  dependencies, manual block, links, comments and history. Every field saves on its own and says so (design §8). */
-export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2' }) {
+/** One cache entry for a task's detail, shared by the panel and the task page's band. */
+const taskDetailQuery = (id: string, meId: string, workScreens: boolean, peopleOn: boolean) =>
+  ({ queryKey: ['task', id, meId, workScreens, peopleOn], queryFn: async () => await readTask(id) as TaskDetailData & WorkSeenFields })
+
+/** `standalone` is the /tasks/:id page (not the side panel); it defaults to the h1 heading the page used before its band. */
+export function TaskDetail({ id, onClose, heading: Heading = 'h2', standalone = Heading === 'h1' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2'; standalone?: boolean }) {
   const noticesOn = useFlag('capacity_screens')
   const me = useMe()
   const workScreens = useFlag('work_screens'), peopleOn = useFlag('people_screens')
-  const q = useQuery({ queryKey: ['task', id, me.id, workScreens, peopleOn], queryFn: async () => await readTask(id) as TaskDetailData & WorkSeenFields })
+  const q = useQuery(taskDetailQuery(id, me.id, workScreens, peopleOn))
   const contextOn = useFlag('screen_patterns')
   const pickupEnabled = useFlag('task_pickup')
   const pickup = useQuery({ queryKey: ['pickup-offers', id], enabled: pickupEnabled, queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/pickup-offer', { params: { id } }) })
@@ -106,7 +110,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const [creatingDeliverable, setCreatingDeliverable] = useState<TaskRow | null>(null)
   const actions = useTaskActions(reload)
   // The full page can remain mounted beneath its own Task inspector; only the current owner is exposed.
-  const detailTarget = Heading === 'h1'
+  const detailTarget = standalone
     ? location.pathname.replace(/\/$/, '') === `/tasks/${id}` && !sectionParams.has('panel')
     : sectionParams.get('panel') === `Task:${id}`
   const currentTaskAvailable = !!q.data && !q.isError && detailTarget
@@ -143,10 +147,10 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
 
   return (
     <PickerProject.Provider value={r.projectId}><FormNavigationScope preservesNavigation={workScreens ? preservesTaskDetailNavigation(r.id, id) : undefined} available={workScreens ? currentTaskAvailable : undefined}><div>
-      {workScreens && q.error && <div className="space-y-3 p-4" data-task-detail-error={r.id}><ErrorBanner error={q.error} /><Button size="sm" variant="outline" disabled={q.isFetching} onClick={() => { void q.refetch() }}>{q.isFetching && <Spinner />}{runtimeText('taskContribution.checkCurrent')}</Button></div>}
+      {workScreens && q.error && <div className="space-y-3 p-4" data-task-detail-error={r.id}><ErrorBanner error={q.error} /><Button size="sm" variant="outline" disabled={q.isFetching} onClick={() => { void q.refetch() }}>{q.isFetching && <Spinner />}{t('taskContribution.checkCurrent')}</Button></div>}
       <div ref={seenOwner.surfaceRef} data-task-detail-body={r.id} hidden={workScreens && q.isError} inert={workScreens && q.isError ? true : undefined} aria-hidden={workScreens && q.isError ? true : undefined}>
       <WorkSeenDetailNotice state={seenOwner.state} />
-      {workScreens && <TaskSectionNavigation taskId={r.id} surface={seenOwner.surfaceRef} owner={detailTarget} inspector={Heading !== 'h1'} paused={visibleDialog} unavailable={[...(!ItemSlots.Comments ? ['comments' as const] : []), ...(!ItemSlots.Links ? ['links' as const] : [])]} />}
+      {workScreens && <TaskSectionNavigation taskId={r.id} surface={seenOwner.surfaceRef} owner={detailTarget} inspector={!standalone} paused={visibleDialog} unavailable={[...(!ItemSlots.Comments ? ['comments' as const] : []), ...(!ItemSlots.Links ? ['links' as const] : [])]} />}
       <TaskSection taskId={r.id} name="details" enabled={workScreens}>
       <div className="space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -298,7 +302,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
       </TaskSection>
       {workScreens && <>
         <TaskSection taskId={r.id} name="dependencies" enabled><Dependencies task={r} canManage={perms.dependencies} onChanged={reload} /></TaskSection>
-        <TaskSection taskId={r.id} name="review" enabled><FieldGroup title={runtimeText('taskSections.review')}>
+        <TaskSection taskId={r.id} name="review" enabled><FieldGroup title={t('taskSections.review')}>
           <FieldRow label={t(contextOn && !perms.allowSelfReview ? 'workReview.reviewer' : 'field.ReviewerId')}>
             <InlinePerson focusKey={`task:${r.id}:reviewer:detail`} value={r.reviewerId} name={r.reviewerName} disabled={!perms.setReviewer.ok} title={perms.setReviewer.reason ?? undefined} exclude={contextOn && !perms.allowSelfReview && r.assigneeId ? [r.assigneeId] : undefined} onSave={(v) => save({ reviewerId: v })} />
             {contextOn && !perms.allowSelfReview && <p className="mt-1 text-xs text-muted-foreground">{t('workReview.independentHint')}</p>}
@@ -306,13 +310,13 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           </FieldRow>
           <FieldRow label={t('field.RequiresReview')}><SaveStatus current={r.requiresReview}>{track => <div className="flex min-h-(--control-row-h) items-center px-2"><Checkbox checked={r.requiresReview} disabled={!perms.edit.ok} onCheckedChange={checked => track(save({ requiresReview: !!checked }), !!checked)} aria-label={t('field.RequiresReview')} /></div>}</SaveStatus></FieldRow>
         </FieldGroup></TaskSection>
-        <TaskSection taskId={r.id} name="time" enabled><FieldGroup title={runtimeText('taskSections.time')}>
+        <TaskSection taskId={r.id} name="time" enabled><FieldGroup title={t('taskSections.time')}>
           <FieldRow label={t('task.estimateHours')}><InlineText value={r.estimatedHours == null ? '' : String(r.estimatedHours)} disabled={!perms.edit.ok} needsReason={perms.needsReason} onSave={v => save({ estimatedHours: v == null || v === '' ? null : Number(v) })} /></FieldRow>
-          <Link className="inline-flex min-h-9 items-center text-sm text-primary underline underline-offset-2" to={`/time?taskId=${encodeURIComponent(r.id)}`}>{runtimeText('taskSections.timeLink')}</Link>
+          <Link className="inline-flex min-h-9 items-center text-sm text-primary underline underline-offset-2" to={`/time?taskId=${encodeURIComponent(r.id)}`}>{t('taskSections.timeLink')}</Link>
           {TASK_SECTIONS.map(extension => <div key={extension.id}>{extension.render(d, reload)}</div>)}
         </FieldGroup></TaskSection>
-        <TaskSection taskId={r.id} name="comments" enabled><FieldGroup title={t('common.comments')}>{ItemSlots.Comments ? <div data-work-comments-section={r.id}><CommentsSlot type="Task" id={r.id} projectId={r.projectId} /></div> : <p className="text-sm text-muted-foreground">{runtimeText('taskSections.unavailable', { section: t('common.comments') })}</p>}</FieldGroup></TaskSection>
-        <TaskSection taskId={r.id} name="links" enabled><FieldGroup title={t('common.links')}>{ItemSlots.Links ? <LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId ?? undefined} /> : <p className="text-sm text-muted-foreground">{runtimeText('taskSections.unavailable', { section: t('common.links') })}</p>}</FieldGroup></TaskSection>
+        <TaskSection taskId={r.id} name="comments" enabled><FieldGroup title={t('common.comments')}>{ItemSlots.Comments ? <div data-work-comments-section={r.id}><CommentsSlot type="Task" id={r.id} projectId={r.projectId} /></div> : <p className="text-sm text-muted-foreground">{t('taskSections.unavailable', { section: t('common.comments') })}</p>}</FieldGroup></TaskSection>
+        <TaskSection taskId={r.id} name="links" enabled><FieldGroup title={t('common.links')}>{ItemSlots.Links ? <LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId ?? undefined} /> : <p className="text-sm text-muted-foreground">{t('taskSections.unavailable', { section: t('common.links') })}</p>}</FieldGroup></TaskSection>
         <TaskSection taskId={r.id} name="history" enabled><FieldGroup title={t('common.history')}><HistoryList type="Task" id={r.id} projectId={r.projectId} taskActorFilter /></FieldGroup></TaskSection>
       </>}
 
@@ -607,5 +611,10 @@ export function TaskPanel({ id, onClose }: PanelProps) { return <TaskDetail id={
 /** Full-page task (§13.3.1 "open full page"). */
 export function TaskPage() {
   const { id } = useParams()
-  return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8"><div className="overflow-hidden rounded-xl border bg-card"><TaskDetail key={id} id={id!} heading="h1" /></div></div>
+  const me = useMe(), visualSystem = useFlag('visual_system'), workScreens = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const q = useQuery({ ...taskDetailQuery(id!, me.id, workScreens, peopleOn), enabled: visualSystem })
+  const card = (heading: 'h1' | 'h2') => <div className="overflow-hidden rounded-xl border bg-card"><TaskDetail key={id} id={id!} heading={heading} standalone /></div>
+  if (!visualSystem) return <div className="mx-auto w-full max-w-3xl p-4 md:p-6 xl:p-8">{card('h1')}</div>
+  // 052 S02 (FR-VSN-11): with the visual system the task page opens with the band; the card's name becomes its h2.
+  return <Page eyebrow={q.data?.task.key} title={q.data?.task.name ?? t('nav.tasks')}><div className="mx-auto w-full max-w-3xl">{card('h2')}</div></Page>
 }

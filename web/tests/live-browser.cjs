@@ -32,8 +32,10 @@ const { startPreview, newMockPage, project } = require('./platform-fixtures.cjs'
     const event = requests.find(request => new URL(request.url()).search === '')
     assert.ok(event, 'live stream opened without query parameters')
     assert.equal(event.headers()['x-dev-user'], 'alex@hub.test', 'stream carries the Development auth header')
-    await page.waitForTimeout(300)
-    assert.ok(mock.pulseRequests.some(url => new URL(url).searchParams.get('projectId') === project.id), 'project pulse carries the open project id')
+    // The first pulse can arrive a few hundred ms after the page shows: wait for it rather than a fixed delay.
+    const projectPulse = () => mock.pulseRequests.some(url => new URL(url).searchParams.get('projectId') === project.id)
+    for (const deadline = Date.now() + 5000; !projectPulse() && Date.now() < deadline;) await page.waitForTimeout(50)
+    assert.ok(projectPulse(), 'project pulse carries the open project id')
     await page.getByRole('button', { name: /reload/i }).count().then(count => assert.equal(count, 0))
     await page.getByRole('main').focus().catch(() => {})
     await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })

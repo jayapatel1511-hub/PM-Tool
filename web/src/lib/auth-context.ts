@@ -22,3 +22,7 @@ export function useOffer() {
   })
 }
 export type Offer = ReturnType<ReturnType<typeof useOffer>>
+/** A whole-project allocation shift is the project manager's (AllocationShift.cs demands Permissions.IsPM); selected rows are checked one by one. */
+export const offersWholeProjectShift = (permissions: { isPm: boolean }) => permissions.isPm
+/** Coordination choices narrowed to the disciplines the server says this person manages (CoordinationOptions.manageDisciplineIds). */
+export const managedDisciplineChoices = <T extends { value: string }>(choices: T[], options: { manageDisciplineIds: string[] }) => choices.filter(choice => options.manageDisciplineIds.includes(choice.value))

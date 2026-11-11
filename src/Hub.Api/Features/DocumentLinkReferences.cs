@@ -46,7 +46,7 @@ public static class DocumentLinkReferences
                 break;
             case ItemType.Task:
                 var task = await db.Tasks.AsNoTracking().Where(work => work.Id == link.ItemId && work.ProjectId == link.ProjectId)
-                    .Select(work => new { work.DeliverableId }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+                    .Select(work => new ReferenceTask(work.Id, work.ProjectId, work.DeliverableId)).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
                 if (task.DeliverableId is { } parent)
                 {
                     Check.That(await db.Deliverables.AnyAsync(work => work.Id == parent && work.ProjectId == link.ProjectId), "reference", "linkReference.targetUnavailable");
@@ -77,11 +77,11 @@ public static class DocumentLinkReferences
         if (shown.Length == 0) return [];
         var taskIds = shown.Where(link => link.ItemType == ItemType.Task).Select(link => link.ItemId).Distinct().ToArray();
         var tasks = await db.Tasks.AsNoTracking().Where(task => taskIds.Contains(task.Id) && allowed.Contains(task.ProjectId))
-            .Select(task => new { task.Id, task.ProjectId, task.DeliverableId }).ToDictionaryAsync(task => task.Id);
+            .Select(task => new ReferenceTask(task.Id, task.ProjectId, task.DeliverableId)).ToDictionaryAsync(task => task.Id);
         var targetIds = shown.Where(link => link.ItemType == ItemType.Deliverable).Select(link => link.ItemId)
             .Concat(shown.Select(link => link.ReferenceDeliverableId).OfType<Guid>()).Concat(tasks.Values.Select(task => task.DeliverableId).OfType<Guid>()).Distinct().ToArray();
         var targets = await db.Deliverables.AsNoTracking().Where(work => targetIds.Contains(work.Id) && allowed.Contains(work.ProjectId))
-            .Select(work => new { work.Id, work.ProjectId, work.Key, work.Name, work.Status, work.Revision, work.RowVersion }).ToDictionaryAsync(work => work.Id);
+            .Select(work => new ReferenceTargetRow(work.Id, work.ProjectId, work.Key, work.Name, work.Status, work.Revision, work.RowVersion)).ToDictionaryAsync(work => work.Id);
         var registrars = shown.Select(link => link.ReferenceRegisteredBy).OfType<Guid>().Distinct().ToArray();
         var people = await db.Users.AsNoTracking().Where(user => registrars.Contains(user.Id))
             .Select(user => new DocumentLinkReferenceUser(user.Id, user.DisplayName, user.IsActive)).ToDictionaryAsync(user => user.Id);
@@ -128,3 +128,6 @@ public static class DocumentLinkReferences
         return contexts;
     }
 }
+
+file sealed record ReferenceTask(Guid Id, Guid ProjectId, Guid? DeliverableId);
+file sealed record ReferenceTargetRow(Guid Id, Guid ProjectId, string Key, string Name, string Status, string? Revision, int RowVersion);

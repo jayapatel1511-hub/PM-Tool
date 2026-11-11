@@ -5,6 +5,7 @@ const { myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
 const { teamMember, teamDiscipline, projectTeam } = require('./team.fixture.cjs')
 const { preferences } = require('./notifications.fixture.cjs')
 const { referenceRow, adminUser } = require('./admin.fixture.cjs')
+const { noticePreferences } = require('./notice-preferences.fixture.cjs')
 const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://127.0.0.1:8853'
 assert.ok(['127.0.0.1', 'localhost'].includes(new URL(base).hostname), 'Use the local built preview')
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
@@ -98,6 +99,8 @@ function facts(person) { return { notices: notices(person), certifications: pers
         Object.assign(person, body); return route.fulfill({ json: { id: person.id, rowVersion: person.rowVersion } })
       }
       if (path === 'me/preferences') return route.fulfill({ json: preferences() })
+      // Preferences mounts the notice preferences form with people_screens on (S47, FR-SCR-80); off, the read stays unknown.
+      if (path === 'me/notice-preferences' && method === 'GET' && me.flags.people_screens) return route.fulfill({ json: noticePreferences() })
       if (path === 'staff') return route.fulfill({ json: myStaffList(people.map(person => myStaffPerson({ id: person.id, displayName: person.displayName, ...(me.flags.capacity_screens ? { personFacts: facts(person) } : {}) }))) })
       const tag = url.searchParams.get('certificationTagId')
       const selected = me.flags.capacity_screens && tag ? people.filter(person => person.certifications.some(record => record.tagId === tag)) : people

@@ -49,20 +49,20 @@ public static class PersonPanelEndpoints
         var memberships = from member in db.ProjectMembers.AsNoTracking()
             join project in visible on member.ProjectId equals project.Id
             where member.UserId == userId && member.RemovedAt == null
-            select new { Member = member, Project = project };
+            select new PanelMembership { Member = member, Project = project };
         var authorised = staffScope != null
             ? await InStaffScope(userId, staffScope, access, db, store, settings)
             : userId == access.Me.Id || access.Actor.Admin || await memberships.AnyAsync() || await InStaffScope(userId, null, access, db, store, settings);
         if (!authorised) throw ApiException.NotFound();
         var user = await db.Users.AsNoTracking().Where(person => person.Id == userId)
-            .Select(person => new { person.Id, person.DisplayName, person.JobTitle, person.IsActive }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+            .Select(person => new PanelPerson(person.Id, person.DisplayName, person.JobTitle, person.IsActive)).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
         var page = Math.Max(1, projectsPage ?? 1); var size = Math.Clamp(projectsPageSize ?? 25, 1, 100);
         var total = await memberships.CountAsync(); var skip = ((long)page - 1) * size;
         var rows = await memberships.OrderBy(row => row.Project.ProjectNumber).ThenBy(row => row.Project.Id)
             .Skip((int)Math.Min(skip, int.MaxValue)).Take(size).ToArrayAsync();
         var projectIds = rows.Select(row => row.Project.Id).ToArray();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(discipline => projectIds.Contains(discipline.ProjectId))
-            .Select(discipline => new { discipline.Id, discipline.ProjectId, Name = discipline.Discipline!.Name, discipline.LeadUserId }).ToArrayAsync();
+            .Select(discipline => new PanelDiscipline(discipline.Id, discipline.ProjectId, discipline.Discipline!.Name, discipline.LeadUserId)).ToArrayAsync();
         var projects = rows.Select(row => new PersonProjectMembership(row.Member.Id, row.Project.Id, row.Project.ProjectNumber, row.Project.Name, row.Project.Status,
             row.Member.Roles, disciplines.FirstOrDefault(discipline => discipline.Id == row.Member.PrimaryDisciplineId && discipline.ProjectId == row.Project.Id) is { } primary
                 ? new TeamScreenReads.Reference(primary.Id, primary.Name) : null,
@@ -74,3 +74,8 @@ public static class PersonPanelEndpoints
             new PersonProjectPage(projects, page, size, total), facts.GetValueOrDefault(userId)));
     }
 }
+
+// Composed further (Any/Count/OrderBy/Skip), so EF needs a member-init projection.
+file sealed class PanelMembership { public ProjectMember Member { get; init; } = null!; public Project Project { get; init; } = null!; }
+file sealed record PanelPerson(Guid Id, string DisplayName, string? JobTitle, bool IsActive);
+file sealed record PanelDiscipline(Guid Id, Guid ProjectId, string Name, Guid? LeadUserId);

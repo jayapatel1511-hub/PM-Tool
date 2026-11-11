@@ -359,21 +359,21 @@ export function HistoryList({ type, id, taskActorFilter = false, projectId }: { 
   return (
     <>
       {filtering && <div className="space-y-2 px-4 py-3" data-task-history-controls={id}>
-        <label className="flex flex-wrap items-center gap-2 text-sm">{runtimeText('taskHistory.person')}
+        <label className="flex flex-wrap items-center gap-2 text-sm">{t('taskHistory.person')}
           <select className="min-h-9 max-w-full rounded-md border bg-card px-2" value={currentUnavailable ? '' : actorId ?? ''} disabled={currentUnavailable} onChange={event => change(event.target.value || undefined, 1)}>
-            <option value="">{currentUnavailable ? t('common.unavailable') : runtimeText('taskHistory.all')}</option>
+            <option value="">{currentUnavailable ? t('common.unavailable') : t('taskHistory.all')}</option>
             {!currentUnavailable && actorId && !choices.some(actor => actor.id === actorId) && <option value={actorId}>{t('common.unavailable')}</option>}
             {choices.map(actor => <option key={actor.id} value={actor.id}>{actor.isActive ? actor.displayName : t('common.inactiveSuffix', { name: actor.displayName })}</option>)}
           </select>
         </label>
         {!currentUnavailable && q.data && <div className="flex flex-wrap items-center gap-2 text-sm" aria-live="polite">
           <Button size="sm" variant="outline" disabled={q.isFetching || page <= 1} onClick={() => change(actorId, page - 1)}>{t('common.previous')}</Button>
-          <span>{runtimeText('taskHistory.page', { page: q.data.page, pages, total: q.data.totalCount })}</span>
+          <span>{t('taskHistory.page', { page: q.data.page, pages, total: q.data.totalCount })}</span>
           <Button size="sm" variant="outline" disabled={q.isFetching || page >= pages} onClick={() => change(actorId, page + 1)}>{t('common.next')}</Button>
         </div>}
       </div>}
       {filtering && (q.isPending || actors.isPending) && <Loading rows={3} />}
-      {filtering && failed && <div className="space-y-3 p-4"><ErrorBanner error={q.error ?? actors.error} /><Button type="button" size="sm" variant="outline" disabled={q.isFetching || actors.isFetching} onClick={() => { void q.refetch(); void actors.refetch() }}>{runtimeText('taskContribution.checkCurrent')}</Button></div>}
+      {filtering && failed && <div className="space-y-3 p-4"><ErrorBanner error={q.error ?? actors.error} /><Button type="button" size="sm" variant="outline" disabled={q.isFetching || actors.isFetching} onClick={() => { void q.refetch(); void actors.refetch() }}>{t('taskContribution.checkCurrent')}</Button></div>}
       {filtering && !failed && !q.isPending && !actors.isPending && !rows.length && <Empty>{t('activity.empty')}</Empty>}
       {small && <label className="flex items-center gap-2 px-4 py-3 text-sm"><input type="checkbox" checked={grouped} onChange={(e) => { const n = new URLSearchParams(sp); if (e.target.checked) n.set('groupChanges', 'true'); else n.delete('groupChanges'); setSp(n, filtering ? { replace: true, state: location.state, preventScrollReset: true } : { replace: true }) }} />{t('activity.groupChanges')}</label>}
       <ol className="divide-y px-4">

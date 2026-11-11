@@ -1,14 +1,14 @@
 import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import type { TaskRow } from './Tasks'
 import { hours } from '@/lib/format'
-import { runtimeText, t } from '@/lib/i18n'
+import { t, type KeyIn } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 interface LeadFact { state?: string | null; id?: string | null; name?: string | null }
 interface BoardRow {
   board?: { reviewRequestedAt?: string | null; reviewWaitingDays?: number | null; reviewStaleDays?: number | null; disciplineLead?: LeadFact | null; projectManager?: LeadFact | null } | null
 }
-const label = (key: string, values?: Record<string, string | number>) => runtimeText(`boardFacts.${key}`, values)
+const label = (key: KeyIn<'boardFacts.'>, values?: Record<string, string | number>) => t(`boardFacts.${key}`, values)
 
 /** These figures describe the actual visible cards, not an unrequested full-filtered-cohort aggregate. */
 export function BoardCardTotals({ rows }: { rows: TaskRow[] }) {

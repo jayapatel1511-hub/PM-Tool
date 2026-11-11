@@ -85,7 +85,7 @@ public static class ReviewRegister
 
         // Only identities occurring in the authorized unresolved scope can become filter options.
         // These are distinct projections before selected filters/paging, not a user directory or a capped package-page join.
-        var disciplineRows = await scope.Select(row => new { row.Discipline.Id, row.Reference.Name,
+        var disciplineRows = await scope.Select(row => new DisciplineOption { Id = row.Discipline.Id, Name = row.Reference.Name,
             Active = row.Discipline.IsActive && row.Reference.IsActive }).Distinct().OrderBy(row => row.Name).ThenBy(row => row.Id).ToArrayAsync();
         var severities = await scope.Select(row => row.Finding.Severity).Distinct().OrderBy(value => value).ToArrayAsync();
         var originators = await scope.Select(row => row.Finding.OriginatorId).Distinct().ToArrayAsync();
@@ -204,3 +204,6 @@ public static class ReviewRegister
         select new ReviewRegisterJoin { Finding = finding, Package = package, Round = round, Source = source, IssuedSource = issued, Receipt = receipt,
             Deliverable = deliverable, Discipline = discipline, Reference = reference };
 }
+
+// Distinct/OrderBy follow this projection, so it stays a member-init expression for EF.
+file sealed class DisciplineOption { public Guid Id { get; init; } public string Name { get; init; } = ""; public bool Active { get; init; } }

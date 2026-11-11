@@ -872,7 +872,7 @@ public static class ReadinessEndpoints
     {
         var (project, _) = await access.Project(projectId, false);
         var raw = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
-            .Select(c => new { c.Id, c.Key, c.Description, c.TargetType, c.TargetId }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+            .Select(c => new ConstraintLocationSource(c.Id, c.Key, c.Description, c.TargetType, c.TargetId)).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
         var row = new ReadinessConstraintLocation(raw.Id, raw.Key, raw.TargetType, raw.TargetId);
         var settings = await store.Get(db);
         var context = await new RecordContextReader(db, project, settings).Read(RecordContextKind.WorkConstraint, id);
@@ -1198,3 +1198,5 @@ public static class ReadinessEndpoints
                 return row;
             });
 }
+
+file sealed record ConstraintLocationSource(Guid Id, string Key, string Description, string TargetType, Guid TargetId);

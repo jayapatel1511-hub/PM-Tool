@@ -6,6 +6,7 @@ import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { BareTable } from '@/components/ui/table'
 import { PlanningBandBar } from './PlanningBandBar'
 import { PlanningDeadlineMarkers } from './PlanningDeadlines'
 import { plannedPercentage, planningColumns, planningTotals, type PlannerUnit } from './planning-display'
@@ -28,7 +29,7 @@ export function PlannerMonthGrid({ data, unit, groupBy, reference, unitByPerson,
   const value = (total: ReturnType<typeof planningTotals>, partial: boolean) => unit === 'percent'
     ? (total.provisional ? null : plannedPercentage(total.confirmed + total.expected, total.capacity)) ?? t('planner.percentageUnavailable')
     : partial ? t('planner.remainingUnavailable') : hoursLabel(total.remaining)
-  return <div className="overflow-auto rounded-lg border bg-card" role="region" aria-label={t('planner.monthGrid')}><table className="w-full min-w-max text-sm"><caption className="p-3 text-left text-xs text-muted-foreground">{t('planner.monthBasis')}</caption><thead className="bg-muted"><tr><th scope="col" className="min-w-60 border-r px-4 py-3 text-left">{t('planner.person')}</th>{columns.map(column => <th key={column.key} scope="col" data-planner-month={column.key} className="min-w-56 border-r p-3 text-left align-top font-medium">{column.label}<span className="block text-xs font-normal text-muted-foreground">{t('planner.displayedWeeks', { n: column.weeks.length })}</span><PlanningDeadlineMarkers context={data.deadlines} weeks={column.weeks} /></th>)}</tr></thead>
+  return <div className="overflow-auto rounded-lg border bg-card" role="region" aria-label={t('planner.monthGrid')}><BareTable className="w-full min-w-max text-sm"><caption className="p-3 text-left text-xs text-muted-foreground">{t('planner.monthBasis')}</caption><thead className="bg-muted"><tr><th scope="col" className="min-w-60 border-r px-4 py-3 text-left">{t('planner.person')}</th>{columns.map(column => <th key={column.key} scope="col" data-planner-month={column.key} className="min-w-56 border-r p-3 text-left align-top font-medium">{column.label}<span className="block text-xs font-normal text-muted-foreground">{t('planner.displayedWeeks', { n: column.weeks.length })}</span><PlanningDeadlineMarkers context={data.deadlines} weeks={column.weeks} /></th>)}</tr></thead>
     {groups.map(([name, people, supervisor, groupKey]) => <tbody key={groupKey ?? name}>{groupBy !== 'none' && <Fragment><tr><th scope="rowgroup" className="border-t border-r bg-sidebar px-4 py-2 text-left text-xs font-medium">{supervisor ? <PersonPanelTrigger userId={supervisor.id} name={supervisor.name} focusKey={`planner:month:group:${groupKey}:heading`}>{name}</PersonPanelTrigger> : name} · {people.length}</th>{columns.map(column => {
       const total = planningTotals(cellsFor(people, column.weeks))
       return <td key={column.key} data-subtotal={total.confirmed + total.expected + total.possible} className="border-t border-r bg-sidebar p-3 text-xs tabular-nums">{hoursLabel(total.confirmed + total.expected + total.possible)} / {hoursLabel(total.capacity)}<PlanningBandBar {...total} partial={people.some(person => person.partial)} /></td>
@@ -42,5 +43,5 @@ export function PlannerMonthGrid({ data, unit, groupBy, reference, unitByPerson,
       const total = planningTotals(cellsFor(data.people, column.weeks))
       return <td key={column.key} className="border-t border-r bg-muted p-3 tabular-nums">{hoursLabel(total.confirmed + total.expected)}<span className="block text-xs text-muted-foreground">{t('planner.remaining')}: {data.people.some(person => person.partial) ? t('planner.remainingUnavailable') : hoursLabel(total.remaining)}</span></td>
     })}</tr></tfoot>
-  </table>{visual && <p className="planner-semantic-legend p-3">{t('planner.semantic.bandLegend')} {t('planner.semantic.timeOffLegend')}</p>}</div>
+  </BareTable>{visual && <p className="planner-semantic-legend p-3">{t('planner.semantic.bandLegend')} {t('planner.semantic.timeOffLegend')}</p>}</div>
 }

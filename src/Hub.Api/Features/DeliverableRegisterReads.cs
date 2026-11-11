@@ -74,7 +74,7 @@ public static partial class DeliverableEndpoints
         if (purposeOfIssueId is { } purpose) Check.That(await db.Set<IssuePurpose>().AnyAsync(value => value.Id == purpose), "purposeOfIssueId", "error.not_found");
         if (returnCodeId is { } code) Check.That(await db.Set<IssueReturnCode>().AnyAsync(value => value.Id == code), "returnCodeId", "error.not_found");
         if (purposeOfIssueId is null && returnCodeId is null) return query;
-        var sources = await query.Select(deliverable => new { deliverable.Id, deliverable.ProjectId, deliverable.CurrentIssueId }).ToArrayAsync();
+        var sources = await query.Select(deliverable => new RegisterIssueSource(deliverable.Id, deliverable.ProjectId, deliverable.CurrentIssueId)).ToArrayAsync();
         var issues = (await RegisterIssues(db, sources.Select(source => source.Id).ToArray())).ToLookup(issue => issue.DeliverableId);
         var ids = sources.Where(source => {
             var current = CurrentIssue(source.CurrentIssueId, issues[source.Id].Where(issue => issue.ProjectId == source.ProjectId));
@@ -119,7 +119,7 @@ public static partial class DeliverableEndpoints
             if (body.ReturnCodeId == issue.ReturnCodeId && body.ResponseDate == issue.ResponseDate)
                 return TypedResults.Ok(new IssueResponseSaved(id, issueId, deliverable.RowVersion, issue.RowVersion));
             if (issue.ReturnCodeId is not null || issue.ResponseDate is not null) reason = Check.Reason(reason);
-            var previous = new { issue.ReturnCodeId, issue.ReturnCodeSnapshot, issue.ReturnLabelSnapshot, issue.ResponseDate, issue.ResponseRecordedBy, issue.ResponseRecordedAt };
+            var previous = IssueResponseState.Of(issue);
             var previousCode = issue.ReturnCodeSnapshot;
             var previousDate = issue.ResponseDate;
             var retainSnapshot = code is not null && code.Id == issue.ReturnCodeId;
@@ -132,11 +132,22 @@ public static partial class DeliverableEndpoints
             deliverable.LastActivityAt = clock.GetUtcNow();
             db.Entry(deliverable).Property(value => value.LastActivityAt).IsModified = true;
             db.LogEvent(ItemType.Deliverable, id, "IssueResponseRecorded", "deliverable", projectId, deliverable.Key, deliverable.Name,
-                new[] { new { field = "ReturnCode", old = (object?)previousCode, @new = (object?)issue.ReturnCodeSnapshot },
-                    new { field = "ResponseDate", old = (object?)previousDate, @new = (object?)issue.ResponseDate } }, reason, deliverable.ProjectDisciplineId,
-                JsonSerializer.Serialize(new { issueId, issue.Revision, previous, current = new { issue.ReturnCodeId, issue.ReturnCodeSnapshot, issue.ReturnLabelSnapshot, issue.ResponseDate, issue.ResponseRecordedBy, issue.ResponseRecordedAt } }, JsonOpts.Web));
+                new[] { new IssueResponseChange("ReturnCode", previousCode, issue.ReturnCodeSnapshot),
+                    new IssueResponseChange("ResponseDate", previousDate, issue.ResponseDate) }, reason, deliverable.ProjectDisciplineId,
+                JsonSerializer.Serialize(new IssueResponseSnapshot(issueId, issue.Revision, previous, IssueResponseState.Of(issue)), JsonOpts.Web));
             await db.SaveChangesAsync();
             return TypedResults.Ok(new IssueResponseSaved(id, issueId, deliverable.RowVersion, issue.RowVersion));
         });
     }
 }
+
+file sealed record RegisterIssueSource(Guid Id, Guid ProjectId, Guid? CurrentIssueId);
+// Activity JSON shapes: property names and order are the stored wire format.
+file sealed record IssueResponseChange(string Field, object? Old, object? New);
+file sealed record IssueResponseState(Guid? ReturnCodeId, string? ReturnCodeSnapshot, string? ReturnLabelSnapshot,
+    DateOnly? ResponseDate, Guid? ResponseRecordedBy, DateTimeOffset? ResponseRecordedAt)
+{
+    public static IssueResponseState Of(DeliverableIssue issue) => new(issue.ReturnCodeId, issue.ReturnCodeSnapshot, issue.ReturnLabelSnapshot,
+        issue.ResponseDate, issue.ResponseRecordedBy, issue.ResponseRecordedAt);
+}
+file sealed record IssueResponseSnapshot(Guid IssueId, string? Revision, IssueResponseState Previous, IssueResponseState Current);

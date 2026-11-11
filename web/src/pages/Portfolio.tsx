@@ -23,7 +23,7 @@ import { useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
-import { plural, runtimeText, t, tv, type TextKey } from '@/lib/i18n'
+import { plural, runtimeText, t, textFor, tv, type TextKey } from '@/lib/i18n'
 import type { ProjectRow, ProjectStatusNoteData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
@@ -40,6 +40,7 @@ const VISUAL_FILTERS = [...FILTERS, 'ids', 'starred', 'priority'] as const
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
 const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey'] as const
 type Health = (typeof HEALTHS)[number]
+const HEALTH_TEXT = { Red: 'health.Red', Yellow: 'health.Yellow', Green: 'health.Green', Grey: 'health.Grey' } as const satisfies Record<Health, TextKey>
 const HEALTH_TILE_LABELS: Record<Exclude<Health, 'Grey'>, TextKey> = { Red: 'portfolio.red', Yellow: 'portfolio.yellow', Green: 'portfolio.green' }
 const GROUP_OPTIONS = [
   { value: 'none', label: 'rcv.groupNone' },
@@ -220,7 +221,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     return <div className="space-y-2">
       {row.statusNote && <ProjectStatusNote note={row.statusNote} />}
       {healthNote && <section data-portfolio-health-note>
-        <p className="font-medium">{t('health.computed')}: {runtimeText(`health.${row.computedHealth}`)} · {t('health.reported')}: {runtimeText(`health.${row.reportedHealth}`)}</p>
+        <p className="font-medium">{t('health.computed')}: {textFor(HEALTH_TEXT, row.computedHealth)} · {t('health.reported')}: {textFor(HEALTH_TEXT, row.reportedHealth)}</p>
         <p>“{row.healthOverrideNote}” — {t('portfolio.noteBy', { name: row.overrideBy ?? '', when: ago(row.healthOverrideAt) })}</p>
       </section>}
     </div>
@@ -239,7 +240,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
       {tiles && (
         visualSystem ? <div className="home-count-cards portfolio-count-cards">
           <CountCard label={t('portfolio.active')} value={tiles.active} tone="blue" definition={t('sig.def.pfActive')} where={where('active')} to={destination('status', 'Active')} />
-          {(['Red', 'Yellow', 'Green'] as const).map(h => <CountCard key={h} label={healthLabel(h, HEALTH_TILE_LABELS[h])} value={tiles[h.toLowerCase() as 'red']} tone={h === 'Red' ? 'red' : h === 'Yellow' ? 'amber' : 'green'} definition={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} where={where(h.toLowerCase())} to={healthLink(h)} />)}
+          {(['Red', 'Yellow', 'Green'] as const).map(h => <CountCard key={h} label={healthLabel(h, HEALTH_TILE_LABELS[h])} value={tiles[h.toLowerCase() as 'red']} tone={h === 'Red' ? 'red' : h === 'Yellow' ? 'amber' : 'green'} definition={t('sig.def.pfHealth', { health: t(`health.${h}`) })} where={where(h.toLowerCase())} to={healthLink(h)} />)}
           <CountCard label={t('portfolio.submissions')} value={tiles.submissions14} tone="amber" definition={t('sig.def.pfSubmissions')} where={where('submissions14')} to={destination('submissionWithinDays', String(submissionWindow))} />
           <CountCard label={t('portfolio.decisions')} value={tiles.overdueDecisions} tone="red" definition={t('sig.def.pfDecisions')} where={where('overdueDecisions')} to={destination('overdueDecisions', 'true')} />
         </div> : <div className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6', projectScreens && 'portfolio-print-legacy-tiles')}>

@@ -6,7 +6,7 @@ import { itemHref } from '@/components/hub/search'
 import { RecordContextActors, recordContextActionLabel } from '@/components/hub/record-context'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { fmtDate, fmtTime } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { t, tv, type KeyIn } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { CoordStatus, PersonLabel, type CoordOptions } from './CoordinationForms'
 import { useWorkRecordOrigin } from './work-record-navigation'
@@ -16,7 +16,7 @@ type Presentation = Schemas['ReadinessDeliveryPresentation']
 type Source = Schemas['RecordContextInputView']
 type Input = Schemas['WorkReadinessInput']
 type Check = Schemas['ReadinessCheckRead']
-const label = (key: string, values?: Record<string, string | number>) => runtimeText(`readinessDelivery.${key}`, values)
+const label = (key: KeyIn<'readinessDelivery.'>, values?: Record<string, string | number>) => t(`readinessDelivery.${key}`, values)
 const link = 'break-words text-left text-primary underline underline-offset-4'
 
 function SourceAction({ source, number, children }: { source: Source; number: string; children: ReactNode }) {

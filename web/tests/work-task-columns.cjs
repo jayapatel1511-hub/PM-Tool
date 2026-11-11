@@ -79,9 +79,11 @@ function groups(rows, visible) {
       return route.fulfill({ json: taskPage(shown, { page: index, pageSize: size, totalCount: rows.length,
         ...(me.flags.work_screens && query.group === 'deliverable' ? { groups: groups(rows, shown), asOf: stamp } : {}) }) })
     })
-    await page.route(/\/api\/v1\/tasks\/[0-9a-f-]+(?:\/dependencies)?(?:\?.*)?$/, route => {
+    await page.route(/\/api\/v1\/tasks\/[0-9a-f-]+(?:\/dependencies|\/activity\/actors)?(?:\?.*)?$/, route => {
       const path = new URL(route.request().url()).pathname, taskId = path.split('/')[4], row = cohort().find(row => row.id === taskId)
       assert.ok(row); details.push(path)
+      // The open panel's History section reads its person filter choices (work_screens).
+      if (path.endsWith('/activity/actors')) return route.fulfill({ json: [] })
       return route.fulfill({ json: path.endsWith('/dependencies') ? taskDependencies() : taskDetail({ task: row, project: { id: row.projectId, projectNumber: row.projectNumber, name: row.projectName, status: 'Active' }, permissions: taskPermissions({ transitions: [] }) }) })
     })
     await page.route(/\/api\/v1\/items\/Task\/[0-9a-f-]+\/(comments|links|activity)(?:\?.*)?$/, route => {
@@ -111,7 +113,9 @@ function groups(rows, visible) {
     await page.goto(url); await page.getByRole('button', { name: twelve[0].name, exact: true }).waitFor()
     await page.evaluate(({ preference, projectPreference }) => { localStorage.removeItem(preference); localStorage.setItem(projectPreference, '["project-only-sentinel"]') }, { preference, projectPreference })
     await page.reload(); await page.getByRole('button', { name: twelve[0].name, exact: true }).waitFor()
-    assert.equal(await headers().count(), 11)
+    // FR-SCR-19: with work_screens on, a leading selection column precedes the chosen columns.
+    assert.equal(await headers().count(), 12)
+    await headers().first().getByRole('checkbox', { name: 'Select this page', exact: true }).waitFor()
     assert.equal(await table().locator('tbody tr:has(td)').count(), 12)
     assert.equal(await table().locator('[data-task-group]').count(), 6)
     assert.equal(new Set(await table().locator('[data-task-group]').evaluateAll(nodes => nodes.map(node => node.dataset.taskGroup))).size, 6)
@@ -125,9 +129,9 @@ function groups(rows, visible) {
 
     await page.goto(`${url}&cols=deliverable,reviewer,estimate,lastActivity,submissionDate,reviewer,unknown`)
     await cell(twelve[0].id, 'submissionDate').getByText('2027-02-11', { exact: true }).waitFor()
-    assert.equal(await headers().count(), 8)
-    assert.deepEqual(await headers().allTextContents(), ['Key', 'Task', 'Project', 'Deliverable', 'Reviewer', 'Est. hrs', 'Last activity', 'Submission date'])
-    assert.deepEqual(await table().locator('[data-task-group] th').evaluateAll(nodes => [...new Set(nodes.map(node => node.colSpan))]), [8])
+    assert.equal(await headers().count(), 9)
+    assert.deepEqual(await headers().allTextContents(), ['', 'Key', 'Task', 'Project', 'Deliverable', 'Reviewer', 'Est. hrs', 'Last activity', 'Submission date'])
+    assert.deepEqual(await table().locator('[data-task-group] th').evaluateAll(nodes => [...new Set(nodes.map(node => node.colSpan))]), [9])
     assert.match(await cell(twelve[0].id, 'estimate').innerText(), /^0(?:\s*h)?$/)
     await cell(twelve[1].id, 'estimate').getByText('Not estimated', { exact: true }).waitFor()
     assert.equal(await cell(twelve[0].id, 'reviewer').evaluate(el => {
@@ -138,7 +142,7 @@ function groups(rows, visible) {
     await save('Five optional work columns'); assert.deepEqual(storedViews[1].params.cols.split(','), eight)
     await page.evaluate(key => localStorage.setItem(key, '["key","name","project"]'), preference)
     await page.goto(url); await page.getByRole('button', { name: 'Views', exact: true }).click(); await page.getByRole('menuitem', { name: 'Five optional work columns', exact: true }).click()
-    await page.waitForURL(next => next.searchParams.get('cols') === eight.join(',')); await headers().filter({ hasText: 'Submission date' }).waitFor(); assert.equal(await headers().count(), 8)
+    await page.waitForURL(next => next.searchParams.get('cols') === eight.join(',')); await headers().filter({ hasText: 'Submission date' }).waitFor(); assert.equal(await headers().count(), 9)
     const beforeEventUrl = page.url(), beforeEventReads = reads.length
     await page.waitForFunction(() => typeof window.__workColumnEvent === 'function')
     targetDate = '2027-02-13'
@@ -157,7 +161,7 @@ function groups(rows, visible) {
         assert.equal(await cards.locator('[data-workspace-column="submissionDate"]').count(), 4)
         await cards.getByText('No open submission', { exact: true }).waitFor(); assert.equal(await cards.getByText('Unavailable', { exact: true }).count(), 2)
         assert.equal(await cards.locator('[data-workspace-column="reviewer"]').count(), 4)
-      } else assert.equal(await headers().count(), 8)
+      } else assert.equal(await headers().count(), 9)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `no page overflow at${width}`)
     }
 
@@ -170,10 +174,10 @@ function groups(rows, visible) {
     await page.waitForURL(next => !next.searchParams.get('cols').split(',').includes('reviewer')); await page.keyboard.press('Escape')
     const afterChoice = new URL(page.url()); for (const [key, value] of pageTwo.searchParams) if (key !== 'cols') assert.equal(afterChoice.searchParams.get(key), value)
     await headers().filter({ hasText: 'Reviewer' }).waitFor({ state: 'detached' })
-    assert.equal(afterChoice.searchParams.get('page'), '2'); assert.equal(await headers().count(), 7)
+    assert.equal(afterChoice.searchParams.get('page'), '2'); assert.equal(await headers().count(), 8)
     assert.deepEqual(JSON.parse(await page.evaluate(key => localStorage.getItem(key), preference)), eight.filter(key => key !== 'reviewer'))
     assert.equal(await page.evaluate(key => localStorage.getItem(key), projectPreference), '["project-only-sentinel"]')
-    await page.reload(); await page.getByRole('button', { name: paged[100].name, exact: true }).waitFor(); assert.equal(await headers().count(), 7)
+    await page.reload(); await page.getByRole('button', { name: paged[100].name, exact: true }).waitFor(); assert.equal(await headers().count(), 8)
     await page.getByRole('button', { name: 'Next', exact: true }).click(); await page.waitForURL(next => next.searchParams.get('page') === '3')
     await page.getByRole('button', { name: paged[200].name, exact: true }).waitFor(); assert.equal(await table().locator('tbody tr:has(td)').count(), 1)
     await page.getByRole('button', { name: 'Previous', exact: true }).click(); await page.waitForURL(next => next.searchParams.get('page') === '2'); await page.getByRole('button', { name: paged[100].name, exact: true }).waitFor()
@@ -184,7 +188,7 @@ function groups(rows, visible) {
     await page.getByRole('dialog').last().getByRole('button', { name: 'Close', exact: true }).click(); await page.waitForURL(origin)
     assert.equal(new URL(page.url()).searchParams.get('page'), '2')
     // A URL with no recognized IDs still retains all identity columns, regardless of stored defaults.
-    mode = 'multi'; await page.goto(`${url}&cols=unknown,unknown`); await page.getByRole('button', { name: twelve[0].name, exact: true }).waitFor(); assert.equal(await headers().count(), 3)
+    mode = 'multi'; await page.goto(`${url}&cols=unknown,unknown`); await page.getByRole('button', { name: twelve[0].name, exact: true }).waitFor(); assert.equal(await headers().count(), 4)
     me.flags.work_screens = false
     await page.goto(`${url}&cols=${eight.join(',')}`); await page.getByRole('button', { name: twelve[0].name, exact: true }).waitFor()
     assert.equal(await headers().count(), 9); assert.equal(await page.getByRole('button', { name: 'Columns', exact: true }).count(), 0)

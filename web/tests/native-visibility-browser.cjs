@@ -8,7 +8,10 @@ const { chromium } = require('playwright')
 
 async function nativeVisibilityBrowser() {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'pm-native-visibility-'))
-  const child = spawn(process.env.CHROME_EXECUTABLE_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
+  // The headless shell never hides a background tab, so a CHROME_EXECUTABLE_PATH naming it cannot serve this helper.
+  const configured = process.env.CHROME_EXECUTABLE_PATH
+  const executable = configured && !/headless[_-]shell/.test(configured) ? configured : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  const child = spawn(executable, [
     '--headless=new', '--window-size=1440,1100', '--no-first-run', '--no-default-browser-check', '--disable-background-networking',
     '--disable-component-update', '--disable-sync', '--no-pings', '--remote-debugging-address=127.0.0.1',
     '--remote-debugging-port=0', '--user-data-dir=' + profile, 'about:blank',
@@ -29,10 +32,12 @@ async function nativeVisibilityBrowser() {
   }
   try {
     const portFile = path.join(profile, 'DevToolsActivePort')
-    for (let attempt = 0; attempt < 200 && !fs.existsSync(portFile) && !spawnError && child.exitCode === null; attempt++)
+    // Chrome may create the file before writing it: wait for the complete "port\n" line.
+    const published = () => { try { return /^\d+\n/.test(fs.readFileSync(portFile, 'utf8')) } catch { return false } }
+    for (let attempt = 0; attempt < 200 && !published() && !spawnError && child.exitCode === null; attempt++)
       await new Promise(resolve => setTimeout(resolve, 50))
     if (spawnError) throw spawnError
-    if (!fs.existsSync(portFile)) throw new Error('Isolated Chrome did not publish its loopback endpoint')
+    if (!published()) throw new Error('Isolated Chrome did not publish its loopback endpoint')
     const port = Number(fs.readFileSync(portFile, 'utf8').split('\n')[0])
     if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid isolated Chrome port')
     const browser = await chromium.connectOverCDP('http://127.0.0.1:' + port, { noDefaults: true })

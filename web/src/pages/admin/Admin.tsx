@@ -3,8 +3,8 @@ import { personOptionLabel } from '@/components/hub/person-option-label'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Monitor, Plus, X } from 'lucide-react'
-import { useState } from 'react'
-import { NavLink, Navigate, useParams, Link } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { NavLink, Navigate, useLocation, useParams, Link } from 'react-router'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ActivityTable } from '@/components/hub/activity'
 import { DataTable } from '@/components/hub/registers'
@@ -45,6 +45,7 @@ const Active = ({ on }: { on: boolean }) => <Pill tone={on ? 'ok' : 'idle'}>{on 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const structure = useFlag('org_structure'), chain = useFlag('verifiable_log'), adminReview = useFlag('admin_review')
   const register = useFlag('register_screens')
+  const visualSystem = useFlag('visual_system')
   const title = t('admin.title')
   const links = [...KINDS.filter(k => register || !REGISTER_KINDS.includes(k)).map((k) => ({ to: `/admin/reference/${k}`, label: runtimeText(`admin.${k}`) })),
     { to: '/admin/settings', label: t('admin.settings') }, { to: '/admin/users', label: t('admin.users') }, { to: '/admin/activity', label: t('admin.activity') },
@@ -55,7 +56,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <DesktopOnly notice={<Page title={title}><Notice icon={Monitor} title={t('app.phoneNotice')}
       action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('admin.phoneHint')}</Notice></Page>}>
-      <Page title={title}>
+      {visualSystem ? <Page title={title} tabs={<AdminBandTabs title={title} links={links} />}><div className="min-w-0">{children}</div></Page> : <Page title={title}>
         <nav aria-label={title} className="flex min-w-0 flex-wrap gap-1 shadow-[inset_0_-1px_0_var(--border)]">
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} className={({ isActive }) => cn('inline-flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -63,11 +64,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="min-w-0">{children}</div>
-      </Page>
+      </Page>}
     </DesktopOnly>
   )
 }
 
+/** 052 S07: with the visual system the Admin pages are one band tab row (FR-VSN-11). Like the band's other rows it
+ *  scrolls sideways instead of wrapping; the current page is scrolled into view when the row overflows. */
+function AdminBandTabs({ title, links }: { title: string; links: { to: string; label: string }[] }) {
+  const nav = useRef<HTMLElement>(null)
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const row = nav.current, current = row?.querySelector('[aria-current="page"]')
+    if (!row || !current) return
+    const a = current.getBoundingClientRect(), r = row.getBoundingClientRect()
+    if (a.left < r.left || a.right > r.right) row.scrollLeft += a.left - r.left - (r.width - a.width) / 2
+  }, [pathname])
+  return <nav ref={nav} aria-label={title} data-admin-tabs className="visual-area-tabs">{links.map((l) => <NavLink key={l.to} to={l.to}>{l.label}</NavLink>)}</nav>
+}
 
 export function AdminIndex() { return <Navigate to="/admin/reference/disciplines" replace /> }
 

@@ -20,7 +20,7 @@ public static class DecisionScreenReads
         await using var snapshot = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
         var asOf = clock.GetUtcNow(); var today = Clock.LocalDate(asOf, settings);
         var rows = await db.Decisions.AsNoTracking().Where(decision => decision.ProjectId == id && decision.Status == DecisionStatus.Decided)
-            .Select(decision => new { decision.DateRequested, decision.DecisionDate, decision.OwnerUserId, decision.OwnerExternalPartyId }).ToListAsync();
+            .Select(decision => new DecidedRow(decision.DateRequested, decision.DecisionDate, decision.OwnerUserId, decision.OwnerExternalPartyId)).ToListAsync();
         var users = rows.Select(row => row.OwnerUserId).OfType<Guid>().Distinct().ToArray();
         var actualUsers = (await db.Users.AsNoTracking().Where(user => users.Contains(user.Id)).Select(user => user.Id).ToArrayAsync()).ToHashSet();
         var parties = rows.Select(row => row.OwnerExternalPartyId).OfType<Guid>().Distinct().ToArray();
@@ -50,3 +50,5 @@ public static class DecisionScreenReads
         return new(asOf, categories, new("CurrentRegisteredValuesAllDecidedInProject", rows.Count, groups.Sum(group => group.DecidedCount), invalid, unattributed, groups));
     }
 }
+
+file sealed record DecidedRow(DateOnly DateRequested, DateOnly? DecisionDate, Guid? OwnerUserId, Guid? OwnerExternalPartyId);

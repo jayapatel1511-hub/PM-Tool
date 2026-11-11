@@ -160,10 +160,10 @@ public static class FileScreenReads
             where pids.Contains(project.Id) && pd.ProjectId == project.Id
                 && deliverable.Status != DeliverableStatus.Issued && deliverable.Status != DeliverableStatus.Accepted && deliverable.Status != DeliverableStatus.Cancelled
                 && !db.DocumentLinks.Any(link => link.ProjectId == deliverable.ProjectId && link.ItemType == ItemType.Deliverable && link.ItemId == deliverable.Id)
-            // Keep server-filtered/ordered members in an anonymous projection until materialization.
-            select new { deliverable.Id, ProjectId = project.Id, project.ProjectNumber, ProjectName = project.Name,
-                deliverable.Key, deliverable.Name, deliverable.Status, DisciplineId = discipline.Id, DisciplineName = discipline.Name,
-                CurrentRevision = deliverable.Revision, deliverable.RowVersion };
+            // Keep server-filtered/ordered members in a member-init projection until materialization.
+            select new MissingDeliverableRow { Id = deliverable.Id, ProjectId = project.Id, ProjectNumber = project.ProjectNumber, ProjectName = project.Name,
+                Key = deliverable.Key, Name = deliverable.Name, Status = deliverable.Status, DisciplineId = discipline.Id, DisciplineName = discipline.Name,
+                CurrentRevision = deliverable.Revision, RowVersion = deliverable.RowVersion };
         if (applied.DisciplineId is { } missingDiscipline) missing = missing.Where(row => row.DisciplineId == missingDiscipline);
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -180,4 +180,19 @@ public static class FileScreenReads
             new(missingTotal, missingRows.Count > MissingLimit, missingItems));
         return new(result, shown.Length, bounded.Count > LinkLimit, LinkType.All, screen);
     }
+}
+
+file sealed class MissingDeliverableRow
+{
+    public Guid Id { get; init; }
+    public Guid ProjectId { get; init; }
+    public string ProjectNumber { get; init; } = "";
+    public string ProjectName { get; init; } = "";
+    public string Key { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Status { get; init; } = "";
+    public Guid DisciplineId { get; init; }
+    public string DisciplineName { get; init; } = "";
+    public string? CurrentRevision { get; init; }
+    public int RowVersion { get; init; }
 }

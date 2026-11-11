@@ -311,18 +311,22 @@ function RailLink({ item, collapsed, drawer = false, onNavigate }: { item: NavIt
   const active = isActive(useLocation().pathname, item)
   const { icon: Icon } = item
   const label = runtimeText(item.label)
+  const link = (
+    <Link to={item.path} onClick={onNavigate} aria-current={active ? 'page' : undefined}
+      className={cn('relative flex min-h-11 items-center gap-3 rounded-md text-sm text-muted-foreground hover:bg-sidebar-hover hover:text-foreground',
+        drawer ? 'justify-start px-3' : collapsed ? 'justify-center' : 'justify-center xl:justify-start xl:px-3',
+        active && 'bg-nav-active font-semibold text-nav-active-foreground before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-nav-active-foreground hover:bg-nav-active hover:text-nav-active-foreground')}>
+      <Icon className="size-5 shrink-0" aria-hidden />
+      <span className={cn('min-w-0 truncate', !drawer && (collapsed ? 'sr-only' : 'sr-only xl:not-sr-only'))}>{label}</span>
+    </Link>
+  )
+  // The drawer shows its labels, so its links carry no tooltip: an open (hidden) tooltip would take the first Escape
+  // and leave the drawer open (FR-VSN-19).
+  if (drawer) return link
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Link to={item.path} onClick={onNavigate} aria-current={active ? 'page' : undefined}
-          className={cn('relative flex min-h-11 items-center gap-3 rounded-md text-sm text-muted-foreground hover:bg-sidebar-hover hover:text-foreground',
-            drawer ? 'justify-start px-3' : collapsed ? 'justify-center' : 'justify-center xl:justify-start xl:px-3',
-            active && 'bg-nav-active font-semibold text-nav-active-foreground before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-nav-active-foreground hover:bg-nav-active hover:text-nav-active-foreground')}>
-          <Icon className="size-5 shrink-0" aria-hidden />
-          <span className={cn('min-w-0 truncate', !drawer && (collapsed ? 'sr-only' : 'sr-only xl:not-sr-only'))}>{label}</span>
-        </Link>
-      </TooltipTrigger>
-      <TooltipContent side="right" className={drawer ? 'hidden' : collapsed ? '' : 'xl:hidden'}>{label}</TooltipContent>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right" className={collapsed ? '' : 'xl:hidden'}>{label}</TooltipContent>
     </Tooltip>
   )
 }

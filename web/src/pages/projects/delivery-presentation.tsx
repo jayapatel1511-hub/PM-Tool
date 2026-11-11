@@ -7,7 +7,7 @@ import { itemHref } from '@/components/hub/search'
 import { Pill } from '@/components/hub/pills'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { fmtDate, fmtTime } from '@/lib/format'
-import { runtimeText, tv } from '@/lib/i18n'
+import { t, tv, type KeyIn } from '@/lib/i18n'
 import { CoordStatus, PersonLabel, type CoordOptions } from './CoordinationForms'
 import { useWorkRecordOrigin } from './work-record-navigation'
 
@@ -16,7 +16,7 @@ type Check = Schemas['SubmissionCheckRow']
 type Summary = Schemas['DeliverySummary']
 type Detail = Schemas['SubmissionDetail']
 type Source = Schemas['RecordContextInputView']
-const label = (key: string, values?: Record<string, string | number>) => runtimeText(`delivery.${key}`, values)
+const label = (key: KeyIn<'delivery.'>, values?: Record<string, string | number>) => t(`delivery.${key}`, values)
 const rank = (state?: string | null) => state === 'Fail' ? 0 : state === 'Pending' ? 1 : state === 'Pass' ? 3 : state === 'Not Applicable' ? 4 : 2
 const unknown = () => label('unavailable')
 
@@ -57,11 +57,11 @@ export function SubmissionDelivery({ detail: d, number, meId, checkId, options, 
   return <div className="space-y-6" data-delivery-presentation>
     <header className="space-y-2 rounded-lg border p-4">
       <DeliveryBlockerSummary summary={presentation?.summary} />
-      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2"><div><dt className="text-xs text-muted-foreground">{runtimeText('coord.coordinator')}</dt><dd><PersonLabel options={options} id={d.package.coordinatorId} focusKey={`delivery:${d.package.id}:coordinator`} /></dd></div>
-        <div><dt className="text-xs text-muted-foreground">{runtimeText('submissions.targetDate')}</dt><dd className="tabular-nums">{fmtDate(d.package.targetDate)}</dd></div></dl>
+      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2"><div><dt className="text-xs text-muted-foreground">{t('coord.coordinator')}</dt><dd><PersonLabel options={options} id={d.package.coordinatorId} focusKey={`delivery:${d.package.id}:coordinator`} /></dd></div>
+        <div><dt className="text-xs text-muted-foreground">{t('submissions.targetDate')}</dt><dd className="tabular-nums">{fmtDate(d.package.targetDate)}</dd></div></dl>
     </header>
-    <section aria-label={runtimeText('submissions.checks')} className="space-y-3" data-delivery-checklist>
-      <h3 className="text-base/6 font-semibold">{runtimeText('submissions.checks')}</h3>
+    <section aria-label={t('submissions.checks')} className="space-y-3" data-delivery-checklist>
+      <h3 className="text-base/6 font-semibold">{t('submissions.checks')}</h3>
       {(!presentation?.checksComplete || !Array.isArray(d.checks) || !Array.isArray(presentation?.checks)) && <p role="status" className="text-sm text-warn">{label('checklistUnavailable')}</p>}
       {presentation?.packageProblems?.length ? <aside className="space-y-1 rounded-md border p-3"><h4 className="font-medium">{label('packageProblems', { n: presentation.packageProblems.length })}</h4>{presentation.packageProblems.map((problem, index) => <p key={`${problem.code}:${index}`}>{problem.message}</p>)}</aside> : null}
       {ordered.map(([key, group]) => <section key={key} className="space-y-2" data-delivery-state={group.state ?? 'Unknown'}>
@@ -76,7 +76,7 @@ export function SubmissionDelivery({ detail: d, number, meId, checkId, options, 
               <ActionLink source={source} number={number}>{source.nextAction === 'not_assessed' || source.nextAction === 'none' ? label('openSource') : recordContextActionLabel(source.nextAction)} · <span className="key">{source.key}</span> · {source.title}</ActionLink>
               <p className="text-xs text-muted-foreground"><RecordContextActors actors={source.nextActors} actorState={source.actorState ?? 'Unknown'} meId={meId} focusKey={`submission:${d.package.id}:check:${check.id}:source:${source.kind}:${source.id}:next`} /></p>
             </li>)}</ul> : check.context && !check.context.terminal ? <Link className="text-primary underline underline-offset-4" onClick={origin} to={itemHref('SubmissionCheck', number, check.id)}>{check.context.nextAction === 'not_assessed' ? label('openCheck') : recordContextActionLabel(check.context.nextAction)}</Link> : null}
-            {check.evidenceUrl && <a className="text-primary underline underline-offset-4" href={check.evidenceUrl} target="_blank" rel="noopener noreferrer">{runtimeText('coord.evidence')}</a>}
+            {check.evidenceUrl && <a className="text-primary underline underline-offset-4" href={check.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('coord.evidence')}</a>}
           </article>
         })}
       </section>)}
@@ -86,7 +86,7 @@ export function SubmissionDelivery({ detail: d, number, meId, checkId, options, 
         <ul className="flex flex-wrap gap-x-6 gap-y-2">{presentation.statusCounts.map(count => <li key={count.status}>{tv(count.status)}: <span className="tabular-nums">{count.count}</span></li>)}</ul>
         {presentation.unavailableDeliverables > 0 && <p className="text-warn">{label('unavailableMembers', { n: presentation.unavailableDeliverables })}</p>}</> : <p className="text-muted-foreground">{label('statusUnavailable')}</p>}
     </section>
-    <details className="rounded-lg border" data-delivery-manifest><summary className="cursor-pointer px-4 py-3 font-medium">{runtimeText('submissions.manifest')}</summary><div className="space-y-3 border-t p-4">
+    <details className="rounded-lg border" data-delivery-manifest><summary className="cursor-pointer px-4 py-3 font-medium">{t('submissions.manifest')}</summary><div className="space-y-3 border-t p-4">
       {(!presentation?.manifestComplete || !Array.isArray(presentation?.manifest)) && <p className="text-warn">{label('manifestUnavailable')}</p>}
       {Array.isArray(presentation?.manifest) && presentation.manifest.map(member => <article key={member.id} className="space-y-2 rounded-md border p-3">
         <h4 className="font-medium">{member.available ? <Link className="text-primary underline underline-offset-4" onClick={origin} to={itemHref('Deliverable', number, member.deliverableId)}><span className="key">{member.key}</span> · {member.title}</Link> : label('memberUnavailable')}</h4>
@@ -95,8 +95,8 @@ export function SubmissionDelivery({ detail: d, number, meId, checkId, options, 
         {member.revisionMismatch == null && <p className="text-xs text-muted-foreground">{label('comparisonUnavailable')}</p>}
       </article>)}
     </div></details>
-    <details className="rounded-lg border"><summary className="cursor-pointer px-4 py-3 font-medium">{label('packageDetails')}</summary><dl className="grid gap-x-4 gap-y-2 border-t p-4 sm:grid-cols-[auto_1fr]"><dt>{runtimeText('submissions.milestone')}</dt><dd>{milestoneName ?? unknown()}</dd><dt>{runtimeText('submissions.recipient')}</dt><dd>{d.package.recipientReference}</dd><dt>{label('purpose')}</dt><dd className="whitespace-pre-wrap">{d.package.purpose}</dd></dl></details>
-    {presentation?.issueAvailability === 'Available' && d.issue ? <section className="space-y-2 rounded-lg border p-4" aria-label={label('issueEvidence')}><h3 className="font-medium">{runtimeText('submissions.issued')}</h3><p>{fmtTime(d.issue.authorisedAt)} · <PersonLabel options={options} id={d.issue.authorisedBy} focusKey={`delivery:${d.package.id}:issue:authorised-by`} /> · {d.issue.destination}</p><p className="text-xs text-muted-foreground">{label('issueFrozen')}</p><a className="text-primary underline underline-offset-4" href={d.issue.transmittalUrl} target="_blank" rel="noopener noreferrer">{runtimeText('submissions.transmittal')}</a></section>
+    <details className="rounded-lg border"><summary className="cursor-pointer px-4 py-3 font-medium">{label('packageDetails')}</summary><dl className="grid gap-x-4 gap-y-2 border-t p-4 sm:grid-cols-[auto_1fr]"><dt>{t('submissions.milestone')}</dt><dd>{milestoneName ?? unknown()}</dd><dt>{t('submissions.recipient')}</dt><dd>{d.package.recipientReference}</dd><dt>{label('purpose')}</dt><dd className="whitespace-pre-wrap">{d.package.purpose}</dd></dl></details>
+    {presentation?.issueAvailability === 'Available' && d.issue ? <section className="space-y-2 rounded-lg border p-4" aria-label={label('issueEvidence')}><h3 className="font-medium">{t('submissions.issued')}</h3><p>{fmtTime(d.issue.authorisedAt)} · <PersonLabel options={options} id={d.issue.authorisedBy} focusKey={`delivery:${d.package.id}:issue:authorised-by`} /> · {d.issue.destination}</p><p className="text-xs text-muted-foreground">{label('issueFrozen')}</p><a className="text-primary underline underline-offset-4" href={d.issue.transmittalUrl} target="_blank" rel="noopener noreferrer">{t('submissions.transmittal')}</a></section>
       : <p className="text-sm text-muted-foreground">{presentation?.issueAvailability === 'NotIssued' ? label('notIssued') : label('issueUnavailable')}</p>}
   </div>
 }

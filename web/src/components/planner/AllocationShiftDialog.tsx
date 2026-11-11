@@ -6,6 +6,7 @@ import { ErrorBanner, Field, TableRegion, tdCls, thCls } from '@/components/hub/
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { BareTable } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
@@ -62,11 +63,11 @@ export function AllocationShiftDialog({ projectId, mode, selectedIds, onClose, o
         <Button type="button" variant="outline" disabled={!validWeeks || busy} onClick={() => void inspect()}>{pending ? t('allocationShift.previewing') : t('allocationShift.preview')}</Button>
       </div>
       {preview && <section className="space-y-2" aria-live="polite"><h3 id="allocation-shift-preview-title" className="text-sm font-medium">{t('allocationShift.previewTitle', { n: preview.allocations.length })}</h3><p className="text-xs text-muted-foreground">{t('allocationShift.childrenHint')}</p>
-        <TableRegion role="region" aria-label={t('allocationShift.previewRegion')}><table className="w-full min-w-max text-sm"><caption className="sr-only">{t('allocationShift.previewRegion')}</caption><thead><tr><th scope="col" className={thCls}>{t('workload.person')}</th><th scope="col" className={thCls}>{t('allocationShift.before')}</th><th scope="col" className={thCls}>{t('allocationShift.after')}</th><th scope="col" className={thCls}>{t('allocation.status')}</th></tr></thead>
+        <TableRegion role="region" aria-label={t('allocationShift.previewRegion')}><BareTable className="w-full min-w-max text-sm"><caption className="sr-only">{t('allocationShift.previewRegion')}</caption><thead><tr><th scope="col" className={thCls}>{t('workload.person')}</th><th scope="col" className={thCls}>{t('allocationShift.before')}</th><th scope="col" className={thCls}>{t('allocationShift.after')}</th><th scope="col" className={thCls}>{t('allocation.status')}</th></tr></thead>
           <tbody>{preview.allocations.map(row => <tr key={row.id} data-shift-preview-row={row.id}><th scope="row" className={`${tdCls} text-left font-medium`}><PersonPanelTrigger userId={row.personId} name={row.personName} focusKey={`allocation-shift:${projectId}:${row.id}:preview-person`} />
             {row.unchangedRoles.map(role => <span key={role.id} className="mt-2 block max-w-72 whitespace-normal text-xs font-normal text-muted-foreground">{t('allocationShift.roleUnchanged', { role: role.label, from: fmtDate(role.fromDate), through: fmtDate(role.throughDate) })}</span>)}
           </th><td className={`${tdCls} tabular-nums`}>{fmtDate(row.fromDate)} – {fmtDate(row.throughDate)}</td><td className={`${tdCls} tabular-nums`}>{fmtDate(row.newFromDate)} – {fmtDate(row.newThroughDate)}</td><td className={tdCls}>{row.requiresConfirmation ? t('allocationShift.reconfirm') : tv(row.status)}</td></tr>)}</tbody>
-        </table></TableRegion>
+        </BareTable></TableRegion>
       </section>}
       <Field label={t('common.reason')} htmlFor="allocation-shift-reason" hint={t('common.reasonHint')}><Textarea id="allocation-shift-reason" required minLength={5} disabled={busy} value={reason} onChange={event => setReason(event.target.value)} /></Field>
     </div>

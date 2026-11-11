@@ -278,19 +278,19 @@ public static class WorkloadEndpoints
         var first = weeks[0]; var last = weeks[^1].AddDays(6);
         var roles = await db.OpenRoles.AsNoTracking().Where(r => r.Status == OpenRoleStatus.Open && projectIds.Contains(r.ProjectId)
                 && r.FromDate <= last && r.ThroughDate >= first)
-            .Select(r => new { Role = r, DisciplineId = db.ProjectDisciplines.Where(pd => pd.Id == r.ProjectDisciplineId && pd.ProjectId == r.ProjectId)
-                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault() }).ToListAsync();
+            .Select(r => new OpenRoleDemand(r, db.ProjectDisciplines.Where(pd => pd.Id == r.ProjectDisciplineId && pd.ProjectId == r.ProjectId)
+                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault())).ToListAsync();
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.AssigneeId == null && projectIds.Contains(t.ProjectId)
                 && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && (t.DueDate == null || t.DueDate >= first && t.DueDate <= last))
-            .Select(t => new { t.DueDate, t.EstimatedHours, DisciplineId = db.ProjectDisciplines.Where(pd => pd.Id == t.ProjectDisciplineId && pd.ProjectId == t.ProjectId)
-                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault() }).ToListAsync();
+            .Select(t => new UnassignedTaskDemand(t.DueDate, t.EstimatedHours, db.ProjectDisciplines.Where(pd => pd.Id == t.ProjectDisciplineId && pd.ProjectId == t.ProjectId)
+                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault())).ToListAsync();
         if (f.DisciplineId is { } discipline)
         {
             roles = roles.Where(r => r.DisciplineId == discipline).ToList();
             tasks = tasks.Where(t => t.DisciplineId == discipline).ToList();
         }
         var calendar = await OpenRoleEndpoints.Calendars(db, roles.Select(r => r.Role.ProjectId).Distinct().ToArray());
-        var roleHours = roles.Select(r => new { r.DisciplineId, Days = OpenRoleEndpoints.Spread(r.Role, calendar(r.Role.ProjectId)) }).ToArray();
+        var roleHours = roles.Select(r => new OpenRoleHours(r.DisciplineId, OpenRoleEndpoints.Spread(r.Role, calendar(r.Role.ProjectId)))).ToArray();
         var disciplineIds = people.Select(p => p.HomeDisciplineId).Concat(roles.Select(r => r.DisciplineId)).Concat(tasks.Select(t => t.DisciplineId)).Distinct().ToArray();
         var names = await db.Disciplines.AsNoTracking().Where(d => disciplineIds.Contains(d.Id)).ToDictionaryAsync(d => d.Id, d => d.Name);
         return disciplineIds.OrderBy(id => id is null).ThenBy(id => id is { } key ? names.GetValueOrDefault(key) : null, StringComparer.OrdinalIgnoreCase).ThenBy(id => id)
@@ -485,3 +485,7 @@ public static class WorkloadEndpoints
         return (cols, rows);
     }
 }
+
+file sealed record OpenRoleDemand(OpenRole Role, Guid? DisciplineId);
+file sealed record UnassignedTaskDemand(DateOnly? DueDate, decimal? EstimatedHours, Guid? DisciplineId);
+file sealed record OpenRoleHours(Guid? DisciplineId, IReadOnlyDictionary<DateOnly, decimal> Days);

@@ -1,4 +1,4 @@
-// S10-A actual-app/mock-API acceptance: existing page facts, exact Comments selection, no closed-row reads or seen writes.
+// S10-A actual-app/mock-API acceptance: existing page facts, exact Comments selection, no closed-row reads; only own My Work visits write.
 const assert = require('node:assert/strict')
 const { newMockPage, me, project, links, comments, panelIds } = require('./platform-fixtures.cjs')
 const { taskRow, taskPage, taskDetail, taskPermissions, taskPermission, taskState } = require('./tasks.fixture.cjs')
@@ -21,6 +21,9 @@ const rowFor = (row, workRoute = false) => {
   const value = { ...row }
   if (!(me.flags.work_screens || !workRoute && me.flags.small_ux)) delete value.lastActivityActorName
   if (partial && row.id === assigned.id) { value.lastActivityAt = null; value.lastActivityActorName = null }
+  // My Work and its task queries render the page-batched WorkActivityFact (S10) with work_screens on.
+  if (me.flags.work_screens) value.workActivity = { eventId: id(5600), occurredAt: value.lastActivityAt ?? null, actorId: id(5601), actorName: value.lastActivityActorName ?? null,
+    actorType: 'User', commentable: true, commentCount: row.commentCount }
   return value
 }
 
@@ -49,9 +52,15 @@ const rowFor = (row, workRoute = false) => {
       projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name })] }) }))
     await page.route('**/api/v1/me/work', route => route.fulfill({ json: myWork({ person: myWorkPerson(me.id, me.displayName), tasks: [assigned, shared].map(row => rowFor(row, true)),
       reviews: { tasks: [rowFor(review, true)], deliverables: [] }, completed: [rowFor(completed, true)], projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name })] }) }))
-    await page.route(/\/api\/v1\/tasks\/[0-9a-f-]+(?:\/dependencies)?(?:\?.*)?$/, route => {
+    // FR-SCR-16: each own My Work mount records one visit; the receipt is the one work_screens validates.
+    const visits = []
+    await page.route('**/api/v1/me/work/visits', route => { const { requestId } = route.request().postDataJSON(); visits.push(requestId)
+      return route.fulfill({ json: { requestId, committedAt: stamp, revision: visits.length, firstVisitAt: stamp, previousVisitAt: null, lastVisitAt: stamp, lastMarkAllAt: null } }) })
+    const visited = () => page.waitForRequest(request => request.method() === 'POST' && new URL(request.url()).pathname === '/api/v1/me/work/visits')
+    await page.route(/\/api\/v1\/tasks\/[0-9a-f-]+(?:\/dependencies|\/activity\/actors)?(?:\?.*)?$/, route => {
       const path = new URL(route.request().url()).pathname, taskId = path.split('/')[4]
       if (path.endsWith('/dependencies')) return route.fulfill({ json: taskDependencies() })
+      if (path.endsWith('/activity/actors')) return route.fulfill({ json: [] }) // the mounted History section's person filter
       detailReads.push(taskId)
       const row = all.find(r => r.id === taskId)
       assert.ok(row, `exact known task requested: ${taskId}`)
@@ -71,14 +80,26 @@ const rowFor = (row, workRoute = false) => {
     const sheet = () => page.getByRole('dialog').last()
     const count = row => page.locator(`[data-work-comments="${row.id}"]:visible`).first()
     const activity = row => page.locator(`[data-work-activity="${row.id}"]:visible`).first()
+    // My Work's activity cells name the item type as well as its ID.
+    const mineCount = row => page.locator(`[data-work-comments="Task:${row.id}"]:visible`).first()
+    const mineActivity = row => page.locator(`[data-work-activity="Task:${row.id}"]:visible`).first()
     const workspace = `${base}/tasks?projects=${project.id}&status=Not+Started&sort=key%3Aasc&page=1`
+    // FR-SCR-26 (S16): with work_screens on, the panel's section strip replaces the Comments/History tabs; opening at
+    // Comments means the Comments section has focus and is in view, and the strip marks it (AC-SCR-26), even near the panel's end.
+    const strip = (row, name) => sheet().locator(`[data-task-section-navigation="${row.id}"]`).getByRole('button', { name, exact: true })
+    const focused = (row, name) => page.waitForFunction(id => document.activeElement?.id === id, `task-${row.id}-${name}`)
+    const marked = async (row, name) => {
+      await page.evaluate(() => new Promise(done => { let frames = 4; const tick = () => --frames ? requestAnimationFrame(tick) : done(); requestAnimationFrame(tick) }))
+      assert.equal(await strip(row, name).getAttribute('aria-current'), 'location', `strip marks ${name}`)
+    }
     const expectComments = async (row, source) => {
       await page.waitForURL(url => url.searchParams.get('panel') === `Task:${row.id}` && url.searchParams.get('taskSection') === 'comments')
       await sheet().getByText(`Exact ${row.key} discussion 1`, { exact: true }).waitFor()
-      assert.equal(await sheet().getByRole('tab', { name: /^Comments/ }).getAttribute('aria-selected'), 'true')
+      assert.equal(await sheet().getByRole('tab').count(), 0)
       const section = sheet().locator(`[data-work-comments-section="${row.id}"]`)
       await section.waitFor()
-      await page.waitForFunction(taskId => document.activeElement?.getAttribute('data-work-comments-section') === taskId, row.id)
+      await focused(row, 'comments'); assert.equal(await section.evaluate(node => node.closest('[data-task-section]') === document.activeElement), true)
+      await marked(row, 'Comments')
       assert.ok(await section.evaluate(node => { const surface = node.closest('[data-slot="sheet-content"]'), box = node.getBoundingClientRect(), bounds = surface.getBoundingClientRect(); return box.top >= bounds.top && box.top < bounds.bottom }), 'Comments target is actually in view')
       const before = new URL(source), current = new URL(page.url())
       assert.equal(current.pathname, before.pathname)
@@ -93,11 +114,12 @@ const rowFor = (row, workRoute = false) => {
     await count(scrollTask).evaluate(node => node.addEventListener('click', () => { window.__commentSource = { top: document.querySelector('main#content').scrollTop } }, { once: true, capture: true }))
     await page.keyboard.press('Enter'); await expectComments(scrollTask, workspace)
     assert.deepEqual(commentReads, [scrollTask.id], 'one normal discussion read only after opening')
-    assert.deepEqual(historyReads, [])
+    assert.deepEqual(historyReads, [scrollTask.id], 'the History section is mounted with the others and reads once')
     assert.ok((await page.evaluate(() => window.__commentSource.top)) > 0, 'the source workspace list actually scrolled')
-    await sheet().getByRole('tab', { name: 'History', exact: true }).click()
-    await page.waitForURL(url => url.searchParams.get('panel') === `Task:${scrollTask.id}` && !url.searchParams.has('taskSection'))
-    await sheet().getByRole('tab', { name: /^Comments/ }).click()
+    // Moving between sections in the strip never rewrites the opened URL.
+    const opened = page.url()
+    await strip(scrollTask, 'History').click(); await focused(scrollTask, 'history'); assert.equal(page.url(), opened); await marked(scrollTask, 'History')
+    await strip(scrollTask, 'Comments').click(); await focused(scrollTask, 'comments'); assert.equal(page.url(), opened); await marked(scrollTask, 'Comments')
     await sheet().getByRole('button', { name: 'Close', exact: true }).click(); await page.waitForURL(workspace)
     await page.waitForFunction(() => document.querySelector('main#content').scrollTop === window.__commentSource.top)
     await page.waitForFunction(taskId => document.activeElement?.getAttribute('data-work-comments') === taskId, scrollTask.id)
@@ -109,15 +131,17 @@ const rowFor = (row, workRoute = false) => {
     assert.equal(new URL(page.url()).searchParams.has('taskSection'), false)
 
     // Every TaskQueries-backed MyWork stream, including read-only other-person views, carries the same page facts.
-    await page.goto(`${base}/my-work?tab=overview`); await count(assigned).waitFor(); await activity(assigned).waitFor(); await count(shared).waitFor(); await count(review).waitFor()
+    let visitSent = visited()
+    await page.goto(`${base}/my-work?tab=overview`); await mineCount(assigned).waitFor(); await mineActivity(assigned).waitFor(); await mineCount(shared).waitFor(); await mineCount(review).waitFor(); await visitSent
+    assert.match(await mineActivity(assigned).innerText(), /2\s*h(?:ours?)?\s*ago\s*·\s*Pat Civil Lead/i)
     for (const tab of ['today', 'upcoming', 'overdue', 'completed']) {
       const row = tab === 'completed' ? completed : assigned
-      await page.goto(`${base}/my-work?tab=${tab}`); await count(row).waitFor(); await activity(row).waitFor()
-      const origin = page.url(); await count(row).click(); await expectComments(row, origin)
+      visitSent = visited(); await page.goto(`${base}/my-work?tab=${tab}`); await mineCount(row).waitFor(); await mineActivity(row).waitFor(); await visitSent
+      const origin = page.url(); await mineCount(row).click(); await expectComments(row, origin)
       await sheet().getByRole('button', { name: 'Close', exact: true }).click(); await page.waitForURL(origin)
     }
-    personMode = true; await page.goto(`${base}/my-work?userId=${id(5402)}`); await count(assigned).waitFor()
-    const personOrigin = page.url(); await count(assigned).click(); await expectComments(assigned, personOrigin)
+    personMode = true; await page.goto(`${base}/my-work?userId=${id(5402)}`); await mineCount(assigned).waitFor()
+    const personOrigin = page.url(); await mineCount(assigned).click(); await expectComments(assigned, personOrigin)
     assert.equal(await sheet().locator(`[data-work-comments-section="${assigned.id}"] textarea`).count(), 0)
     assert.equal(await sheet().locator(`[data-work-comments-section="${assigned.id}"] form`).count(), 0)
     await sheet().getByRole('button', { name: 'Close', exact: true }).click(); await page.waitForURL(personOrigin); personMode = false
@@ -152,7 +176,8 @@ const rowFor = (row, workRoute = false) => {
     me.flags.work_screens = false; await page.goto(`${secondPage}&panel=Task%3A${assigned.id}&taskSection=comments`)
     await sheet().getByRole('tab', { name: /^Comments/ }).waitFor(); assert.equal(await sheet().locator('[data-work-comments-section]').count(), 0)
     assert.ok(listQueries.every(query => !('taskSection' in query)), 'section selection never enters task endpoint filters/query')
-    assert.deepEqual(writes, []); assert.deepEqual(errors, []); assert.deepEqual(mock.apiErrors, [])
-    console.log('PASS: page facts and 101-row paging; all TaskQueries-backed MyWork streams/person-readonly; exact keyboard Comments path+section+scroll+focus return; ordinary-open cleanup; unknown facts; phone/table and1280 reflow; four flag combinations; no closed-row reads or seen/task writes')
+    // Only the five own My Work mounts wrote (their visits); another person's My Work records none.
+    assert.equal(visits.length, 5); assert.deepEqual(writes, visits.map(() => 'POST /api/v1/me/work/visits')); assert.deepEqual(errors, []); assert.deepEqual(mock.apiErrors, [])
+    console.log('PASS: page facts and 101-row paging; all TaskQueries-backed MyWork streams/person-readonly; exact keyboard Comments path+section+scroll+focus return; ordinary-open cleanup; unknown facts; phone/table and1280 reflow; four flag combinations; no closed-row reads; only own My Work visits write')
   } finally { me.flags = savedFlags; me.capabilities = savedCapabilities; await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

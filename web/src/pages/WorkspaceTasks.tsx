@@ -20,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, fmtDate, hours, today } from '@/lib/format'
-import { plural, t, tv , runtimeText } from '@/lib/i18n'
+import { plural, t, tv, runtimeText, type TextKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { AssigneeSwimlaneName, CardBody, LANES, MAX_CARDS, SIDE, Swimlane, fetchUpTo, useLaneDrop } from './projects/Board'
@@ -71,12 +71,12 @@ function TaskFilters({ rows, extra, lead, actions }: { rows: TaskRow[]; extra?: 
       ['priority', t('common.priority'), f.priority && tv(f.priority)],
       ['assigneeId', t('field.AssigneeId'), assignee],
       ['disciplineId', t('common.discipline'), discipline],
-      ['homePreset', runtimeText('home.rolePreset'), preset],
-      ['homeProjectStatus', runtimeText('homeScope.projectStatus'), f.homeProjectStatus?.split(',').map(tv).join(', ')],
+      ['homePreset', t('home.rolePreset'), preset],
+      ['homeProjectStatus', t('homeScope.projectStatus'), f.homeProjectStatus?.split(',').map(tv).join(', ')],
       ['createdBy', t('ws.createdBy'), rows.find((r) => r.createdBy === f.createdBy)?.createdByName],
       ['dueFrom', t('tfilter.dueFrom'), f.dueFrom && fmtDate(f.dueFrom)],
       ['dueTo', t('tfilter.dueTo'), f.dueTo && fmtDate(f.dueTo)],
-      ['withoutDueDate', runtimeText('home.undatedTasks'), f.withoutDueDate === 'true' && t('common.yes')],
+      ['withoutDueDate', t('home.undatedTasks'), f.withoutDueDate === 'true' && t('common.yes')],
       ['onHold', t('tfilter.onHold'), f.onHold && t(f.onHold === 'true' ? 'common.yes' : 'common.no')],
     ] as const).filter(([k]) => f[k]).map(([key, label, value]) => ({ key, label, value: value || <Missing /> })),
     ...flags.map((k) => ({ key: k, label: k === 'open' ? t('tfilter.open') : t(`tquick.${k}`), value: t('common.yes') })),
@@ -169,10 +169,10 @@ export function WorkspaceTasksPage() {
   const submissionDate = (r: TaskRow & TaskSubmissionDateRow) => {
     const fact = r.submissionDate
     if (fact?.state !== 'Known') return unavailable
-    if (fact.targetDate === null) return <span className="text-muted-foreground">{runtimeText('ws.noOpenSubmission')}</span>
+    if (fact.targetDate === null) return <span className="text-muted-foreground">{t('ws.noOpenSubmission')}</span>
     return typeof fact.targetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fact.targetDate) ? fmtDate(fact.targetDate) : unavailable
   }
-  const allColumns: { id: WorkspaceTaskColumnId; label: string; sort?: string; num?: boolean; cls?: string; cell: (r: TaskRow, surface?: 'table' | 'card') => React.ReactNode }[] = [
+  const allColumns: { id: WorkspaceTaskColumnId; label: TextKey; sort?: string; num?: boolean; cls?: string; cell: (r: TaskRow, surface?: 'table' | 'card') => React.ReactNode }[] = [
     { id: 'key', label: 'col.key', sort: 'key', cls: 'whitespace-nowrap', cell: r => <button type="button" data-task-bulk-return={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
     { id: 'name', label: 'col.name', sort: 'name', cls: 'min-w-48 max-w-[22rem]', cell: r => <button type="button" className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button> },
     { id: 'project', label: 'col.project', cls: 'whitespace-nowrap', cell: r => <span className="inline-flex items-center gap-2" title={r.projectName}><AccentDot id={r.projectId} /><Key>{r.projectNumber}</Key></span> },
@@ -196,7 +196,7 @@ export function WorkspaceTasksPage() {
     <DropdownMenuTrigger asChild><Button variant="outline"><Columns3 className="size-4" aria-hidden />{t('task.columns')}</Button></DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       {allColumns.filter(column => !REQUIRED_WORKSPACE_TASK_COLUMNS.includes(column.id)).map(column => <DropdownMenuCheckboxItem key={column.id} checked={columnIds.includes(column.id)}
-        onSelect={event => event.preventDefault()} onCheckedChange={on => setColumns(on ? [...columnIds, column.id] : columnIds.filter(id => id !== column.id))}>{runtimeText(column.label)}</DropdownMenuCheckboxItem>)}
+        onSelect={event => event.preventDefault()} onCheckedChange={on => setColumns(on ? [...columnIds, column.id] : columnIds.filter(id => id !== column.id))}>{t(column.label)}</DropdownMenuCheckboxItem>)}
     </DropdownMenuContent>
   </DropdownMenu>
   return (
@@ -222,7 +222,7 @@ export function WorkspaceTasksPage() {
               <p className="flex flex-wrap items-center gap-2" title={r.projectName}><AccentDot id={r.projectId} /><Key>{r.projectNumber}</Key><Key>{r.key}</Key></p>
               <button type="button" data-task-bulk-return={r.id} className="block text-left font-semibold hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
               {!activityOn && <div className="flex flex-wrap items-center gap-2"><StatusMenu r={r} onMove={actions.move} /><PriorityBadge priority={r.priority} /><TaskIndicators r={r} /></div>}
-              {activityOn && <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 text-xs/[18px]">{columns.filter(column => !REQUIRED_WORKSPACE_TASK_COLUMNS.includes(column.id)).map(column => <div key={column.id} className="contents" data-workspace-column={column.id}><dt className="text-muted-foreground">{runtimeText(column.label)}</dt><dd className="min-w-0 break-words">{column.cell(r, 'card')}</dd></div>)}</dl>}
+              {activityOn && <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 text-xs/[18px]">{columns.filter(column => !REQUIRED_WORKSPACE_TASK_COLUMNS.includes(column.id)).map(column => <div key={column.id} className="contents" data-workspace-column={column.id}><dt className="text-muted-foreground">{t(column.label)}</dt><dd className="min-w-0 break-words">{column.cell(r, 'card')}</dd></div>)}</dl>}
               {!activityOn && <>
               <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs/[18px] text-muted-foreground">
                 {r.assigneeId && r.assigneeName ? <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} focusKey={`workspace-task:${r.id}:assignee:card-legacy`} /> : r.assigneeName ?? <span className="text-warn">{t('ind.unassigned')}</span>}
@@ -238,7 +238,7 @@ export function WorkspaceTasksPage() {
           <table className="w-full text-sm">
             <caption className="sr-only">{t('nav.tasks')}</caption>
             <thead className="bg-muted">
-              <tr>{activityOn && <th scope="col" className={thCls}><Checkbox aria-label={t('bulkCommand.selectPage')} checked={rows.length > 0 && rows.every(row => selection.selected.has(row.id))} onCheckedChange={on => selection.page(rows, on === true)} /></th>}{columns.map(column => <Fragment key={column.id}>{column.sort ? th(column.sort, column.label, column.num) : <th scope="col" className={thCls}>{runtimeText(column.label)}</th>}</Fragment>)}</tr>
+              <tr>{activityOn && <th scope="col" className={thCls}><Checkbox aria-label={t('bulkCommand.selectPage')} checked={rows.length > 0 && rows.every(row => selection.selected.has(row.id))} onCheckedChange={on => selection.page(rows, on === true)} /></th>}{columns.map(column => <Fragment key={column.id}>{column.sort ? th(column.sort, column.label, column.num) : <th scope="col" className={thCls}>{t(column.label)}</th>}</Fragment>)}</tr>
             </thead>
             <tbody>
               {entries.map(entry => { if (entry.kind === 'group') return <tr key={entry.group.key} data-task-group={entry.group.key} className="border-t bg-muted"><th scope="rowgroup" colSpan={columns.length + (activityOn ? 1 : 0)} className="space-y-1 px-4 py-2 text-left"><span className="block break-words text-sm font-semibold">{groupName(entry.group, 'table')}</span><TaskGroupSummary summary={entry.group} shown={entry.shown} unavailable={entry.unavailable} /></th></tr>

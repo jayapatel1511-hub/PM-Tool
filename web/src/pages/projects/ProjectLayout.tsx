@@ -11,7 +11,7 @@ import { HealthPill, StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { typedRequest } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
-import { plural, t , runtimeText } from '@/lib/i18n'
+import { plural, t, runtimeText, type TextKey } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -27,13 +27,13 @@ import '@/components/hub/visual-tabs.css'
 const Ctx = createContext<ProjectDetail | null>(null)
 export const useCurrentProject = () => useContext(Ctx)!
 
-type ProjectPage = { path: string | ((p: ProjectDetail) => string); label: string; show?: (p: ProjectDetail, me: Me) => boolean }
-const page = (path: ProjectPage['path'], label: string, show?: ProjectPage['show']): ProjectPage => ({ path, label, show })
+type ProjectPage = { path: string | ((p: ProjectDetail) => string); label: TextKey; show?: (p: ProjectDetail, me: Me) => boolean }
+const page = (path: ProjectPage['path'], label: TextKey, show?: ProjectPage['show']): ProjectPage => ({ path, label, show })
 
 /** Project navigation (§9.4, §41 R3, decision E1): six groups plus More. Every page keeps its own route; the group that
  *  holds the current page is highlighted, and a group with several pages shows them in a second-level switch. A page
  *  appears only when its screen exists (§36.1). */
-const PROJECT_GROUPS: { id: string; label: string; pages: ProjectPage[] }[] = [
+const PROJECT_GROUPS: { id: string; label: TextKey; pages: ProjectPage[] }[] = [
   { id: 'overview', label: 'calm.group.overview', pages: [page('dashboard', 'ptab.dashboard')] },
   { id: 'work', label: 'calm.group.work', pages: [page('tasks', 'ptab.tasks'), page('board', 'ptab.board'), page('timeline', 'ptab.timeline'), page('calendar', 'ptab.calendar'), page('milestones', 'ptab.milestones')] },
   { id: 'deliverables', label: 'calm.group.deliverables', pages: [page('deliverables', 'ptab.deliverables'), page('submissions', 'ptab.submissions'), page('reviews', 'ptab.reviews'), page('readiness', 'ptab.readiness')] },
@@ -88,8 +88,8 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
   const tab = (on: boolean) => cn('inline-flex min-h-11 items-center px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', on && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')
   const primary = (
     <nav aria-label={t('ptab.label')} className={visualSystem ? 'visual-project-tabs-v2__primary' : 'flex min-w-0 flex-wrap items-center gap-1'}>
-      {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (to(g.pages[0]).split(/[/?]/)[0] === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{runtimeText(g.label)}</Link>)}
-      {visualSystem ? more.map((x, index) => <Link key={x.label} to={to(x)} aria-current={x === moreActive ? 'page' : undefined} className={cn(tab(x === moreActive), 'visual-project-tabs-v2__quiet', index === 0 && 'visual-project-tabs-v2__quiet--first')}>{runtimeText(x.label)}</Link>) : more.length > 0 && (
+      {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (to(g.pages[0]).split(/[/?]/)[0] === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{t(g.label)}</Link>)}
+      {visualSystem ? more.map((x, index) => <Link key={x.label} to={to(x)} aria-current={x === moreActive ? 'page' : undefined} className={cn(tab(x === moreActive), 'visual-project-tabs-v2__quiet', index === 0 && 'visual-project-tabs-v2__quiet--first')}>{t(x.label)}</Link>) : more.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className={cn(tab(!!moreActive), 'gap-1')}>{moreActive ? runtimeText(moreActive.label) : t('calm.more')}<ChevronDown className="size-4" aria-hidden /></DropdownMenuTrigger>
             <DropdownMenuContent align="start">
@@ -100,8 +100,8 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
     </nav>
   )
   const secondary = current && current.pages.length > 1 && (
-    <nav aria-label={t('calm.groupPages', { group: runtimeText(current.label) })} className={visualSystem ? 'visual-project-tabs-v2__secondary' : 'flex min-w-0 flex-wrap gap-0.5 py-1.5'}>
-      {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{runtimeText(x.label)}</NavLink>)}
+    <nav aria-label={t('calm.groupPages', { group: t(current.label) })} className={visualSystem ? 'visual-project-tabs-v2__secondary' : 'flex min-w-0 flex-wrap gap-0.5 py-1.5'}>
+      {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{t(x.label)}</NavLink>)}
     </nav>
   )
   return visualSystem ? (

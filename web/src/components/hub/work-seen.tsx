@@ -4,7 +4,7 @@ import { CheckCheck, MessageSquare } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtTime } from '@/lib/format'
-import { runtimeText, t } from '@/lib/i18n'
+import { t, type KeyIn } from '@/lib/i18n'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -24,8 +24,8 @@ type Status = 'idle' | 'pending' | 'success' | 'error'
 type OpenedPayload = { itemType: string; itemId: string; observedTokens: string[] }
 type CommandPath = '/api/v1/me/work/visits' | '/api/v1/me/work/seen-all' | '/api/v1/me/work/opened'
 type Attempt = { signature: string; requestId: string; status: Status; result?: WorkSeenCommandResult; error?: unknown; controller?: AbortController; promise?: Promise<void> }
-const label = (key: string, values?: Record<string, string | number>) => runtimeText('workSeen.' + key, values)
-const activityLabel = (key: string, values?: Record<string, string | number>) => runtimeText('workActivity.' + key, values)
+const label = (key: KeyIn<'workSeen.'>, values?: Record<string, string | number>) => t(`workSeen.${key}`, values)
+const activityLabel = (key: KeyIn<'workActivity.'>, values?: Record<string, string | number>) => t(`workActivity.${key}`, values)
 const guid = (value: unknown): value is string => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value) && value !== '00000000-0000-0000-0000-000000000000'
 const utc = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]00:00)$/i.test(value) && Number.isFinite(Date.parse(value))
 

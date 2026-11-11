@@ -128,7 +128,7 @@ public static class TaskGroupReads
         return ((IOrderedQueryable<ReadRow>)result).ThenBy(row => row.Key.Task.Id);
     }
 
-    static IQueryable<Aggregate> AggregateQuery(IQueryable<ReadRow> source, bool parent) => source.GroupBy(row => new { row.Key.ProjectId, Value = parent ? null : row.Key.Value })
+    static IQueryable<Aggregate> AggregateQuery(IQueryable<ReadRow> source, bool parent) => source.GroupBy(row => new GroupKey { ProjectId = row.Key.ProjectId, Value = parent ? null : row.Key.Value })
         .Select(group => new Aggregate(group.Key.ProjectId, group.Key.Value, group.Count(), group.Sum(row => row.Key.Task.EstimatedHours ?? 0m),
             group.Count(row => row.Key.Task.EstimatedHours == null), group.Count(row => row.Overdue == true), group.Count(row => row.Overdue == null),
             group.Count(row => row.Key.Task.Status != TaskStatuses.Cancelled), group.Count(row => row.Key.Task.Status != TaskStatuses.Cancelled && row.Key.Task.EstimatedHours == null),
@@ -178,3 +178,6 @@ public static class TaskGroupReads
         return new(total, page.Select(row => row.Id).ToList(), groups);
     }
 }
+
+// A GroupBy key must be a member-init expression for EF to translate it.
+file sealed class GroupKey { public Guid ProjectId { get; init; } public string? Value { get; init; } }

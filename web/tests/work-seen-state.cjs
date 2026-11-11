@@ -72,6 +72,9 @@ async function setup(options, browserOptions) {
       return route.fulfill({ json: world.taskDetail(path.split('/')[1]) })
     }
     if (/^tasks\/[^/]+\/dependencies$/.test(path)) return route.fulfill({ json: taskDependencies() })
+    // With work_screens on the Task panel mounts its History section (FR-SCR-26): an empty history and person filter.
+    if (/^tasks\/[^/]+\/activity\/actors$/.test(path)) return route.fulfill({ json: [] })
+    if (/^items\/Task\/[^/]+\/activity$/.test(path)) return route.fulfill({ json: { items: [], page: 1, pageSize: 100, totalCount: 0 } })
     if (path === 'deliverables/' + f.ids.deliverable) return route.fulfill({ json: world.deliverableDetail() })
     if (/^items\/(Task|Deliverable)\/[^/]+\/comments$/.test(path)) return route.fulfill({ json: path === 'items/Task/' + f.ids.created + '/comments' ? { ...world.thread, items: [] } : world.thread })
     if (/^items\/[^/]+\/[^/]+\/history$/.test(path)) return route.fulfill({ json: { items: [], page: 1, pageSize: 50, totalCount: 0 } })

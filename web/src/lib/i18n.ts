@@ -13,6 +13,13 @@ export function t(key: TextKey, params?: Record<string, string | number | null |
   return s
 }
 
+/** The names under one key prefix, so a screen's `label('name')` helper stays checked against en.ts. */
+export type KeyIn<P extends string, K = keyof typeof en> = K extends `${P}${infer S}` ? S : never
+/** A label for a value the server or address bar sends, read through a typed key map; a value the map does not name shows as sent. */
+export const textFor = (keys: Readonly<Record<string, TextKey>>, value: string) => Object.hasOwn(keys, value) ? t(keys[value]) : value
+/** For a set en.ts itself defines (event types, template fields): true when `prefix + name` has text, so `${prefix}${name}` is a checked key. */
+export const hasKey = <P extends string>(prefix: P, name: string): name is KeyIn<P> => Object.hasOwn(en, prefix + name)
+
 /** Explicit escape hatch for keys assembled from server data or reusable component props (§44.3). */
 export const runtimeText = (key: string, params?: Record<string, string | number | null | undefined>) => t(key as TextKey, params)
 /** An organisation setting's name as the Settings page shows it; a flag without its packet shows its name alone. */

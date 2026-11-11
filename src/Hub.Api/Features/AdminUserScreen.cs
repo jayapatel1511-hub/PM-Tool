@@ -18,9 +18,9 @@ public static class AdminUserScreenReads
     {
         if (!settings.IsFlagOn("people_screens") || userIds.Count == 0) return [];
         var now = clock.GetUtcNow();
-        var subjects = await db.Users.AsNoTracking().Where(user => userIds.Contains(user.Id)).Select(user => new
+        var subjects = await db.Users.AsNoTracking().Where(user => userIds.Contains(user.Id)).Select(user => new AdminSubject
         {
-            user.Id, user.RowVersion, user.HomeDisciplineId, user.WeeklyCapacityHours, user.IsActive,
+            Id = user.Id, RowVersion = user.RowVersion, HomeDisciplineId = user.HomeDisciplineId, WeeklyCapacityHours = user.WeeklyCapacityHours, IsActive = user.IsActive,
             Roles = user.Roles.Select(role => role.Role).ToList(),
         }).ToListAsync();
         var disciplineIds = subjects.Select(user => user.HomeDisciplineId).OfType<Guid>().Distinct().ToArray();
@@ -58,4 +58,14 @@ public static class AdminUserScreenReads
         }
         return result;
     }
+}
+
+file sealed class AdminSubject
+{
+    public Guid Id { get; init; }
+    public int RowVersion { get; init; }
+    public Guid? HomeDisciplineId { get; init; }
+    public decimal? WeeklyCapacityHours { get; init; }
+    public bool IsActive { get; init; }
+    public List<string> Roles { get; init; } = [];
 }

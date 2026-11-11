@@ -7,23 +7,25 @@ import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { BareTable } from '@/components/ui/table'
 import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { runtimeText, t } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import './time-week.css'
 
 type Week = components['schemas']['TimeWeekView']
 type Task = components['schemas']['TimeWeekTask']
 type Entry = components['schemas']['TimeRow']
 const hours = (value: number) => String(Number(value.toFixed(2)))
-const weekday = (date: string) => runtimeText(`calendar.dow.${new Date(`${date}T00:00:00Z`).getUTCDay()}`)
+const DAYS = ['calendar.dow.0', 'calendar.dow.1', 'calendar.dow.2', 'calendar.dow.3', 'calendar.dow.4', 'calendar.dow.5', 'calendar.dow.6'] as const
+const weekday = (date: string) => t(DAYS[new Date(`${date}T00:00:00Z`).getUTCDay()])
 
 /** Own actuals only. Suggestions are blank; neither focus nor rendering creates an entry. */
 export function TimeWeekGrid({ data, onEdit, onRemove, onSaved }: { data: Week; onEdit: (entry: Entry) => void; onRemove: (entry: Entry) => void; onSaved: () => Promise<unknown> }) {
   const [details, setDetails] = useState<{ task: Task; date: string; entries: Entry[] } | null>(null)
   return <section className="min-w-0 space-y-2" aria-label={t('timeWeek.title')}>
     <p className="text-sm font-semibold" data-time-week-capacity>{data.capacityHours == null ? t('timeWeek.capacityUnknown') : t('timeWeek.capacity', { hours: hours(data.capacityHours) })}</p>
-    <TableRegion role="region" aria-label={t('timeWeek.region')}><table className="time-week-table w-full text-sm">
+    <TableRegion role="region" aria-label={t('timeWeek.region')}><BareTable className="time-week-table w-full text-sm">
       <caption className="sr-only">{t('timeWeek.region')}</caption><thead><tr>
         <th scope="col" className={thCls}>{t('time.task')}</th>
         {data.days.map(day => <th key={day.date} scope="col" className={thCls} data-time-day={day.date} data-time-away={day.timeAwayHours != null && day.timeAwayHours > 0 ? 'true' : undefined}>
@@ -54,7 +56,7 @@ export function TimeWeekGrid({ data, onEdit, onRemove, onSaved }: { data: Week; 
           <td className={`${tdCls} text-right align-top font-medium tabular-nums`} data-time-task-total>{hours(task.entries.reduce((value, entry) => value + entry.hours, 0))} h</td>
         </tr>)}
       </tbody><tfoot><tr className="border-t"><th scope="row" className={`${thCls} text-left`}>{t('time.dailyTotals')}</th>{data.days.map(day => <td key={day.date} className={`${tdCls} text-center font-medium tabular-nums`} data-time-day-total={day.date}>{hours(data.tasks.reduce((value, task) => value + task.entries.filter(entry => entry.workDate === day.date).reduce((sum, entry) => sum + entry.hours, 0), 0))} h</td>)}<td className={`${tdCls} text-right font-semibold tabular-nums`} data-time-week-total>{hours(data.tasks.reduce((value, task) => value + task.entries.reduce((sum, entry) => sum + entry.hours, 0), 0))} h</td></tr></tfoot>
-    </table></TableRegion>
+    </BareTable></TableRegion>
     {!data.tasks.length && <Empty>{t('timeWeek.empty')}</Empty>}
     <p className="text-xs text-muted-foreground">{t('timeWeek.hint')} {data.capacityHours == null && t('timeWeek.unknownHint')}</p>
     {details && <Dialog open onOpenChange={open => !open && setDetails(null)}><DialogContent className="sm:max-w-lg"><DialogHeader><DialogTitle>{t('timeWeek.detailsTitle', { key: details.task.taskKey, date: fmtDate(details.date) })}</DialogTitle><DialogDescription>{t('timeWeek.multipleHint')}</DialogDescription></DialogHeader>

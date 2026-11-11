@@ -43,7 +43,7 @@ public static class IssueRootCauses
             ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         await access.Project(id, false);
         var rows = await db.Issues.AsNoTracking().Where(issue => issue.ProjectId == id && issue.Status == IssueStatus.Resolved)
-            .Select(issue => new { issue.RootCauseCategoryId, issue.RootCauseLabelSnapshot }).ToArrayAsync();
+            .Select(issue => new RootCauseRow(issue.RootCauseCategoryId, issue.RootCauseLabelSnapshot)).ToArrayAsync();
         var ids = rows.Select(row => row.RootCauseCategoryId).OfType<Guid>().Distinct().ToArray();
         var categories = await db.IssueRootCauseCategories.AsNoTracking().Where(category => ids.Contains(category.Id)).ToDictionaryAsync(category => category.Id);
         if (rows.Any(row => row.RootCauseCategoryId is { } category
@@ -55,3 +55,5 @@ public static class IssueRootCauses
         return TypedResults.Ok(new IssueRootCauseSummary(id, rows.Length, rows.Count(row => row.RootCauseCategoryId is null), counts));
     }
 }
+
+file sealed record RootCauseRow(Guid? RootCauseCategoryId, string? RootCauseLabelSnapshot);

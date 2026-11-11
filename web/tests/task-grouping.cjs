@@ -113,12 +113,16 @@ function groups(rows, shown, by) {
     mode = 'zero'; await page.goto(workspace); await header().getByText('Progress unavailable (hours)', { exact: true }).waitFor(); await header().getByText(/0 known overdue · 1 state unavailable/).waitFor()
     mode = 'mixed'; await page.goto(`${workspace}&status=Complete,In+Progress,Cancelled`); await header().getByText('50% by count · excludes Cancelled', { exact: true }).waitFor(); await header().getByText(/38 h estimated across matched rows · 1 unestimated/).waitFor()
     mode = 'partial'; await page.goto(workspace); await page.getByText('Full filtered group totals unavailable', { exact: true }).waitFor(); assert.equal(await page.locator('[data-task-group-summary]').count(), 0)
-    mode = 'four'; await page.goto(`${base}/my-work?tab=overview`); await page.locator('[data-task-group="mywork:overdue"]').getByText('1 shown / 1 matched tasks', { exact: true }).waitFor()
+    // FR-SCR-16: each My Work mount (not its tabs, filters or pages) records one visit.
+    const visitPath = '/api/v1/me/work/visits', visit = { method: 'POST', path: visitPath }
+    const visited = () => page.waitForRequest(request => request.method() === 'POST' && new URL(request.url()).pathname === visitPath)
+    let visitSent = visited()
+    mode = 'four'; await page.goto(`${base}/my-work?tab=overview`); await page.locator('[data-task-group="mywork:overdue"]').getByText('1 shown / 1 matched tasks', { exact: true }).waitFor(); await visitSent
     mode = 'paged'; const mine = `${base}/my-work?tab=upcoming&who=assigned&projects=${project.id}&group=discipline`
-    await page.goto(mine); await header().getByText('200 shown / 201 matched tasks', { exact: true }).waitFor(); await page.getByRole('navigation', { name: 'Grouped task pages' }).getByRole('button', { name: 'Next', exact: true }).click()
+    visitSent = visited(); await page.goto(mine); await header().getByText('200 shown / 201 matched tasks', { exact: true }).waitFor(); await visitSent; await page.getByRole('navigation', { name: 'Grouped task pages' }).getByRole('button', { name: 'Next', exact: true }).click()
     await page.waitForURL(url => url.searchParams.get('page') === '2'); await header().getByText('1 shown / 201 matched tasks', { exact: true }).waitFor(); assert.equal(reads.at(-1).assigneeId, me.id); assert.equal(reads.at(-1).projects, project.id)
-    mode = 'four'; await page.goto(mine); await page.getByRole('checkbox', { name: new RegExp(four[3].key) }).click(); await page.waitForFunction(() => !document.querySelector('[role="checkbox"][aria-checked="false"]'))
-    assert.equal(writes.length, 1); assert.deepEqual(mutations, [{ method: 'POST', path: `/api/v1/tasks/${four[3].id}/transition` }]); await page.goto(workspace); await header().getByText('60% by hours', { exact: true }).waitFor()
+    mode = 'four'; visitSent = visited(); await page.goto(mine); await visitSent; await page.getByRole('checkbox', { name: new RegExp(four[3].key) }).click(); await page.waitForFunction(() => !document.querySelector('[role="checkbox"][aria-checked="false"]'))
+    assert.equal(writes.length, 1); assert.deepEqual(mutations, [visit, visit, visit, { method: 'POST', path: `/api/v1/tasks/${four[3].id}/transition` }]); await page.goto(workspace); await header().getByText('60% by hours', { exact: true }).waitFor()
     for (const width of [375, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 }); await page.goto(workspace); await header().waitFor()
       assert.ok(await page.locator('main#content').evaluate(node => node.scrollWidth <= node.clientWidth + 1), `group headers stay inside list/card surface at ${width}`)
@@ -144,7 +148,7 @@ function groups(rows, shown, by) {
       }
     }
     project.permissions.createTaskIn = originalCreateTaskIn; mode = 'four'
-    assert.deepEqual(mutations, [{ method: 'POST', path: `/api/v1/tasks/${four[3].id}/transition` }], 'recovery inspection opens forms without writes')
+    assert.deepEqual(mutations, [visit, visit, visit, { method: 'POST', path: `/api/v1/tasks/${four[3].id}/transition` }], 'recovery inspection opens forms without writes')
     me.flags.work_screens = false; await page.goto(workspace); await page.getByRole('heading', { name: /^Tasks/ }).first().waitFor()
     assert.equal(await page.locator('[data-task-group]').count(), 0); assert.equal('group' in reads.at(-1), false)
     assert.deepEqual(errors, []); assert.deepEqual(mock.apiErrors, [])

@@ -97,6 +97,14 @@ public sealed class DeliverableRegisterTests : IDisposable
         Assert.Equal(before + 1, f.Db(db => db.ActivityLog.Count(entry => entry.ItemId == id)));
         var audit = f.Db(db => db.ActivityLog.Single(entry => entry.ItemId == id && entry.Action == "IssueResponseRecorded"));
         Assert.Equal("IssueResponseRecorded", audit.Action); Assert.Equal(project.Id, audit.ProjectId); Assert.Contains(issueId.ToString(), audit.Snapshot);
+        // The stored activity changes and snapshot match the legacy anonymous wire (jsonb normalises key order, so compare as JSON).
+        var stored = f.Db(db => db.DeliverableIssues.AsNoTracking().Single(issue => issue.Id == issueId));
+        Assert.True(JsonNode.DeepEquals(JsonSerializer.SerializeToNode(new[] { new { field = "ReturnCode", old = (object?)null, @new = (object?)stored.ReturnCodeSnapshot },
+            new { field = "ResponseDate", old = (object?)null, @new = (object?)stored.ResponseDate } }, JsonOpts.Web), JsonNode.Parse(audit.Changes)));
+        var none = new { ReturnCodeId = (Guid?)null, ReturnCodeSnapshot = (string?)null, ReturnLabelSnapshot = (string?)null,
+            ResponseDate = (DateOnly?)null, ResponseRecordedBy = (Guid?)null, ResponseRecordedAt = (DateTimeOffset?)null };
+        Assert.True(JsonNode.DeepEquals(JsonSerializer.SerializeToNode(new { issueId, stored.Revision, previous = none, current = new { stored.ReturnCodeId, stored.ReturnCodeSnapshot,
+            stored.ReturnLabelSnapshot, stored.ResponseDate, stored.ResponseRecordedBy, stored.ResponseRecordedAt } }, JsonOpts.Web), JsonNode.Parse(audit.Snapshot!)));
         Assert.True(saved.I("rowVersion") > issued["deliverable"]!.I("rowVersion")); Assert.True(saved.I("issueRowVersion") > History(issued, issueId)["registerInfo"]!.I("rowVersion"));
         Assert.Equal(id, Assert.Single((await List(project.Id, $"purposeOfIssueId={purpose}&returnCodeId={b}")).AsArray())!.G("id"));
         var code = await Code("A"); Assert.Empty((await List(project.Id, $"returnCodeId={code}")).AsArray());

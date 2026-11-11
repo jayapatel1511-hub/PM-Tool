@@ -17,15 +17,15 @@ public static class TaskSubmissionDates
         var projects = rows.Select(row => row.ProjectId).Distinct().ToArray();
         // Default live-record filters deliberately keep deleted/missing references unavailable.
         var deliverables = await db.Deliverables.AsNoTracking().Where(row => deliverableIds.Contains(row.Id))
-            .Select(row => new { row.Id, row.ProjectId }).ToDictionaryAsync(row => row.Id, row => row.ProjectId);
+            .Select(row => new DeliverableProject(row.Id, row.ProjectId)).ToDictionaryAsync(row => row.Id, row => row.ProjectId);
         var dates = await (from item in db.SubmissionManifestItems.AsNoTracking()
             join package in db.SubmissionPackages.AsNoTracking() on item.PackageId equals package.Id
             join deliverable in db.Deliverables.AsNoTracking() on item.DeliverableId equals deliverable.Id
             where deliverableIds.Contains(item.DeliverableId) && projects.Contains(package.ProjectId)
                 && item.ProjectId == package.ProjectId && deliverable.ProjectId == package.ProjectId && item.ManifestVersion == package.ManifestVersion
                 && (package.Status == SubmissionStatus.Draft || package.Status == SubmissionStatus.Checking || package.Status == SubmissionStatus.Ready)
-            group package.TargetDate by new { item.ProjectId, item.DeliverableId } into membership
-            select new { membership.Key.ProjectId, membership.Key.DeliverableId, Date = membership.Min() }).ToListAsync();
+            group package.TargetDate by new SubmissionDateKey { ProjectId = item.ProjectId, DeliverableId = item.DeliverableId } into membership
+            select new SubmissionDateRow(membership.Key.ProjectId, membership.Key.DeliverableId, membership.Min())).ToListAsync();
         var byReference = dates.ToDictionary(row => (row.ProjectId, row.DeliverableId), row => row.Date);
         return rows.Select(row => row with {
             SubmissionDate = row.DeliverableId is not { } deliverable ? new("Known", null)
@@ -34,3 +34,8 @@ public static class TaskSubmissionDates
         }).ToArray();
     }
 }
+
+file sealed record DeliverableProject(Guid Id, Guid ProjectId);
+// A GroupBy key must be a member-init expression for EF to translate it.
+file sealed class SubmissionDateKey { public Guid ProjectId { get; init; } public Guid DeliverableId { get; init; } }
+file sealed record SubmissionDateRow(Guid ProjectId, Guid DeliverableId, DateOnly Date);

@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
-import { t, runtimeText, tv } from '@/lib/i18n'
+import { hasKey, t, textFor, tv } from '@/lib/i18n'
 
 type Template = components['schemas']['TemplateRead']
 type Diff = components['schemas']['TemplateDraftDiffRead']
+const DIFF_CHANGES = { Added: 'tpl.diffAdded', Removed: 'tpl.diffRemoved', Changed: 'tpl.diffChanged' } as const
+const DIFF_KINDS = { Header: 'tpl.kind.Header', Role: 'tpl.kind.Role', Discipline: 'tpl.kind.Discipline', Milestone: 'tpl.kind.Milestone', Deliverable: 'tpl.kind.Deliverable', Task: 'tpl.kind.Task', Dependency: 'tpl.kind.Dependency', Risk: 'tpl.kind.Risk', Basis: 'tpl.kind.Basis' } as const
 const unavailable = () => new Error(t('tpl.dataUnavailable'))
 
 export function TemplateVersionDetails({ template, dirty }: { template: Pick<Template, 'id' | 'rowVersion' | 'status' | 'screen'>; dirty: boolean }) {
@@ -63,9 +65,9 @@ function DiffRead({ diff }: { diff: Diff | undefined }) {
     <p className="text-sm tabular-nums">{t('tpl.diffCounts', { added: diff.counts.added, removed: diff.counts.removed, changed: diff.counts.changed })}</p>
     {diff.totalCount === 0 && <p className="text-sm text-muted-foreground">{t('tpl.diffNone')}</p>}
     <ul className="space-y-3">{diff.changes.map(change => <li key={`${change.kind}:${change.ref}`} className="rounded-md border p-3 text-sm">
-      <p className="font-medium">{runtimeText(`tpl.diff${change.change}`)} · {runtimeText(`tpl.kind.${change.kind}`)} · {change.afterName ?? change.beforeName}</p>
+      <p className="font-medium">{textFor(DIFF_CHANGES, change.change)} · {textFor(DIFF_KINDS, change.kind)} · {change.afterName ?? change.beforeName}</p>
       {change.fields.length > 0 && <dl className="mt-2 grid gap-1 text-xs/[18px] text-muted-foreground">{change.fields.map(field => <div key={field.field} className="grid grid-cols-[minmax(100px,1fr)_2fr_2fr] gap-3">
-        <dt>{runtimeText(`tpl.field.${field.field}`)}</dt><dd className="break-words">{t('tpl.diffBefore')}: {field.before === 'True' ? t('common.yes') : field.before === 'False' ? t('common.no') : field.before ?? '—'}</dd><dd className="break-words">{t('tpl.diffAfter')}: {field.after === 'True' ? t('common.yes') : field.after === 'False' ? t('common.no') : field.after ?? '—'}</dd>
+        <dt>{hasKey('tpl.field.', field.field) ? t(`tpl.field.${field.field}`) : field.field}</dt><dd className="break-words">{t('tpl.diffBefore')}: {field.before === 'True' ? t('common.yes') : field.before === 'False' ? t('common.no') : field.before ?? '—'}</dd><dd className="break-words">{t('tpl.diffAfter')}: {field.after === 'True' ? t('common.yes') : field.after === 'False' ? t('common.no') : field.after ?? '—'}</dd>
       </div>)}</dl>}
     </li>)}</ul>
   </div>

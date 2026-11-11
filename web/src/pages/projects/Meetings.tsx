@@ -25,7 +25,7 @@ import { useWorkRecordOrigin } from './work-record-navigation'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
-import { t, tv , runtimeText } from '@/lib/i18n'
+import { t, textFor, tv, runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { DateText, FieldGroup, PanelHead, Person, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { useCurrentProject } from './ProjectLayout'
@@ -41,6 +41,7 @@ export type ActionRow = Schemas['MeetingActionRow']
 type MeetingRow = Schemas['MeetingListRow']
 const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Decision: 'decisions', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
+const DECISION_RELATIONS = { blocked_by_decision: 'decision.rel.blocked_by_decision', related: 'decision.rel.related' } as const
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
 const STATUSES = ['Open', 'In Progress', 'Complete', 'Cancelled']
 const OWNER_TYPES = ['User', 'Discipline', 'External Party'] as const
@@ -490,7 +491,7 @@ export function ActionPanel({ id }: PanelProps) {
         {!contextOn && q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={e => openRelatedPanel('Decision', q.data.decision!.id, e)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
         {relatedLinks.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{relatedLinks.map(link => {
           const route = ACTION_LINK_ROUTES[link.targetType]
-          return route && <li key={link.id}><Link className="text-primary underline underline-offset-4" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`} onClick={followRelatedLink}><Key>{link.key}</Key> {link.name}</Link>{contextOn && <> · <span className="text-muted-foreground">{link.relation === 'converted_to_task' ? t('action.followsTask') : link.relation === 'realised_as' ? t('risk.realisedAs') : runtimeText(`decision.rel.${link.relation}`)}</span></>}{link.status && <> · <StatusPill status={link.status} /></>}<ActionLinkedPerson row={link} actionId={a.id} /></li>
+          return route && <li key={link.id}><Link className="text-primary underline underline-offset-4" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`} onClick={followRelatedLink}><Key>{link.key}</Key> {link.name}</Link>{contextOn && <> · <span className="text-muted-foreground">{link.relation === 'converted_to_task' ? t('action.followsTask') : link.relation === 'realised_as' ? t('risk.realisedAs') : textFor(DECISION_RELATIONS, link.relation)}</span></>}{link.status && <> · <StatusPill status={link.status} /></>}<ActionLinkedPerson row={link} actionId={a.id} /></li>
         })}</ul></FieldRow>}
       </FieldGroup>}
       <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />

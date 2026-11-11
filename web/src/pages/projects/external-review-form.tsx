@@ -12,6 +12,7 @@ import type { components, paths } from '@/gen/api'
 import { useSafeForm } from '@/hooks/drafts'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
+import { managedDisciplineChoices } from '@/lib/auth-context'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { PersonLabel, RegisterPager, SelectField, disciplineChoices, peopleChoices, type CoordOptions } from './CoordinationForms'
@@ -132,7 +133,7 @@ export function IssuedReviewPackageForm({ options, projectId, refresh, open, clo
     <DialogHeader><DialogTitle>{t(packageRow ? 'review.newRound' : 'reviews.new')}</DialogTitle><DialogDescription>{t('externalReview.supplementary')}</DialogDescription></DialogHeader><DraftNotice form={safe} />
     <form className="space-y-4" onSubmit={submit}>{packageRow && onCheck && <Button type="button" size="sm" variant="outline" disabled={receipt.busy} onClick={onCheck}>{t('externalReview.check')}</Button>}<fieldset className="min-w-0 space-y-4" disabled={receipt.busy || receipt.uncertain || !available}>
       {sourceModeControl}
-      {!packageRow && <><Field label={t('coord.title')} htmlFor={`${prefix}-title`}><Input id={`${prefix}-title`} required maxLength={200} value={value.title} onChange={event => setValue(old => ({ ...old, title: event.target.value }))} /></Field><div className="grid gap-3 sm:grid-cols-2"><SelectField label={t('coord.discipline')} value={value.projectDisciplineId} onChange={projectDisciplineId => setValue(old => ({ ...old, projectDisciplineId }))} choices={disciplineChoices(options).filter(row => options.manageDisciplineIds.includes(row.value))} /><SelectField label={t('coord.coordinator')} value={value.coordinatorId} onChange={coordinatorId => setValue(old => ({ ...old, coordinatorId }))} choices={peopleChoices(options, noticesOn)} /></div></>}
+      {!packageRow && <><Field label={t('coord.title')} htmlFor={`${prefix}-title`}><Input id={`${prefix}-title`} required maxLength={200} value={value.title} onChange={event => setValue(old => ({ ...old, title: event.target.value }))} /></Field><div className="grid gap-3 sm:grid-cols-2"><SelectField label={t('coord.discipline')} value={value.projectDisciplineId} onChange={projectDisciplineId => setValue(old => ({ ...old, projectDisciplineId }))} choices={managedDisciplineChoices(disciplineChoices(options), options)} /><SelectField label={t('coord.coordinator')} value={value.coordinatorId} onChange={coordinatorId => setValue(old => ({ ...old, coordinatorId }))} choices={peopleChoices(options, noticesOn)} /></div></>}
       <Field label={t('review.purpose')} htmlFor={`${prefix}-purpose`}><Textarea id={`${prefix}-purpose`} required maxLength={2000} value={value.purpose} onChange={event => setValue(old => ({ ...old, purpose: event.target.value }))} /></Field>
       <IssuedSourcePicker projectId={projectId} selected={value.sources} onChange={sources => setValue(old => ({ ...old, sources }))} />
       <fieldset className={box}><legend className="px-1 text-sm font-semibold">{t('review.requiredDisciplines')}</legend><p className="text-xs text-muted-foreground">{t(rules?.allowSelfReview ? 'workReview.selfAllowed' : 'externalReview.independence')}</p>{guidance.error && <ErrorBanner error={guidance.error} retry={() => guidance.refetch()} />}

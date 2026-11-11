@@ -85,17 +85,27 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
       unknown.push('GET ' + path); return route.fulfill({ status: 501, json: { detail: 'Unexpected finite Calendar GET' } })
     })
     const layers = [['Project deadlines', 'Deadline'], ['Meetings', 'Meeting'], ['Site work', 'Site Work'], ['Internal tasks', 'Internal Task']]
+    // §41 R1: the layers, Time away, Person and Discipline open from Filters (a popover on desktop); set filters show as chips.
+    const filters = page.locator('[data-calendar-filters]')
+    const openFilters = async () => { if (!(await filters.isVisible())) { await page.getByRole('button', { name: /^Filters/ }).click(); await filters.waitFor({ state: 'visible' }) } }
+    const closeFilters = async () => { if (await filters.isVisible()) { await page.keyboard.press('Escape'); await filters.waitFor({ state: 'hidden' }) } }
     const waitForClear = async () => {
       await page.waitForURL(uri => !['showAway', 'personId', 'disciplineId', 'hide'].some(key => uri.searchParams.has(key)))
+      await openFilters()
       await page.getByRole('button', { name: 'Time away', exact: true, pressed: false }).waitFor({ state: 'visible' })
+      await openFilters()
       await page.waitForFunction(() => document.querySelector('#calendar-person')?.value === '' && document.querySelector('#calendar-discipline')?.value === '')
+      await openFilters()
       for (const [label] of layers) await page.getByRole('button', { name: label, exact: true, pressed: true }).waitFor({ state: 'visible' })
       await page.waitForFunction(() => document.querySelectorAll('[data-calendar-away]').length === 0)
       await page.getByText('Synthetic ownerless milestone', { exact: true }).waitFor({ state: 'visible' })
+      await closeFilters()
     }
     await page.goto(base + url)
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true }).click()
     await page.waitForURL(uri => uri.searchParams.get('showAway') === 'true')
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true, pressed: true }).waitFor({ state: 'visible' })
     await page.locator('[data-calendar-away]').getByText('Synthetic Calendar PM · Away', { exact: true }).waitFor({ state: 'visible' })
     await page.locator('[data-calendar-away]').getByText('Synthetic Calendar PM · Away 4 h', { exact: true }).waitFor({ state: 'visible' })
@@ -104,6 +114,7 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
     const noBusinessResponse = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/v1/calendar/screen'
       && new URL(response.url()).searchParams.get('types') === 'none' && response.status() === 200)
     for (const [label, type] of layers) {
+      await openFilters()
       await page.getByRole('button', { name: label, exact: true }).click()
       await page.waitForURL(uri => (uri.searchParams.get('hide') ?? '').split(',').includes(type) && uri.searchParams.get('showAway') === 'true')
       await page.getByRole('button', { name: label, exact: true, pressed: false }).waitFor({ state: 'visible' })
@@ -116,6 +127,7 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
     const awayOnly = screenReplies.slice(beforeLayersOff).filter(entry => entry.query.types === 'none')
     assert.ok(awayOnly.length > 0); assert.ok(awayOnly.every(entry => entry.query.showAway === 'true' && entry.reply.range.entries.length === 0 && entry.reply.undated.totalCount === 0 && entry.reply.away.days.length > 0))
     for (const [label, type] of layers) {
+      await openFilters()
       await page.getByRole('button', { name: label, exact: true }).click()
       await page.waitForURL(uri => !(uri.searchParams.get('hide') ?? '').split(',').includes(type) && uri.searchParams.get('showAway') === 'true')
       await page.getByRole('button', { name: label, exact: true, pressed: true }).waitFor({ state: 'visible' })
@@ -125,8 +137,10 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
     const selfResponse = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/v1/calendar/screen'
       && new URL(response.url()).searchParams.get('personId') === f.ids.viewer && new URL(response.url()).searchParams.get('showAway') === 'true'
       && !new URL(response.url()).searchParams.has('disciplineId') && response.status() === 200)
+    await openFilters()
     await page.getByLabel('Person', { exact: true }).selectOption(f.ids.viewer)
     await page.waitForURL(uri => uri.searchParams.get('personId') === f.ids.viewer && uri.searchParams.get('showAway') === 'true')
+    await openFilters()
     await page.waitForFunction(id => document.querySelector('#calendar-person')?.value === id, f.ids.viewer)
     await selfResponse
     await page.getByRole('button', { name: /S-CAL-T001/ }).first().waitFor({ state: 'visible' })
@@ -134,31 +148,40 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
     const disciplineResponse = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/v1/calendar/screen'
       && new URL(response.url()).searchParams.get('personId') === f.ids.viewer && new URL(response.url()).searchParams.get('disciplineId') === f.ids.civil
       && new URL(response.url()).searchParams.get('showAway') === 'true' && response.status() === 200)
+    await openFilters()
     await page.getByLabel('Discipline', { exact: true }).selectOption(f.ids.civil)
     await page.waitForURL(uri => uri.searchParams.get('disciplineId') === f.ids.civil && uri.searchParams.get('personId') === f.ids.viewer && uri.searchParams.get('showAway') === 'true')
+    await openFilters()
     await page.waitForFunction(id => document.querySelector('#calendar-discipline')?.value === id, f.ids.civil)
     await disciplineResponse
     await page.getByText('Synthetic visible meeting', { exact: true }).waitFor({ state: 'hidden' })
+    await closeFilters()
     await page.getByRole('button', { name: 'Clear filters', exact: true }).click()
     await waitForClear()
     assert.equal(new URL(page.url()).searchParams.get('date'), '2026-11-02'); assert.equal(new URL(page.url()).searchParams.get('projects'), scope)
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true }).click()
     await page.waitForURL(uri => uri.searchParams.get('showAway') === 'true' && !uri.searchParams.has('personId') && !uri.searchParams.has('disciplineId'))
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true, pressed: true }).waitFor({ state: 'visible' })
     await page.locator('[data-calendar-away]').getByText('Synthetic Calendar PM · Away 4 h', { exact: true }).waitFor({ state: 'visible' })
     const peerResponse = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === '/api/v1/calendar/screen'
       && new URL(response.url()).searchParams.get('personId') === f.ids.other && new URL(response.url()).searchParams.get('showAway') === 'true'
       && !new URL(response.url()).searchParams.has('disciplineId') && response.status() === 200)
+    await openFilters()
     await page.getByLabel('Person', { exact: true }).selectOption(f.ids.other)
     await page.waitForURL(uri => uri.searchParams.get('personId') === f.ids.other && uri.searchParams.get('showAway') === 'true' && !uri.searchParams.has('disciplineId'))
+    await openFilters()
     await page.waitForFunction(id => document.querySelector('#calendar-person')?.value === id, f.ids.other)
     await peerResponse
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true, pressed: true }).waitFor({ state: 'visible' })
     const peer = screenReplies.filter(entry => entry.query.personId === f.ids.other && entry.query.showAway === 'true' && !entry.query.disciplineId).at(-1)
     assert.ok(peer); assert.equal(peer.reply.away.state, 'Unavailable'); assert.equal(peer.reply.away.days.length, 0)
     await page.getByText('Time away is unavailable for this people scope.', { exact: true }).waitFor({ state: 'visible' })
     await page.getByText('Synthetic drawing deadline', { exact: true }).waitFor({ state: 'visible' })
     assert.equal(await page.locator('[data-calendar-away]').count(), 0)
+    await closeFilters()
     await page.getByRole('button', { name: 'Clear filters', exact: true }).click()
     await waitForClear()
     await page.getByText('Synthetic due marker', { exact: true }).waitFor({ state: 'visible' })
@@ -219,6 +242,7 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Use the 
     await milestone.getByRole('button', { name: 'Cancel', exact: true }).click()
     assert.equal(writes.length, 3); assert.ok(previews.some(row => row.type === 'Milestone'))
 
+    await openFilters()
     await page.getByRole('button', { name: 'Time away', exact: true }).click()
     await page.getByRole('button', { name: 'Views', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Save current view…', exact: true }).click()

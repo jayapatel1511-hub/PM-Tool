@@ -79,6 +79,22 @@ public sealed partial class ExternalReviewTests
         Assert.Empty(Findings(s)); Assert.False(F.Db(db => db.Set<ExternalReview>().Any(row => row.PackageId == s.Package)));
     }
 
+    [Fact]
+    public async Task Named_command_payloads_store_the_exact_legacy_anonymous_receipt_hash()
+    {
+        var s = await New(package: false);
+        string Stored(Guid request) => F.Db(db => db.CoordinationCommands.AsNoTracking().Single(row => row.ProjectId == s.Project.Id && row.RequestId == request).PayloadHash);
+        var create = CreateBody(s); var package = (await Post(TestData.Marc, Root(s) + "/reviews", create)).G("id");
+        Assert.Equal(Coordination.Hash(new { operation = "review.create", body = create }), Stored(create.RequestId));
+        s = s with { Package = package }; await Start(s);
+        var round = new ReviewEndpoints.RoundBody(Guid.NewGuid(), V<ReviewPackage>(package), "Review the explicit next actual issue", [], Assignments(s),
+            "The recorded issued content changed and needs a new round", null, [s.Issue]);
+        await Post(TestData.Marc, PackagePath(s) + "/rounds", round);
+        Assert.Equal(Coordination.Hash(new { operation = "review.round", id = package, body = round }), Stored(round.RequestId));
+        await Start(s); var record = Body(s); await Record(s, record);
+        Assert.Equal(Coordination.Hash(new { operation = "review.external.record", id = package, body = record }), Stored(record.RequestId));
+    }
+
     // An independent copy of the pre-extension wire, not a serialization of the new DTO itself.
     sealed record LegacyReviewCreate(Guid RequestId, string Title, string Purpose, Guid ProjectDisciplineId, Guid CoordinatorId,
         Guid[] SourceRevisionIds, ReviewEndpoints.Assignment[] Assignments, bool RequiredForIssue, string? Reason);

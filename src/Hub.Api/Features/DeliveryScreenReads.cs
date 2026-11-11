@@ -61,7 +61,7 @@ public static class DeliveryScreenReads
     {
         var disciplineIds = checks.Select(c => c.ProjectDisciplineId).OfType<Guid>().Distinct().ToArray();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == project.Id && disciplineIds.Contains(d.Id))
-            .Select(d => new { d.Id, d.Discipline!.Name }).ToDictionaryAsync(d => d.Id, d => d.Name);
+            .Select(d => new CheckDiscipline(d.Id, d.Discipline!.Name)).ToDictionaryAsync(d => d.Id, d => d.Name);
         var checkViews = new List<DeliveryCheckView>();
         foreach (var check in checks)
         {
@@ -110,3 +110,5 @@ public static class DeliveryScreenReads
             issueAvailability, checkViews, Problems(read.Snapshot), rows, statuses, rows.Where(m => !m.Available).Select(m => m.DeliverableId).Distinct().Count());
     }
 }
+
+file sealed record CheckDiscipline(Guid Id, string Name);

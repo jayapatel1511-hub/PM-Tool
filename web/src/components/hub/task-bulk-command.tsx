@@ -7,7 +7,7 @@ import { useMe } from '@/lib/auth'
 import { leaveQuestion } from '@/lib/drafts'
 import { useUnsavedGuard } from '@/hooks/drafts'
 import { invalidateChange } from '@/lib/keys'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { t, textFor, tv } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -53,11 +53,12 @@ export function TaskBulkToolbar({ selected, pageIds, onAction, onClear, omitShif
   if (!selected.size) return null
   return <div role="region" aria-label={t('bulk.actions')} className="sticky top-0 z-20 flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3" data-task-bulk-toolbar>
     <p className="basis-full text-sm tabular-nums" aria-live="polite">{t('bulkCommand.selection', { selected: selected.size, outside: [...selected.keys()].filter(id => !pageIds.includes(id)).length })}</p>
-    {TASK_BULK_OPERATIONS.filter(op => !omitShift || op !== 'shiftDueDates').map(op => <Button key={op} variant="outline" onClick={() => onAction(op)}>{runtimeText(`tbulk.${op}`)}</Button>)}
+    {TASK_BULK_OPERATIONS.filter(op => !omitShift || op !== 'shiftDueDates').map(op => <Button key={op} variant="outline" onClick={() => onAction(op)}>{t(`tbulk.${op}`)}</Button>)}
     <Button variant="ghost" onClick={onClear}>{t('common.clear')}</Button>
   </div>
 }
 
+const OUTCOMES = { eligible: 'bulkCommand.eligible', changed: 'bulkCommand.changed', unchanged: 'bulkCommand.unchanged', refused: 'bulkCommand.refused' } as const
 const UNDO_MS = 10_000 // FR-SCR-20, 053-D9
 const requestUndo = (commandId: string) => typedRequest('post', '/api/v1/tasks/bulk/commands/{commandId}/undo', { params: { commandId } })
 
@@ -175,7 +176,7 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
   }
   const renderedRows = undone?.rows ?? result?.rows ?? preview?.rows ?? []
   return <Dialog open onOpenChange={open => !open && close()}><DialogContent onOpenAutoFocus={captureFocus} onCloseAutoFocus={restoreFocus} className="max-h-[90vh] overflow-y-auto sm:max-w-2xl" data-task-bulk-dialog data-bulk-navigation-blocked={navigationBlocks || undefined}>
-    <DialogHeader><DialogTitle>{t(result ? 'bulkCommand.result' : 'bulkCommand.title')}</DialogTitle><DialogDescription>{runtimeText(`tbulk.${operation}`)} · {t('bulk.selected', { n: original.length })}</DialogDescription></DialogHeader>
+    <DialogHeader><DialogTitle>{t(result ? 'bulkCommand.result' : 'bulkCommand.title')}</DialogTitle><DialogDescription>{t(`tbulk.${operation}`)} · {t('bulk.selected', { n: original.length })}</DialogDescription></DialogHeader>
     {!result && <form className="space-y-3" onSubmit={event => { event.preventDefault(); if (!uncertain) void review() }}>
       <fieldset disabled={busy || uncertain || !sameActor || !sameScope} className="space-y-3" onChange={resetPreview}>
         {operation === 'assign' && <Field label={t('field.AssigneeId')} htmlFor={prefix + '-assignee'}><PeoplePicker id={prefix + '-assignee'} value={assignee} onChange={id => { setAssignee(id); resetPreview() }} /></Field>}
@@ -198,7 +199,7 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
     {result && <p role="status" className="text-sm tabular-nums">{t('bulkCommand.resultCounts', result.counts)}</p>}
     {undone && <p role="status" className="text-sm tabular-nums" data-task-bulk-undone>{t('undo.bulkUndone', undone.counts)}</p>}
     {renderedRows.length > 0 && <ul className="max-h-72 space-y-2 overflow-y-auto text-sm" aria-label={t(result ? 'bulkCommand.result' : 'bulkCommand.preview')}>{renderedRows.map(row => <li key={row.index} data-task-bulk-outcome={row.outcome} className="break-words rounded border p-2">
-      {row.outcome === 'unavailable' ? t('bulkCommand.unavailable', { index: row.index + 1 }) : <><strong>{row.key}</strong> · {runtimeText('bulkCommand.' + row.outcome)}{row.reason && <p>{row.reason}</p>}</>}
+      {row.outcome === 'unavailable' ? t('bulkCommand.unavailable', { index: row.index + 1 }) : <><strong>{row.key}</strong> · {textFor(OUTCOMES, row.outcome)}{row.reason && <p>{row.reason}</p>}</>}
     </li>)}</ul>}
     <DialogFooter>{result && !undone && undoUntil > 0 && <Button variant="outline" disabled={busy} onClick={undo} data-task-bulk-undo>{busy && <Spinner />}{t('undo.action')}</Button>}
       <Button variant="outline" disabled={busy || uncertain} onClick={close}>{t(result ? 'common.close' : 'common.cancel')}</Button>

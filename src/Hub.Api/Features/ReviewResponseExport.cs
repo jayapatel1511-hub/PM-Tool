@@ -45,17 +45,17 @@ public static class ReviewResponseExportEndpoints
         var issueIds = findings.Select(row => row.DeliverableIssueId).OfType<Guid>().Concat(receipts.Values.Select(row => row.DeliverableIssueId)).Distinct().ToArray();
         var issues = await db.DeliverableIssues.AsNoTracking().Where(row => issueIds.Contains(row.Id)).ToDictionaryAsync(row => row.Id);
         var partyIds = receipts.Values.Select(row => row.ExternalPartyId).Distinct().ToArray();
-        var parties = await db.ExternalParties.AsNoTracking().Where(row => partyIds.Contains(row.Id)).Select(row => new { row.Id, row.ProjectId }).ToDictionaryAsync(row => row.Id);
+        var parties = await db.ExternalParties.AsNoTracking().Where(row => partyIds.Contains(row.Id)).Select(row => new ProjectOwned(row.Id, row.ProjectId)).ToDictionaryAsync(row => row.Id);
         var roundIds = rounds.Keys.ToArray();
         var manifest = await db.ReviewManifestItems.AsNoTracking().Where(row => roundIds.Contains(row.RoundId)).ToArrayAsync();
         var assignments = await db.DisciplineReviews.AsNoTracking().Where(row => roundIds.Contains(row.RoundId))
-            .Select(row => new { row.ProjectId, row.RoundId, row.ProjectDisciplineId }).ToArrayAsync();
+            .Select(row => new RoundAssignment(row.ProjectId, row.RoundId, row.ProjectDisciplineId)).ToArrayAsync();
         var byId = findings.ToDictionary(row => row.Id);
         var deliverableIds = sources.Values.Where(row => row.DeliverableId.HasValue).Select(row => row.DeliverableId!.Value)
             .Concat(issues.Values.Select(row => row.DeliverableId)).Distinct().ToArray();
         // Deleted same-project source work is legitimate historical provenance; never expose its metadata here.
         var deliverables = await db.Deliverables.IgnoreQueryFilters().AsNoTracking().Where(row => deliverableIds.Contains(row.Id))
-            .Select(row => new { row.Id, row.ProjectId }).ToDictionaryAsync(row => row.Id);
+            .Select(row => new ProjectOwned(row.Id, row.ProjectId)).ToDictionaryAsync(row => row.Id);
         var disciplineIds = findings.Select(row => row.ProjectDisciplineId).Append(package.ProjectDisciplineId).Distinct().ToArray();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(row => disciplineIds.Contains(row.Id)).ToDictionaryAsync(row => row.Id);
         var referenceIds = disciplines.Values.Select(row => row.DisciplineId).Distinct().ToArray();
@@ -144,3 +144,6 @@ public static class ReviewResponseExportEndpoints
         return result;
     }
 }
+
+file sealed record ProjectOwned(Guid Id, Guid ProjectId);
+file sealed record RoundAssignment(Guid ProjectId, Guid RoundId, Guid ProjectDisciplineId);

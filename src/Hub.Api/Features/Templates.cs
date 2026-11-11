@@ -262,10 +262,10 @@ public static class TemplateEndpoints
         var (_, p) = await Snapshot(db, t.Id);
         var disc = p.Disciplines.ToDictionary(d => d.Id, d => d.DisciplineId);
         var familyRows = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
-            .Select(x => new { x.Id, x.Version, x.Status, x.PublishedAt }).ToListAsync();
+            .Select(x => new FamilyVersionRow(x.Id, x.Version, x.Status, x.PublishedAt)).ToListAsync();
         var familyIds = familyRows.Select(row => row.Id).ToArray();
         var counts = people ? await access.VisibleProjects().AsNoTracking().Where(project => project.CreatedFromTemplateId != null && familyIds.Contains(project.CreatedFromTemplateId.Value))
-            .GroupBy(project => project.CreatedFromTemplateId!.Value).Select(group => new { Id = group.Key, Count = group.Count() }).ToDictionaryAsync(row => row.Id, row => row.Count)
+            .GroupBy(project => project.CreatedFromTemplateId!.Value).Select(group => new TemplateUseCount(group.Key, group.Count())).ToDictionaryAsync(row => row.Id, row => row.Count)
             : new Dictionary<Guid, int>();
         var family = familyRows.Select(row => new TemplateFamilyVersion(row.Id, row.Version, row.Status, row.PublishedAt, people ? counts.GetValueOrDefault(row.Id) : null)).ToArray();
         var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).OrderBy(x => x.Id).ToListAsync();
@@ -745,3 +745,6 @@ public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, Tim
         await db.SaveChangesAsync();
     }
 }
+
+file sealed record FamilyVersionRow(Guid Id, int? Version, string Status, DateTimeOffset? PublishedAt);
+file sealed record TemplateUseCount(Guid Id, int Count);

@@ -183,27 +183,25 @@ internal static class DrawingImportRows
             + diagnostics.Count(value => value.Severity == DrawingImportDiagnosticSeverity.Error && (value.SourceRow is null || !sourceRows.Contains(value.SourceRow.Value)));
         var creates = rows.Count(row => row.Preview.Classification == "Create");
         var canCommit = parsed.Complete && errors == 0 && creates > 0;
-        object? ReferenceFacts(DrawingImportPreparedRow row)
+        FingerprintRow? ReferenceFacts(DrawingImportPreparedRow row)
         {
             if (row.Plan is not { } plan) return null;
             var pd = disciplines.Single(value => value.Id == plan.Discipline.Id);
             var type = types.Single(value => value.Id == plan.Body.DeliverableTypeId);
             var selectedPeople = new[] { (Guid?)plan.OwnerId, plan.Body.ReviewerId }.Where(value => value is not null).Select(value => value!.Value).Distinct().Order().ToArray();
-            return new {
-                discipline = new { pd.Id, pd.RowVersion, pd.IsActive, pd.LeadUserId, pd.DisciplineId, pd.Discipline!.Name, pd.Discipline.Code, referenceVersion = pd.Discipline.RowVersion },
-                type = new { type.Id, type.RowVersion, type.IsActive, type.Name },
-                people = people.Where(person => selectedPeople.Contains(person.Id)).OrderBy(person => person.Id).Select(person => new { person.Id, person.RowVersion, person.IsActive, person.Email, person.DisplayName }).ToArray(),
-                membership = members.Where(member => selectedPeople.Contains(member.UserId)).OrderBy(member => member.Id).Select(member => new { member.Id, member.UserId, member.RowVersion, member.RemovedAt, roles = member.Roles.Order().ToArray() }).ToArray(),
-                milestone = plan.Milestone is { } milestone ? new { milestone.Id, milestone.RowVersion, milestone.Key, milestone.Date } : null,
-                row.Preview.Values, warnings = row.Preview.Warnings.Select(warning => warning.Code).Order().ToArray()
-            };
+            return new(
+                new(pd.Id, pd.RowVersion, pd.IsActive, pd.LeadUserId, pd.DisciplineId, pd.Discipline!.Name, pd.Discipline.Code, pd.Discipline.RowVersion),
+                new(type.Id, type.RowVersion, type.IsActive, type.Name),
+                people.Where(person => selectedPeople.Contains(person.Id)).OrderBy(person => person.Id).Select(person => new FingerprintPerson(person.Id, person.RowVersion, person.IsActive, person.Email, person.DisplayName)).ToArray(),
+                members.Where(member => selectedPeople.Contains(member.UserId)).OrderBy(member => member.Id).Select(member => new FingerprintMember(member.Id, member.UserId, member.RowVersion, member.RemovedAt, member.Roles.Order().ToArray())).ToArray(),
+                plan.Milestone is { } milestone ? new(milestone.Id, milestone.RowVersion, milestone.Key, milestone.Date) : null,
+                row.Preview.Values, row.Preview.Warnings.Select(warning => warning.Code).Order().ToArray());
         }
-        var fingerprint = canCommit ? Coordination.Hash(new {
-            contentHash = parsed.ContentSha256, body.Format, sheet = parsed.SelectedSheet, body.Worksheet, sourceReference, body.Defaults, reason,
-            project = new { project.Id, project.RowVersion, project.ProjectNumber, project.Status, project.Visibility, project.ProjectManagerId, project.ClientDrawingNumberPattern, project.RevisionConvention },
-            actor = new { access.Actor.Id, access.Actor.IsActive, roles = access.Actor.Roles.Order().ToArray(), memberRoles = context.MemberRoles.Order().ToArray(), leads = context.LeadDisciplineIds.Order().ToArray(), context.PrimaryDisciplineId },
-            rows = rows.Select(ReferenceFacts).ToArray()
-        }) : null;
+        var fingerprint = canCommit ? Coordination.Hash(new Fingerprint(
+            parsed.ContentSha256, body.Format, parsed.SelectedSheet, body.Worksheet, sourceReference, body.Defaults, reason,
+            new(project.Id, project.RowVersion, project.ProjectNumber, project.Status, project.Visibility, project.ProjectManagerId, project.ClientDrawingNumberPattern, project.RevisionConvention),
+            new(access.Actor.Id, access.Actor.IsActive, access.Actor.Roles.Order().ToArray(), context.MemberRoles.Order().ToArray(), context.LeadDisciplineIds.Order().ToArray(), context.PrimaryDisciplineId),
+            rows.Select(ReferenceFacts).ToArray())) : null;
         var preview = new DrawingImportPreview(body.Format, sourceReference, parsed.SelectedSheet, parsed.ContentSha256, fingerprint,
             project.RowVersion, ProjectStatus.NeedsCorrectionReason(project.Status), parsed.Complete, parsed.Sheets.ToArray(), diagnostics.ToArray(), rows.Select(row => row.Preview).ToArray(), creates, errors, canCommit);
         return new(preview, rows, reason);
@@ -220,3 +218,17 @@ internal static class DrawingImportRows
         return true;
     }
 }
+
+// Preview fingerprint hash input: property names, order and declared types are the hashed wire format.
+file sealed record Fingerprint(string? ContentHash, string Format, string? Sheet, string? Worksheet, string? SourceReference,
+    DrawingImportDefaults? Defaults, string? Reason, FingerprintProject Project, FingerprintActor Actor, FingerprintRow?[] Rows);
+file sealed record FingerprintProject(Guid Id, int RowVersion, string ProjectNumber, string Status, string Visibility, Guid ProjectManagerId,
+    string? ClientDrawingNumberPattern, string? RevisionConvention);
+file sealed record FingerprintActor(Guid Id, bool IsActive, string[] Roles, string[] MemberRoles, Guid[] Leads, Guid? PrimaryDisciplineId);
+file sealed record FingerprintRow(FingerprintDiscipline Discipline, FingerprintType Type, FingerprintPerson[] People, FingerprintMember[] Membership,
+    FingerprintMilestone? Milestone, DrawingImportValues? Values, string[] Warnings);
+file sealed record FingerprintDiscipline(Guid Id, int RowVersion, bool IsActive, Guid? LeadUserId, Guid DisciplineId, string Name, string Code, int ReferenceVersion);
+file sealed record FingerprintType(Guid Id, int RowVersion, bool IsActive, string Name);
+file sealed record FingerprintPerson(Guid Id, int RowVersion, bool IsActive, string Email, string DisplayName);
+file sealed record FingerprintMember(Guid Id, Guid UserId, int RowVersion, DateTimeOffset? RemovedAt, string[] Roles);
+file sealed record FingerprintMilestone(Guid Id, int RowVersion, string Key, DateOnly? Date);

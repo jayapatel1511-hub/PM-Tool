@@ -15,18 +15,21 @@ public static class PlanningDeadlines
     {
         var wanted = linkedProjects.Distinct().ToArray();
         var visible = access.VisibleProjects().Where(p => wanted.Contains(p.Id));
-        var projects = await visible.Select(p => new { p.Id, p.ProjectNumber }).ToDictionaryAsync(p => p.Id, p => p.ProjectNumber);
+        var projects = await visible.Select(p => new DeadlineProject(p.Id, p.ProjectNumber)).ToDictionaryAsync(p => p.Id, p => p.ProjectNumber);
         var ids = projects.Keys.ToArray(); var from = weeks[0]; var through = weeks[^1].AddDays(6);
         var milestones = await db.Milestones.AsNoTracking().Where(m => ids.Contains(m.ProjectId) && !m.IsComplete && !m.IsCancelled
                 && (m.Date == null || m.Date >= from && m.Date <= through))
-            .Select(m => new { m.Id, m.Key, m.Name, m.ProjectId, m.Date }).ToListAsync();
+            .Select(m => new DeadlineSource(m.Id, m.Key, m.Name, m.ProjectId, m.Date)).ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => ids.Contains(d.ProjectId)
                 && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted
                 && (d.DueDate == null || d.DueDate >= from && d.DueDate <= through))
-            .Select(d => new { d.Id, d.Key, d.Name, d.ProjectId, d.DueDate }).ToListAsync();
+            .Select(d => new DeadlineSource(d.Id, d.Key, d.Name, d.ProjectId, d.DueDate)).ToListAsync();
         var rows = milestones.Select(m => new PlanningDeadlineRow(ItemType.Milestone, m.Id, m.Key, m.Name, m.ProjectId, projects[m.ProjectId], m.Date))
-            .Concat(deliverables.Select(d => new PlanningDeadlineRow(ItemType.Deliverable, d.Id, d.Key, d.Name, d.ProjectId, projects[d.ProjectId], d.DueDate)))
+            .Concat(deliverables.Select(d => new PlanningDeadlineRow(ItemType.Deliverable, d.Id, d.Key, d.Name, d.ProjectId, projects[d.ProjectId], d.Date)))
             .OrderBy(d => d.Date).ThenBy(d => d.ItemType).ThenBy(d => d.ProjectNumber).ThenBy(d => d.Key).ThenBy(d => d.Id).ToArray();
         return new(weeks, rows.Where(d => d.Date != null).ToArray(), rows.Where(d => d.Date == null).ToArray(), clock.GetUtcNow());
     }
 }
+
+file sealed record DeadlineProject(Guid Id, string ProjectNumber);
+file sealed record DeadlineSource(Guid Id, string Key, string Name, Guid ProjectId, DateOnly? Date);

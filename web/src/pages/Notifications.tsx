@@ -16,13 +16,14 @@ import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, localIso, today, addDays } from '@/lib/format'
 import { en } from '@/i18n/en'
-import { t , runtimeText } from '@/lib/i18n'
+import { hasKey, t, runtimeText } from '@/lib/i18n'
 import { invalidateNotifications } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 
 // Every event with a label (the same `event.*` table Preferences uses), so new events appear in the filter automatically.
 const EVENTS = Object.keys(en).filter((k) => k.startsWith('event.')).map((k) => k.slice(6))
   .sort((a, b) => runtimeText(`event.${a}`).localeCompare(runtimeText(`event.${b}`)))
+const eventText = (name: string) => hasKey('event.', name) ? t(`event.${name}`) : name
 
 /** "Today", "Yesterday" or the date, for grouping by day (§13.17). */
 function dayLabel(ts: string) {
@@ -41,11 +42,14 @@ export function NotificationsPage() {
   const [sp, setSp] = useSearchParams()
   const tab = sp.get('tab') === 'following' ? 'following' : 'notifications'
   const unread = useUnread()
+  const visualSystem = useFlag('visual_system')
+  const tabs = <TabBar tabs={[{ id: 'notifications', label: t('notif.personal'), count: unread.data?.notifications }, { id: 'following', label: t('notif.following'), count: unread.data?.following }]}
+    value={tab} onChange={(v) => setSp(v === 'following' ? { tab: v } : {}, { replace: true })} />
+  // 052 S07: with the visual system the tab row sits in the band (FR-VSN-11); flag off keeps it inside the card.
   return (
-    <Page title={t('nav.notifications')} actions={<Button asChild variant="outline"><Link to="/preferences"><Settings className="size-4" />{t('top.preferences')}</Link></Button>}>
+    <Page title={t('nav.notifications')} actions={<Button asChild variant="outline"><Link to="/preferences"><Settings className="size-4" />{t('top.preferences')}</Link></Button>} tabs={visualSystem ? tabs : undefined}>
       <div className="overflow-hidden rounded-lg border bg-card">
-        <TabBar tabs={[{ id: 'notifications', label: t('notif.personal'), count: unread.data?.notifications }, { id: 'following', label: t('notif.following'), count: unread.data?.following }]}
-          value={tab} onChange={(v) => setSp(v === 'following' ? { tab: v } : {}, { replace: true })} />
+        {!visualSystem && tabs}
         {tab === 'notifications' ? <Personal /> : <Following />}
       </div>
     </Page>
@@ -130,7 +134,7 @@ function ScreenPersonal() {
   const markRead = useMarkRead(), open = useOpenNotification()
   const tokens = ([
     ['unread', t('notif.unreadOnly'), filters.unread && t('common.yes')],
-    ['type', t('common.type'), filters.type && runtimeText(`event.${filters.type}`)],
+    ['type', t('common.type'), filters.type && eventText(filters.type)],
     ['projectId', t('common.project'), projects.find(([id]) => id === filters.projectId)?.[1]],
     ['needsAction', t('notifScreen.needsAction'), filters.needsAction && t('common.yes')],
   ] as const).filter(([key]) => sp.get(key))
@@ -139,7 +143,7 @@ function ScreenPersonal() {
     <div className="flex flex-col gap-3 border-b px-4 py-4">
       <div className="flex flex-wrap items-end gap-3">
         <Field label={t('common.type')} htmlFor="notif-type" className="w-full sm:w-64"><select id="notif-type" className={selectCls} value={filters.type ?? ''} onChange={event => set('type', event.target.value || undefined)}>
-          <option value="">{t('notif.anyType')}</option>{EVENTS.map(event => <option key={event} value={event}>{runtimeText(`event.${event}`)}</option>)}
+          <option value="">{t('notif.anyType')}</option>{EVENTS.map(event => <option key={event} value={event}>{eventText(event)}</option>)}
         </select></Field>
         <Field label={t('common.project')} htmlFor="notif-project" className="w-full sm:w-44"><select id="notif-project" className={selectCls} value={filters.projectId ?? ''} onChange={event => set('projectId', event.target.value || undefined)}>
           <option value="">{t('notif.anyProject')}</option>{projects.map(([id, number]) => <option key={id} value={id}>{number}</option>)}

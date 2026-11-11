@@ -1,6 +1,7 @@
 import { Component, useId, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { BareTable } from '@/components/ui/table'
 import { Empty, Field, selectCls, tdCls, thCls } from '@/components/hub/common'
 import type { components } from '@/gen/api'
 import { fmtTime } from '@/lib/format'
@@ -98,9 +99,9 @@ export function ReportCapacityComparison({ data }: { data: Comparison }) {
       {/* Text-only values: the region takes focus to support keyboard horizontal scrolling. */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
       <div role="region" aria-label={t('reportChart.table')} tabIndex={0} className="report-capacity-table scroll-region">
-        <table data-report-comparison-table><caption className="sr-only">{t('reportChart.table')}</caption><thead><tr><th scope="col" className={thCls}>{t('reportChart.discipline')}</th>{measures.map(measure => <th key={measure} className={thCls} scope="col">{t(`reportChart.${measure}`)}</th>)}</tr></thead>
+        <BareTable data-report-comparison-table><caption className="sr-only">{t('reportChart.table')}</caption><thead><tr><th scope="col" className={thCls}>{t('reportChart.discipline')}</th>{measures.map(measure => <th key={measure} className={thCls} scope="col">{t(`reportChart.${measure}`)}</th>)}</tr></thead>
           <tbody>{rows.map(row => <tr key={`${row.key}:${row.periodKey}`} data-report-comparison-row={row.key}><th className={tdCls} scope="row">{row.discipline}<span className="block text-xs font-normal">{t('reportChart.affected', { partial: row.partialPeople, provisional: row.provisionalPeople })}</span></th>{measures.map(measure => <td key={measure} className={tdCls}><QuantityValue quantity={row[measure]} unit={data.unit} />{measure === 'deficit' && <span className="block text-xs"><Shortfall quantity={row.deficit} unit={data.unit} /></span>}</td>)}</tr>)}</tbody>
-        </table>
+        </BareTable>
       </div>
       <nav className="flex flex-wrap justify-between gap-2" aria-label={t('reportChart.title')}><Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => setFocus('chartPage', String(page - 1))}>{t('reportChart.previous')}</Button><Button type="button" variant="outline" size="sm" disabled={page >= pages} onClick={() => setFocus('chartPage', String(page + 1))}>{t('reportChart.next')}</Button></nav>
     </>}

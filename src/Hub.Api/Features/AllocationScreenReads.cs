@@ -46,7 +46,7 @@ public static class AllocationScreenReads
             var taskInputs = await db.Tasks.AsNoTracking().Where(task => task.AssigneeId == candidate.PersonId && task.DeletedAt == null
                 && task.Status != TaskStatuses.Complete && task.Status != TaskStatuses.Cancelled && task.Status != TaskStatuses.OnHold
                 && db.Projects.Any(project => project.Id == task.ProjectId && (project.Status == ProjectStatus.Setup || project.Status == ProjectStatus.Active)))
-                .Select(task => new { task.EstimatedHours, task.DueDate }).ToArrayAsync();
+                .Select(task => new TaskEstimateInput(task.EstimatedHours, task.DueDate)).ToArrayAsync();
             unestimated = taskInputs.Count(task => task.EstimatedHours is null); undated = taskInputs.Count(task => task.DueDate is null);
             if (unestimated > 0 || undated > 0) state = "Incomplete";
         }
@@ -96,7 +96,7 @@ public static class AllocationScreenReads
                 && package.Status != ReviewStatus.Superseded && package.Status != ReviewStatus.Approved))
             .Select(review => new WorkDiscipline(review.Id, review.ProjectDisciplineId, review.ReviewerId)).ToDictionaryAsync(review => review.Id);
         var roles = await db.OpenRoles.AsNoTracking().Where(role => role.ProjectId == projectId && role.Status == OpenRoleStatus.Filled
-            && role.FilledAllocationId != null && ids.Contains(role.FilledAllocationId.Value)).Select(role => new { role.FilledAllocationId, role.ProjectDisciplineId }).ToArrayAsync();
+            && role.FilledAllocationId != null && ids.Contains(role.FilledAllocationId.Value)).Select(role => new FilledRoleDiscipline(role.FilledAllocationId, role.ProjectDisciplineId)).ToArrayAsync();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(discipline => discipline.ProjectId == projectId)
             .Select(discipline => new ReservationDiscipline(discipline.Id, discipline.IsActive, discipline.Discipline!.Name)).ToDictionaryAsync(discipline => discipline.Id);
         var overrides = await db.AllocationDayOverrides.AsNoTracking().Where(day => ids.Contains(day.AllocationId)).ToArrayAsync();
@@ -200,7 +200,7 @@ public static class AllocationScreenReads
         }
         var tasks = await db.Tasks.AsNoTracking().Where(task => task.ProjectId == projectId && task.Status != TaskStatuses.Complete
             && task.Status != TaskStatuses.Cancelled && (task.DueDate == null || task.DueDate >= first && task.DueDate <= through))
-            .Select(task => new { task.ProjectDisciplineId, task.DueDate, task.EstimatedHours, task.ProgressPct }).ToArrayAsync();
+            .Select(task => new DisciplineTaskInput(task.ProjectDisciplineId, task.DueDate, task.EstimatedHours, task.ProgressPct)).ToArrayAsync();
         foreach (var task in tasks)
         {
             var bucket = For(task.ProjectDisciplineId);
@@ -219,3 +219,7 @@ public static class AllocationScreenReads
         return new(weeks, completeAllocations ? "Complete" : "VisibleOnly", rows, clock.GetUtcNow());
     }
 }
+
+file sealed record TaskEstimateInput(decimal? EstimatedHours, DateOnly? DueDate);
+file sealed record FilledRoleDiscipline(Guid? FilledAllocationId, Guid? ProjectDisciplineId);
+file sealed record DisciplineTaskInput(Guid ProjectDisciplineId, DateOnly? DueDate, decimal? EstimatedHours, int ProgressPct);

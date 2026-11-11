@@ -402,13 +402,13 @@ public static class WorkspaceEndpoints
         var deliverableSource = preset?.ApplyDeliverables(db.Deliverables.AsNoTracking()) ?? db.Deliverables.AsNoTracking();
         var milestoneSource = preset?.ApplyMilestones(db.Milestones.AsNoTracking()) ?? db.Milestones.AsNoTracking();
         var tasks = taskSource.Where(t => pids.Contains(t.ProjectId) && t.DueDate >= from && t.DueDate <= end && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-            .Select(t => new { Type = ItemType.Task, t.Id, t.ProjectId, t.Key, t.Name, Date = t.DueDate!.Value });
+            .Select(t => new RunwaySource { Type = ItemType.Task, Id = t.Id, ProjectId = t.ProjectId, Key = t.Key, Name = t.Name, Date = t.DueDate!.Value });
         var deliverables = deliverableSource.Where(d => pids.Contains(d.ProjectId) && d.DueDate >= from && d.DueDate <= end && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted)
-            .Select(d => new { Type = ItemType.Deliverable, d.Id, d.ProjectId, d.Key, d.Name, Date = d.DueDate!.Value });
+            .Select(d => new RunwaySource { Type = ItemType.Deliverable, Id = d.Id, ProjectId = d.ProjectId, Key = d.Key, Name = d.Name, Date = d.DueDate!.Value });
         var milestones = milestoneSource.Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= end && !m.IsCancelled && !m.IsComplete)
-            .Select(m => new { Type = ItemType.Milestone, m.Id, m.ProjectId, m.Key, m.Name, Date = m.Date!.Value });
+            .Select(m => new RunwaySource { Type = ItemType.Milestone, Id = m.Id, ProjectId = m.ProjectId, Key = m.Key, Name = m.Name, Date = m.Date!.Value });
         var source = tasks.Concat(deliverables).Concat(milestones);
-        var totals = await source.GroupBy(x => x.Date).Select(g => new { Date = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.Date, x => x.Count);
+        var totals = await source.GroupBy(x => x.Date).Select(g => new RunwayDayCount(g.Key, g.Count())).ToDictionaryAsync(x => x.Date, x => x.Count);
         var calendars = await Calendars.For(db, settings, names.Keys.ToArray());
         var days = new List<HomeRunwayDay>();
         for (var day = from; day <= end; day = day.AddDays(1))
@@ -430,7 +430,7 @@ public static class WorkspaceEndpoints
     static async Task<HomeProjectCount?> TopProject(HubDb db, IQueryable<WorkTask> tasks, string key, string value, Guid me, DateOnly today, OrgSettings s, Dictionary<Guid, Named> names)
     {
         var q = TaskQueries.Apply(db, tasks, TaskFilter.Of(new Dictionary<string, string?> { [key] = value }), me, today, s);
-        var groups = await q.GroupBy(t => t.ProjectId).Select(g => new { ProjectId = g.Key, Count = g.Count() }).ToListAsync();
+        var groups = await q.GroupBy(t => t.ProjectId).Select(g => new ProjectTaskCount(g.Key, g.Count())).ToListAsync();
         return groups.Where(g => names.ContainsKey(g.ProjectId)).OrderByDescending(g => g.Count)
             .ThenBy(g => names[g.ProjectId].ProjectNumber, StringComparer.Ordinal)
             .Select(g => new HomeProjectCount(g.ProjectId, names[g.ProjectId].ProjectNumber, g.Count)).FirstOrDefault();
@@ -452,11 +452,11 @@ public static class WorkspaceEndpoints
         if (paged)
         {
             var taskRows = taskSource.Where(t => pids.Contains(t.ProjectId) && t.DueDate >= from && t.DueDate <= to && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-                .Select(t => new { Type = ItemType.Task, t.Id, t.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, t.Key, t.Name, Date = t.DueDate!.Value, Status = (string?)t.Status, Owner = db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(), Overdue = db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue) });
+                .Select(t => new DeadlineSource { Type = ItemType.Task, Id = t.Id, ProjectId = t.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, Key = t.Key, Name = t.Name, Date = t.DueDate!.Value, Status = (string?)t.Status, Owner = db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(), Overdue = db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue) });
             var deliverableRows = deliverableSource.Where(d => pids.Contains(d.ProjectId) && d.DueDate >= from && d.DueDate <= to && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted)
-                .Select(d => new { Type = ItemType.Deliverable, d.Id, d.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, d.Key, d.Name, Date = d.DueDate!.Value, Status = (string?)d.Status, Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) });
+                .Select(d => new DeadlineSource { Type = ItemType.Deliverable, Id = d.Id, ProjectId = d.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, Key = d.Key, Name = d.Name, Date = d.DueDate!.Value, Status = (string?)d.Status, Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) });
             var milestoneRows = milestoneSource.Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= to && !m.IsCancelled && !m.IsComplete)
-                .Select(m => new { Type = ItemType.Milestone, m.Id, m.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == m.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, m.Key, m.Name, Date = m.Date!.Value, Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault(), Owner = (string?)null, Overdue = db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue) });
+                .Select(m => new DeadlineSource { Type = ItemType.Milestone, Id = m.Id, ProjectId = m.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == m.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault()!, Key = m.Key, Name = m.Name, Date = m.Date!.Value, Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault(), Owner = (string?)null, Overdue = db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue) });
             var allRows = taskRows.Concat(deliverableRows).Concat(milestoneRows);
             var total = await allRows.CountAsync();
             var totalPages = total == 0 ? 0 : (int)Math.Ceiling(total / (double)pageSize);
@@ -592,3 +592,29 @@ public static class WorkspaceEndpoints
         return TypedResults.Ok(new TeamRead(people, names.Count));
     }
 }
+
+// Member-init (not constructor) shapes: EF Core composes these through Concat, GroupBy, Where and OrderBy.
+file sealed class RunwaySource
+{
+    public string Type { get; init; } = "";
+    public Guid Id { get; init; }
+    public Guid ProjectId { get; init; }
+    public string Key { get; init; } = "";
+    public string Name { get; init; } = "";
+    public DateOnly Date { get; init; }
+}
+file sealed class DeadlineSource
+{
+    public string Type { get; init; } = "";
+    public Guid Id { get; init; }
+    public Guid ProjectId { get; init; }
+    public string ProjectNumber { get; init; } = "";
+    public string Key { get; init; } = "";
+    public string Name { get; init; } = "";
+    public DateOnly Date { get; init; }
+    public string? Status { get; init; }
+    public string? Owner { get; init; }
+    public bool Overdue { get; init; }
+}
+file sealed record RunwayDayCount(DateOnly Date, int Count);
+file sealed record ProjectTaskCount(Guid ProjectId, int Count);

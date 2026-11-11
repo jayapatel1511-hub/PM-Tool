@@ -11,13 +11,13 @@ import { Avatar } from '@/components/hub/people'
 import { Key } from '@/components/hub/pills'
 import { DataTable, RegisterCards } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
-import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
+import { HOME_PRESETS, useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
-import { plural, t , runtimeText } from '@/lib/i18n'
+import { plural, t, runtimeText, textFor, tv } from '@/lib/i18n'
 import { CertificationFilter, PersonFactsChips, useCertificationTags } from '@/components/hub/person-facts'
 
 type Member = components['schemas']['TeamPersonRow']
@@ -82,8 +82,8 @@ export function WorkspaceTeamPage() {
         {factsEnabled && <CertificationFilter id="team-certification" value={certificationTagId ?? ''} onChange={value => { const next = new URLSearchParams(sp); if (value) next.set('certificationTagId', value); else next.delete('certificationTagId'); setSp(next, { replace: true }) }} />}
       </TeamOrganisationControls>{table.menu}</div>}
       {(homePreset || homeProjectStatus || certificationTagId) && <ActiveFilters tokens={[
-        ...(homePreset ? [{ key: 'homePreset', label: t('homeScope.label'), value: runtimeText(`homeScope.${homePreset}`) }] : []),
-        ...(homeProjectStatus ? [{ key: 'homeProjectStatus', label: t('homeScope.projectStatus'), value: homeProjectStatus.split(',').map(status => runtimeText(`value.${status}`)).join(', ') }] : []),
+        ...(homePreset ? [{ key: 'homePreset', label: t('homeScope.label'), value: textFor(HOME_PRESETS, homePreset) }] : []),
+        ...(homeProjectStatus ? [{ key: 'homeProjectStatus', label: t('homeScope.projectStatus'), value: homeProjectStatus.split(',').map(tv).join(', ') }] : []),
         ...(certificationTagId ? [{ key: 'certificationTagId', label: t('personFacts.filter'), value: tags.data?.find(tag => tag.id === certificationTagId)?.name ?? t('common.unavailable') }] : []),
       ]} onRemove={key => { const next = new URLSearchParams(sp); next.delete(key); setSp(next, { replace: true }) }} onClear={clearHomeFilters} />}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}

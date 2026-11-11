@@ -178,6 +178,13 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
 
     // Explicit initial target belongs to the actual standalone Task and another task ignores old scoped History keys.
     await strip('Details'); await target('details').getByRole('button', { name: 'Take theirs', exact: true }).click()
+    // 052 S02 (FR-VSN-11): with the visual system the standalone Task opens under the band and still owns its sections.
+    source.flags.visual_system = true
+    await page.goto(base + '/tasks/' + f.ids.task + '?taskSection=comments')
+    await page.locator('.visual-page-band').getByRole('heading', { level: 1 }).waitFor()
+    await target('comments').waitFor(); await page.waitForFunction(id => document.activeElement?.id === 'task-' + id + '-comments', f.ids.task)
+    await strip('Time'); assert.equal(await nav().getByRole('button', { name: 'Time', exact: true }).getAttribute('aria-current'), 'location')
+    source.flags.visual_system = false
     await page.goto(base + '/tasks/' + f.ids.task + '?taskSection=comments')
     await target('comments').waitFor(); await page.waitForFunction(id => document.activeElement?.id === 'task-' + id + '-comments', f.ids.task)
     await strip('Time'); const timeLink = target('time').getByRole('link', { name: 'Open my time for this task', exact: true })

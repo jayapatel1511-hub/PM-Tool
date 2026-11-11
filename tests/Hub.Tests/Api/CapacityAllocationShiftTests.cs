@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
+using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,6 +66,8 @@ public sealed class CapacityAllocationShiftTests : IDisposable
         Assert.Single(preview["allocations"]!.AsArray().Where(row => row!["requiresConfirmation"]!.GetValue<bool>()));
         var oldAudit = await f.DbAsync(db => db.ActivityLog.Select(row => row.Id).ToArrayAsync()); var body = ApplyBody(preview);
         var saved = await (await f.As(TestData.Pm).Post(Root(p.Id) + "/shift", body)).Json();
+        // The stored receipt hash is the exact legacy anonymous payload wire.
+        Assert.Equal(Coordination.Hash(new { operation = "allocation.shift", body }), f.Db(db => db.CoordinationCommands.Single(row => row.RequestId == body.RequestId).PayloadHash));
         Assert.Equal(new[] { one.Id, two.Id, three.Id }.Order().First(), saved.G("id"));
         foreach (var item in new[] { one, two, three })
         {

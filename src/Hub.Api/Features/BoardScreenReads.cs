@@ -19,14 +19,14 @@ public static class BoardScreenReads
         var projectIds = rows.Select(row => row.ProjectId).Distinct().ToArray();
         var disciplineIds = rows.Select(row => row.ProjectDisciplineId).Distinct().ToArray();
         var tasks = await db.Tasks.AsNoTracking().Where(task => taskIds.Contains(task.Id) && projectIds.Contains(task.ProjectId))
-            .Select(task => new { task.Id, task.ProjectId, task.Status, task.ReviewRequestedAt }).ToDictionaryAsync(task => task.Id);
+            .Select(task => new BoardTaskSource(task.Id, task.ProjectId, task.Status, task.ReviewRequestedAt)).ToDictionaryAsync(task => task.Id);
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(discipline => disciplineIds.Contains(discipline.Id) && projectIds.Contains(discipline.ProjectId))
-            .Select(discipline => new { discipline.Id, discipline.ProjectId, discipline.LeadUserId }).ToDictionaryAsync(discipline => discipline.Id);
+            .Select(discipline => new BoardDisciplineSource(discipline.Id, discipline.ProjectId, discipline.LeadUserId)).ToDictionaryAsync(discipline => discipline.Id);
         var projects = await db.Projects.AsNoTracking().Where(project => projectIds.Contains(project.Id))
-            .Select(project => new { project.Id, project.ProjectManagerId }).ToDictionaryAsync(project => project.Id);
+            .Select(project => new BoardProjectSource(project.Id, project.ProjectManagerId)).ToDictionaryAsync(project => project.Id);
         var peopleIds = disciplines.Values.Select(discipline => discipline.LeadUserId).OfType<Guid>()
             .Concat(projects.Values.Select(project => project.ProjectManagerId)).Distinct().ToArray();
-        var people = await db.Users.AsNoTracking().Where(person => peopleIds.Contains(person.Id)).Select(person => new { person.Id, person.DisplayName })
+        var people = await db.Users.AsNoTracking().Where(person => peopleIds.Contains(person.Id)).Select(person => new BoardPersonName(person.Id, person.DisplayName))
             .ToDictionaryAsync(person => person.Id, person => person.DisplayName);
         LeadFact Person(Guid? id) => id is not { } value ? new("Unassigned", null, null)
             : people.TryGetValue(value, out var name) && !string.IsNullOrWhiteSpace(name) ? new("Known", value, name) : new("Unavailable", value, null);
@@ -47,3 +47,8 @@ public static class BoardScreenReads
         }).ToArray();
     }
 }
+
+file sealed record BoardTaskSource(Guid Id, Guid ProjectId, string Status, DateTimeOffset? ReviewRequestedAt);
+file sealed record BoardDisciplineSource(Guid Id, Guid ProjectId, Guid? LeadUserId);
+file sealed record BoardProjectSource(Guid Id, Guid ProjectManagerId);
+file sealed record BoardPersonName(Guid Id, string DisplayName);

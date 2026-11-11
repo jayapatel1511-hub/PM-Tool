@@ -19,7 +19,7 @@ import type { ItemPartProps } from '@/pages/projects/slots-items'
 type LinkRow = components['schemas']['LinkRow']
 type LinkList = components['schemas']['LinkListResponse']
 
-const LINK_TYPES = ['SharePoint', 'OneDrive', 'Teams', 'Network Folder', 'External DMS', 'Client Portal', 'Other']
+const LINK_TYPES = ['SharePoint', 'OneDrive', 'Teams', 'Network Folder', 'External DMS', 'Client Portal', 'Other'] as const
 export const LINK_ICON: Record<string, typeof Link2> = {
   SharePoint: Files, OneDrive: Cloud, Teams: MessagesSquare, 'Network Folder': FolderOpen, 'External DMS': Archive, 'Client Portal': Globe, Other: Link2,
 }
@@ -123,7 +123,7 @@ function RegisteredAddLink({ type, id, onDone }: Parameters<typeof AddLink>[0]) 
       </Field>
       <Field label={t('field.Title')} htmlFor={`${prefix}-title`} optional><Input id={`${prefix}-title`} maxLength={200} value={value.title} onChange={event => setValue(old => ({ ...old, title: event.target.value }))} /></Field>
       <Field label={t('common.type')} htmlFor={`${prefix}-type`}><select id={`${prefix}-type`} className={selectCls} value={value.linkType} onChange={event => setValue(old => ({ ...old, linkType: event.target.value }))}>
-        <option value="">{t('links.autoType')}</option>{LINK_TYPES.map(x => <option key={x} value={x}>{runtimeText(`linkType.${x}`)}</option>)}
+        <option value="">{t('links.autoType')}</option>{LINK_TYPES.map(x => <option key={x} value={x}>{t(`linkType.${x}`)}</option>)}
       </select></Field>
       <label className="flex items-start gap-2 sm:col-span-2"><input type="checkbox" checked={value.register} onChange={event => setValue(old => ({ ...old, register: event.target.checked }))} />{t('linkReference.enable')}</label>
       {value.register && <div className="sm:col-span-2"><LinkReferenceFields prefix={prefix} value={value.reference} onChange={reference => setValue(old => ({ ...old, reference }))} task={type === 'Task'} /></div>}

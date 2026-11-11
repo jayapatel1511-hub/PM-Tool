@@ -388,7 +388,7 @@ public static class TaskBulkCommandEndpoints
     {
         var rows = stored.OrderBy(r => r.Index).ToArray(); var ids = rows.Select(r => r.TaskId).ToArray();
         var projects = access.VisibleProjectIds();
-        var visible = await db.Tasks.AsNoTracking().Where(t => ids.Contains(t.Id) && projects.Contains(t.ProjectId)).Select(t => new { t.Id, t.ProjectId }).ToDictionaryAsync(t => t.Id);
+        var visible = await db.Tasks.AsNoTracking().Where(t => ids.Contains(t.Id) && projects.Contains(t.ProjectId)).Select(t => new VisibleTask(t.Id, t.ProjectId)).ToDictionaryAsync(t => t.Id);
         return rows.Select(r => r.Outcome == "unavailable" || !visible.TryGetValue(r.TaskId, out var task) || task.ProjectId != r.ProjectId
             ? new TaskBulkRow(r.Index, "unavailable") : new TaskBulkRow(r.Index, r.Outcome, r.TaskId, r.ProjectId, r.Key, r.Code, r.Reason, r.RowVersion,
                 r.ActivityIds.Length == 0 ? null : r.ActivityIds)).ToArray();
@@ -401,3 +401,5 @@ public static class TaskBulkCommandEndpoints
             stored.Rows.Where(r => visibleIndexes.Contains(r.Index)).SelectMany(r => r.Warnings).ToArray());
     }
 }
+
+file sealed record VisibleTask(Guid Id, Guid ProjectId);

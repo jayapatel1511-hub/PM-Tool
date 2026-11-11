@@ -1,0 +1,4614 @@
+{
+ "title": "Packet 052 S07/S08 real-page sweep: every registered route (62 paths; the * error route excluded), six seeded roles, all eight 052/053 flags on, 1440 and 375 px",
+ "generated": "2026-11-11",
+ "source": "Detached worktree at 65cbcd64 plus the uncommitted S07/S08 lane changes; built wwwroot served by the Release Development-mode API on a disposable database (hub_nav_sweep, dropped afterwards) with the visual-census-real SYN-101..103 synthetic fixtures",
+ "scope": "Destination pages loaded through the real API. Checks: document and main sideways overflow, selected sidebar item, page errors. Not hosted or human acceptance. No template existed, so /templates/:id was opened with a missing id; org_structure and admin_review were off, so /admin/structure and /admin/review show Page not available.",
+ "roles": {
+  "jordan": "Admin",
+  "lena": "Executive + Supervisor",
+  "sam": "Supervisor",
+  "priya": "Project Manager",
+  "alex": "team member",
+  "rita": "Read Only"
+ },
+ "summary": {
+  "pageLoads": 744,
+  "sidewaysOverflow": 0,
+  "crashes": 0,
+  "pageErrors": 0,
+  "notVisualRoot": 0,
+  "moreThanOneSelected": 0,
+  "utilityPagesSelectingAnItem": 0
+ },
+ "legend": "state: rendered | alert (the page shows an error or permission banner, as for a role that may not open it) | not available (route behind a flag that was off) ; selected: href of the sidebar item with aria-current=page, null = none",
+ "routes": {
+  "/": {
+   "rita": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/my-work": {
+   "rita": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/my-work",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/home": {
+   "rita": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/home",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/boards": {
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/tasks": {
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/timeline": {
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/calendar": {
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/files": {
+   "rita": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/files",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/team": {
+   "rita": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/time": {
+   "rita": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/reports": {
+   "rita": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/organisation": {
+   "rita": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/team",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/pickup": {
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/tasks/01a1cbe0-f05f-7850-9675-b742ecd80cb1": {
+   "jordan": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/tasks",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/reports/overdue-tasks": {
+   "jordan": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/reports",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/planner": {
+   "jordan": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/workload": {
+   "jordan": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/vacation": {
+   "rita": {
+    "375": {
+     "selected": "/time",
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/planner",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/time",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/portfolio": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/staff": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/people/01a1cbdd-ace6-76c0-b10d-e89e311f16c4/reassign-work": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/staff",
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/staff",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/templates": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/templates/none": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/templates",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/templates",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/templates",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/reference/disciplines": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/settings": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/users": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/activity": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/operations": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/holidays": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/structure": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/audit-chains": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/admin/review": {
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/admin",
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/admin",
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "not available",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/notifications": {
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/search": {
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/preferences": {
+   "lena": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": null,
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101": {
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/dashboard": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/tasks": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/board": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/timeline": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/calendar": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/milestones": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/deliverables": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/submissions": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/reviews": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/readiness": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/coordination": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/handoffs": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/changes": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/design-basis": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/decisions": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/risks": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/issues": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/meetings": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/team": {
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/allocations": {
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/files": {
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/activity": {
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/settings": {
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  },
+  "/projects/SYN-101/vacation": {
+   "jordan": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "rita": {
+    "375": {
+     "selected": "/projects",
+     "state": "alert",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "alert",
+     "sidewaysPx": 0
+    }
+   },
+   "lena": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "alex": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "sam": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   },
+   "priya": {
+    "375": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    },
+    "1440": {
+     "selected": "/projects",
+     "state": "rendered",
+     "sidewaysPx": 0
+    }
+   }
+  }
+ }
+}

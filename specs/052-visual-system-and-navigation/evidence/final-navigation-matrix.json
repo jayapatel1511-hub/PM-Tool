@@ -1,0 +1,4272 @@
+{
+  "title": "Packet 052 S07/S08 navigation matrix: every registered route x role, sidebar item selected, flags on and off, 1440 and 375 px",
+  "generated": "2026-11-11",
+  "source": "Detached worktree at 65cbcd64 plus the uncommitted S07/S08 lane changes (Shell.tsx, Admin.tsx, Notifications.tsx, visual-tabs.css, visual-route-matrix harness)",
+  "harness": "web/tests/visual-route-matrix.cjs with web/tests/visual-route-matrix.fixture.cjs on the Vite dev server: the real Shell, ProjectLayout and route table with leaf probes in place of destination pages, mocked API, synthetic /me capability profiles. Proves navigation binding, not destination loading or API permission.",
+  "legend": {
+    "highlight": "href of the one sidebar item with aria-current=page; null = none selected (utility pages, the error page, and flags-off routes with no E2 parent); \"not permitted\" = the profile cannot open the route, so it was not visited",
+    "projectGroup": "text of the selected project group tab (flags off, Activity and Settings show as the More trigger label)"
+  },
+  "flagsOffBaseline": {
+    "ref": "ac2fa894 (live release)",
+    "method": "same harness with TUESDAY_ROUTE_MATRIX_FLAGS=off against that commit's web source",
+    "result": "PASS, 898 observations; flags-off highlight and project group cells identical to this build at both widths"
+  },
+  "counts": {
+    "observations": 1796,
+    "utility": 54,
+    "drawer": 449,
+    "notPermitted": 472
+  },
+  "drawerChecksPerProfile": {
+    "Admin": 63,
+    "Executive": 51,
+    "Supervisor": 51,
+    "Project Manager": 49,
+    "Team member": 46,
+    "Read Only": 44,
+    "Unit leader capability": 50,
+    "Template editor capability": 48,
+    "Read Only project manager": 47
+  },
+  "widths": [
+    1440,
+    375
+  ],
+  "profiles": [
+    {
+      "name": "Admin",
+      "roles": [
+        "Admin"
+      ],
+      "capabilities": {
+        "admin": true,
+        "staff": true,
+        "templates": true,
+        "workload": true,
+        "portfolio": true
+      }
+    },
+    {
+      "name": "Executive",
+      "roles": [
+        "Executive"
+      ],
+      "capabilities": {
+        "staff": true,
+        "workload": true,
+        "portfolio": true
+      }
+    },
+    {
+      "name": "Supervisor",
+      "roles": [
+        "Supervisor"
+      ],
+      "capabilities": {
+        "staff": true,
+        "workload": true,
+        "portfolio": true
+      }
+    },
+    {
+      "name": "Project Manager",
+      "roles": [
+        "ProjectManager"
+      ],
+      "capabilities": {
+        "workload": true,
+        "portfolio": true
+      }
+    },
+    {
+      "name": "Team member",
+      "roles": [],
+      "capabilities": {}
+    },
+    {
+      "name": "Read Only",
+      "roles": [
+        "ReadOnly"
+      ],
+      "capabilities": {
+        "readOnly": true
+      }
+    },
+    {
+      "name": "Unit leader capability",
+      "roles": [],
+      "capabilities": {
+        "staff": true,
+        "workload": true
+      }
+    },
+    {
+      "name": "Template editor capability",
+      "roles": [],
+      "capabilities": {
+        "templates": true
+      }
+    },
+    {
+      "name": "Read Only project manager",
+      "roles": [
+        "ProjectManager",
+        "ReadOnly"
+      ],
+      "capabilities": {
+        "workload": true,
+        "portfolio": true,
+        "readOnly": true
+      }
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "",
+      "path": "/",
+      "settled": "/my-work"
+    },
+    {
+      "pattern": "my-work",
+      "path": "/my-work"
+    },
+    {
+      "pattern": "home",
+      "path": "/home"
+    },
+    {
+      "pattern": "projects",
+      "path": "/projects"
+    },
+    {
+      "pattern": "boards",
+      "path": "/boards"
+    },
+    {
+      "pattern": "tasks",
+      "path": "/tasks"
+    },
+    {
+      "pattern": "timeline",
+      "path": "/timeline"
+    },
+    {
+      "pattern": "calendar",
+      "path": "/calendar"
+    },
+    {
+      "pattern": "files",
+      "path": "/files"
+    },
+    {
+      "pattern": "team",
+      "path": "/team"
+    },
+    {
+      "pattern": "time",
+      "path": "/time"
+    },
+    {
+      "pattern": "reports",
+      "path": "/reports"
+    },
+    {
+      "pattern": "organisation",
+      "path": "/organisation"
+    },
+    {
+      "pattern": "pickup",
+      "path": "/pickup"
+    },
+    {
+      "pattern": "tasks/:id",
+      "path": "/tasks/00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "pattern": "reports/:code",
+      "path": "/reports/overdue-tasks"
+    },
+    {
+      "pattern": "planner",
+      "path": "/planner"
+    },
+    {
+      "pattern": "workload",
+      "path": "/workload"
+    },
+    {
+      "pattern": "vacation",
+      "path": "/vacation"
+    },
+    {
+      "pattern": "portfolio",
+      "path": "/portfolio"
+    },
+    {
+      "pattern": "staff",
+      "path": "/staff"
+    },
+    {
+      "pattern": "people/:id/reassign-work",
+      "path": "/people/00000000-0000-0000-0000-000000000002/reassign-work"
+    },
+    {
+      "pattern": "templates",
+      "path": "/templates"
+    },
+    {
+      "pattern": "templates/:id",
+      "path": "/templates/00000000-0000-0000-0000-000000000002"
+    },
+    {
+      "pattern": "admin",
+      "path": "/admin"
+    },
+    {
+      "pattern": "admin/reference/:kind",
+      "path": "/admin/reference/disciplines"
+    },
+    {
+      "pattern": "admin/settings",
+      "path": "/admin/settings"
+    },
+    {
+      "pattern": "admin/users",
+      "path": "/admin/users"
+    },
+    {
+      "pattern": "admin/activity",
+      "path": "/admin/activity"
+    },
+    {
+      "pattern": "admin/operations",
+      "path": "/admin/operations"
+    },
+    {
+      "pattern": "admin/holidays",
+      "path": "/admin/holidays"
+    },
+    {
+      "pattern": "admin/structure",
+      "path": "/admin/structure"
+    },
+    {
+      "pattern": "admin/audit-chains",
+      "path": "/admin/audit-chains"
+    },
+    {
+      "pattern": "admin/review",
+      "path": "/admin/review"
+    },
+    {
+      "pattern": "notifications",
+      "path": "/notifications"
+    },
+    {
+      "pattern": "search",
+      "path": "/search"
+    },
+    {
+      "pattern": "preferences",
+      "path": "/preferences"
+    },
+    {
+      "pattern": "*",
+      "path": "/unregistered-route-probe"
+    },
+    {
+      "pattern": "projects/:number",
+      "path": "/projects/NAV-001",
+      "settled": "/projects/NAV-001/dashboard"
+    },
+    {
+      "pattern": "projects/:number/dashboard",
+      "path": "/projects/NAV-001/dashboard"
+    },
+    {
+      "pattern": "projects/:number/tasks",
+      "path": "/projects/NAV-001/tasks"
+    },
+    {
+      "pattern": "projects/:number/board",
+      "path": "/projects/NAV-001/board"
+    },
+    {
+      "pattern": "projects/:number/timeline",
+      "path": "/projects/NAV-001/timeline"
+    },
+    {
+      "pattern": "projects/:number/calendar",
+      "path": "/projects/NAV-001/calendar"
+    },
+    {
+      "pattern": "projects/:number/milestones",
+      "path": "/projects/NAV-001/milestones"
+    },
+    {
+      "pattern": "projects/:number/deliverables",
+      "path": "/projects/NAV-001/deliverables"
+    },
+    {
+      "pattern": "projects/:number/submissions",
+      "path": "/projects/NAV-001/submissions"
+    },
+    {
+      "pattern": "projects/:number/reviews",
+      "path": "/projects/NAV-001/reviews"
+    },
+    {
+      "pattern": "projects/:number/readiness",
+      "path": "/projects/NAV-001/readiness"
+    },
+    {
+      "pattern": "projects/:number/coordination",
+      "path": "/projects/NAV-001/coordination"
+    },
+    {
+      "pattern": "projects/:number/handoffs",
+      "path": "/projects/NAV-001/handoffs"
+    },
+    {
+      "pattern": "projects/:number/changes",
+      "path": "/projects/NAV-001/changes"
+    },
+    {
+      "pattern": "projects/:number/design-basis",
+      "path": "/projects/NAV-001/design-basis"
+    },
+    {
+      "pattern": "projects/:number/decisions",
+      "path": "/projects/NAV-001/decisions"
+    },
+    {
+      "pattern": "projects/:number/risks",
+      "path": "/projects/NAV-001/risks"
+    },
+    {
+      "pattern": "projects/:number/issues",
+      "path": "/projects/NAV-001/issues"
+    },
+    {
+      "pattern": "projects/:number/meetings",
+      "path": "/projects/NAV-001/meetings"
+    },
+    {
+      "pattern": "projects/:number/team",
+      "path": "/projects/NAV-001/team"
+    },
+    {
+      "pattern": "projects/:number/allocations",
+      "path": "/projects/NAV-001/allocations"
+    },
+    {
+      "pattern": "projects/:number/files",
+      "path": "/projects/NAV-001/files"
+    },
+    {
+      "pattern": "projects/:number/activity",
+      "path": "/projects/NAV-001/activity"
+    },
+    {
+      "pattern": "projects/:number/settings",
+      "path": "/projects/NAV-001/settings"
+    },
+    {
+      "pattern": "projects/:number/vacation",
+      "path": "/projects/NAV-001/vacation"
+    }
+  ],
+  "highlight": {
+    "375": {
+      "on": {
+        "/": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/my-work": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/home": {
+          "Admin": "/home",
+          "Executive": "/home",
+          "Supervisor": "/home",
+          "Project Manager": "/home",
+          "Team member": "/home",
+          "Read Only": "/home",
+          "Unit leader capability": "/home",
+          "Template editor capability": "/home",
+          "Read Only project manager": "/home"
+        },
+        "/projects": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/boards": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/timeline": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/calendar": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/files": {
+          "Admin": "/files",
+          "Executive": "/files",
+          "Supervisor": "/files",
+          "Project Manager": "/files",
+          "Team member": "/files",
+          "Read Only": "/files",
+          "Unit leader capability": "/files",
+          "Template editor capability": "/files",
+          "Read Only project manager": "/files"
+        },
+        "/team": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/time": {
+          "Admin": "/time",
+          "Executive": "/time",
+          "Supervisor": "/time",
+          "Project Manager": "/time",
+          "Team member": "/time",
+          "Read Only": "/time",
+          "Unit leader capability": "/time",
+          "Template editor capability": "/time",
+          "Read Only project manager": "/time"
+        },
+        "/reports": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/organisation": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/pickup": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks/00000000-0000-0000-0000-000000000001": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/reports/overdue-tasks": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/planner": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/workload": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/vacation": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "/time",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "/time",
+          "Read Only project manager": "not permitted"
+        },
+        "/portfolio": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/projects"
+        },
+        "/staff": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/people/00000000-0000-0000-0000-000000000002/reassign-work": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates/00000000-0000-0000-0000-000000000002": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/reference/disciplines": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/settings": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/users": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/activity": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/operations": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/holidays": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/structure": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/audit-chains": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/review": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/notifications": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/search": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/preferences": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/unregistered-route-probe": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/projects/NAV-001": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "not permitted"
+        }
+      },
+      "off": {
+        "/": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/my-work": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/home": {
+          "Admin": "/home",
+          "Executive": "/home",
+          "Supervisor": "/home",
+          "Project Manager": "/home",
+          "Team member": "/home",
+          "Read Only": "/home",
+          "Unit leader capability": "/home",
+          "Template editor capability": "/home",
+          "Read Only project manager": "/home"
+        },
+        "/projects": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/boards": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/timeline": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/calendar": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/files": {
+          "Admin": "/files",
+          "Executive": "/files",
+          "Supervisor": "/files",
+          "Project Manager": "/files",
+          "Team member": "/files",
+          "Read Only": "/files",
+          "Unit leader capability": "/files",
+          "Template editor capability": "/files",
+          "Read Only project manager": "/files"
+        },
+        "/team": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/time": {
+          "Admin": "/time",
+          "Executive": "/time",
+          "Supervisor": "/time",
+          "Project Manager": "/time",
+          "Team member": "/time",
+          "Read Only": "/time",
+          "Unit leader capability": "/time",
+          "Template editor capability": "/time",
+          "Read Only project manager": "/time"
+        },
+        "/reports": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/organisation": {
+          "Admin": "/organisation",
+          "Executive": "/organisation",
+          "Supervisor": "/organisation",
+          "Project Manager": "/organisation",
+          "Team member": "/organisation",
+          "Read Only": "/organisation",
+          "Unit leader capability": "/organisation",
+          "Template editor capability": "/organisation",
+          "Read Only project manager": "/organisation"
+        },
+        "/pickup": {
+          "Admin": "/pickup",
+          "Executive": "/pickup",
+          "Supervisor": "/pickup",
+          "Project Manager": "/pickup",
+          "Team member": "/pickup",
+          "Read Only": "/pickup",
+          "Unit leader capability": "/pickup",
+          "Template editor capability": "/pickup",
+          "Read Only project manager": "/pickup"
+        },
+        "/tasks/00000000-0000-0000-0000-000000000001": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/reports/overdue-tasks": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/planner": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/workload": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/vacation": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": "not permitted",
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": "not permitted"
+        },
+        "/portfolio": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/projects"
+        },
+        "/staff": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/people/00000000-0000-0000-0000-000000000002/reassign-work": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": null,
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates/00000000-0000-0000-0000-000000000002": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/reference/disciplines": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/settings": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/users": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/activity": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/operations": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/holidays": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/structure": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/audit-chains": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/review": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/notifications": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/search": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/preferences": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/unregistered-route-probe": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/projects/NAV-001": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "not permitted"
+        }
+      }
+    },
+    "1440": {
+      "on": {
+        "/": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/my-work": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/home": {
+          "Admin": "/home",
+          "Executive": "/home",
+          "Supervisor": "/home",
+          "Project Manager": "/home",
+          "Team member": "/home",
+          "Read Only": "/home",
+          "Unit leader capability": "/home",
+          "Template editor capability": "/home",
+          "Read Only project manager": "/home"
+        },
+        "/projects": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/boards": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/timeline": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/calendar": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/files": {
+          "Admin": "/files",
+          "Executive": "/files",
+          "Supervisor": "/files",
+          "Project Manager": "/files",
+          "Team member": "/files",
+          "Read Only": "/files",
+          "Unit leader capability": "/files",
+          "Template editor capability": "/files",
+          "Read Only project manager": "/files"
+        },
+        "/team": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/time": {
+          "Admin": "/time",
+          "Executive": "/time",
+          "Supervisor": "/time",
+          "Project Manager": "/time",
+          "Team member": "/time",
+          "Read Only": "/time",
+          "Unit leader capability": "/time",
+          "Template editor capability": "/time",
+          "Read Only project manager": "/time"
+        },
+        "/reports": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/organisation": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/pickup": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks/00000000-0000-0000-0000-000000000001": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/reports/overdue-tasks": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/planner": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/workload": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/vacation": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "/time",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "/time",
+          "Read Only project manager": "not permitted"
+        },
+        "/portfolio": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/projects"
+        },
+        "/staff": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/people/00000000-0000-0000-0000-000000000002/reassign-work": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates/00000000-0000-0000-0000-000000000002": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/reference/disciplines": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/settings": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/users": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/activity": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/operations": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/holidays": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/structure": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/audit-chains": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/review": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/notifications": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/search": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/preferences": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/unregistered-route-probe": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/projects/NAV-001": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "not permitted"
+        }
+      },
+      "off": {
+        "/": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/my-work": {
+          "Admin": "/my-work",
+          "Executive": "/my-work",
+          "Supervisor": "/my-work",
+          "Project Manager": "/my-work",
+          "Team member": "/my-work",
+          "Read Only": "/my-work",
+          "Unit leader capability": "/my-work",
+          "Template editor capability": "/my-work",
+          "Read Only project manager": "/my-work"
+        },
+        "/home": {
+          "Admin": "/home",
+          "Executive": "/home",
+          "Supervisor": "/home",
+          "Project Manager": "/home",
+          "Team member": "/home",
+          "Read Only": "/home",
+          "Unit leader capability": "/home",
+          "Template editor capability": "/home",
+          "Read Only project manager": "/home"
+        },
+        "/projects": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/boards": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/tasks": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/timeline": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/calendar": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/files": {
+          "Admin": "/files",
+          "Executive": "/files",
+          "Supervisor": "/files",
+          "Project Manager": "/files",
+          "Team member": "/files",
+          "Read Only": "/files",
+          "Unit leader capability": "/files",
+          "Template editor capability": "/files",
+          "Read Only project manager": "/files"
+        },
+        "/team": {
+          "Admin": "/team",
+          "Executive": "/team",
+          "Supervisor": "/team",
+          "Project Manager": "/team",
+          "Team member": "/team",
+          "Read Only": "/team",
+          "Unit leader capability": "/team",
+          "Template editor capability": "/team",
+          "Read Only project manager": "/team"
+        },
+        "/time": {
+          "Admin": "/time",
+          "Executive": "/time",
+          "Supervisor": "/time",
+          "Project Manager": "/time",
+          "Team member": "/time",
+          "Read Only": "/time",
+          "Unit leader capability": "/time",
+          "Template editor capability": "/time",
+          "Read Only project manager": "/time"
+        },
+        "/reports": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/organisation": {
+          "Admin": "/organisation",
+          "Executive": "/organisation",
+          "Supervisor": "/organisation",
+          "Project Manager": "/organisation",
+          "Team member": "/organisation",
+          "Read Only": "/organisation",
+          "Unit leader capability": "/organisation",
+          "Template editor capability": "/organisation",
+          "Read Only project manager": "/organisation"
+        },
+        "/pickup": {
+          "Admin": "/pickup",
+          "Executive": "/pickup",
+          "Supervisor": "/pickup",
+          "Project Manager": "/pickup",
+          "Team member": "/pickup",
+          "Read Only": "/pickup",
+          "Unit leader capability": "/pickup",
+          "Template editor capability": "/pickup",
+          "Read Only project manager": "/pickup"
+        },
+        "/tasks/00000000-0000-0000-0000-000000000001": {
+          "Admin": "/tasks",
+          "Executive": "/tasks",
+          "Supervisor": "/tasks",
+          "Project Manager": "/tasks",
+          "Team member": "/tasks",
+          "Read Only": "/tasks",
+          "Unit leader capability": "/tasks",
+          "Template editor capability": "/tasks",
+          "Read Only project manager": "/tasks"
+        },
+        "/reports/overdue-tasks": {
+          "Admin": "/reports",
+          "Executive": "/reports",
+          "Supervisor": "/reports",
+          "Project Manager": "/reports",
+          "Team member": "/reports",
+          "Read Only": "/reports",
+          "Unit leader capability": "/reports",
+          "Template editor capability": "/reports",
+          "Read Only project manager": "/reports"
+        },
+        "/planner": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/workload": {
+          "Admin": "/planner",
+          "Executive": "/planner",
+          "Supervisor": "/planner",
+          "Project Manager": "/planner",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/planner",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/planner"
+        },
+        "/vacation": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": "not permitted",
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": "not permitted"
+        },
+        "/portfolio": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "/projects"
+        },
+        "/staff": {
+          "Admin": "/staff",
+          "Executive": "/staff",
+          "Supervisor": "/staff",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/staff",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/people/00000000-0000-0000-0000-000000000002/reassign-work": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": null,
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/templates/00000000-0000-0000-0000-000000000002": {
+          "Admin": "/templates",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "/templates",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/reference/disciplines": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/settings": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/users": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/activity": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/operations": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/holidays": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/structure": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/audit-chains": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/admin/review": {
+          "Admin": "/admin",
+          "Executive": "not permitted",
+          "Supervisor": "not permitted",
+          "Project Manager": "not permitted",
+          "Team member": "not permitted",
+          "Read Only": "not permitted",
+          "Unit leader capability": "not permitted",
+          "Template editor capability": "not permitted",
+          "Read Only project manager": "not permitted"
+        },
+        "/notifications": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/search": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/preferences": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/unregistered-route-probe": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Read Only": null,
+          "Unit leader capability": null,
+          "Template editor capability": null,
+          "Read Only project manager": null
+        },
+        "/projects/NAV-001": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "/projects",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "/projects"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "/projects",
+          "Executive": "/projects",
+          "Supervisor": "/projects",
+          "Project Manager": "/projects",
+          "Team member": "/projects",
+          "Read Only": "not permitted",
+          "Unit leader capability": "/projects",
+          "Template editor capability": "/projects",
+          "Read Only project manager": "not permitted"
+        }
+      }
+    }
+  },
+  "projectGroup": {
+    "375": {
+      "on": {
+        "/projects/NAV-001": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "Files",
+          "Executive": "Files",
+          "Supervisor": "Files",
+          "Project Manager": "Files",
+          "Team member": "Files",
+          "Read Only": "Files",
+          "Unit leader capability": "Files",
+          "Template editor capability": "Files",
+          "Read Only project manager": "Files"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "Activity",
+          "Executive": "Activity",
+          "Supervisor": "Activity",
+          "Project Manager": "Activity",
+          "Team member": "Activity",
+          "Read Only": "Activity",
+          "Unit leader capability": "Activity",
+          "Template editor capability": "Activity",
+          "Read Only project manager": "Activity"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "Settings",
+          "Executive": "Settings",
+          "Supervisor": "Settings",
+          "Project Manager": "Settings",
+          "Team member": "Settings",
+          "Read Only": "Settings",
+          "Unit leader capability": "Settings",
+          "Template editor capability": "Settings",
+          "Read Only project manager": "Settings"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People"
+        }
+      },
+      "off": {
+        "/projects/NAV-001": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "Files",
+          "Executive": "Files",
+          "Supervisor": "Files",
+          "Project Manager": "Files",
+          "Team member": "Files",
+          "Read Only": "Files",
+          "Unit leader capability": "Files",
+          "Template editor capability": "Files",
+          "Read Only project manager": "Files"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "Activity",
+          "Executive": "Activity",
+          "Supervisor": "Activity",
+          "Project Manager": "Activity",
+          "Team member": "Activity",
+          "Read Only": "Activity",
+          "Unit leader capability": "Activity",
+          "Template editor capability": "Activity",
+          "Read Only project manager": "Activity"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "Settings",
+          "Executive": "Settings",
+          "Supervisor": "Settings",
+          "Project Manager": "Settings",
+          "Team member": "Settings",
+          "Read Only": "Settings",
+          "Unit leader capability": "Settings",
+          "Template editor capability": "Settings",
+          "Read Only project manager": "Settings"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Unit leader capability": null,
+          "Template editor capability": null
+        }
+      }
+    },
+    "1440": {
+      "on": {
+        "/projects/NAV-001": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "Files",
+          "Executive": "Files",
+          "Supervisor": "Files",
+          "Project Manager": "Files",
+          "Team member": "Files",
+          "Read Only": "Files",
+          "Unit leader capability": "Files",
+          "Template editor capability": "Files",
+          "Read Only project manager": "Files"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "Activity",
+          "Executive": "Activity",
+          "Supervisor": "Activity",
+          "Project Manager": "Activity",
+          "Team member": "Activity",
+          "Read Only": "Activity",
+          "Unit leader capability": "Activity",
+          "Template editor capability": "Activity",
+          "Read Only project manager": "Activity"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "Settings",
+          "Executive": "Settings",
+          "Supervisor": "Settings",
+          "Project Manager": "Settings",
+          "Team member": "Settings",
+          "Read Only": "Settings",
+          "Unit leader capability": "Settings",
+          "Template editor capability": "Settings",
+          "Read Only project manager": "Settings"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People"
+        }
+      },
+      "off": {
+        "/projects/NAV-001": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/dashboard": {
+          "Admin": "Overview",
+          "Executive": "Overview",
+          "Supervisor": "Overview",
+          "Project Manager": "Overview",
+          "Team member": "Overview",
+          "Read Only": "Overview",
+          "Unit leader capability": "Overview",
+          "Template editor capability": "Overview",
+          "Read Only project manager": "Overview"
+        },
+        "/projects/NAV-001/tasks": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/board": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/timeline": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/calendar": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/milestones": {
+          "Admin": "Work",
+          "Executive": "Work",
+          "Supervisor": "Work",
+          "Project Manager": "Work",
+          "Team member": "Work",
+          "Read Only": "Work",
+          "Unit leader capability": "Work",
+          "Template editor capability": "Work",
+          "Read Only project manager": "Work"
+        },
+        "/projects/NAV-001/deliverables": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/submissions": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/reviews": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/readiness": {
+          "Admin": "Deliverables",
+          "Executive": "Deliverables",
+          "Supervisor": "Deliverables",
+          "Project Manager": "Deliverables",
+          "Team member": "Deliverables",
+          "Read Only": "Deliverables",
+          "Unit leader capability": "Deliverables",
+          "Template editor capability": "Deliverables",
+          "Read Only project manager": "Deliverables"
+        },
+        "/projects/NAV-001/coordination": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/handoffs": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/changes": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/design-basis": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/decisions": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/risks": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/issues": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/meetings": {
+          "Admin": "Coordination",
+          "Executive": "Coordination",
+          "Supervisor": "Coordination",
+          "Project Manager": "Coordination",
+          "Team member": "Coordination",
+          "Read Only": "Coordination",
+          "Unit leader capability": "Coordination",
+          "Template editor capability": "Coordination",
+          "Read Only project manager": "Coordination"
+        },
+        "/projects/NAV-001/team": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/allocations": {
+          "Admin": "People",
+          "Executive": "People",
+          "Supervisor": "People",
+          "Project Manager": "People",
+          "Team member": "People",
+          "Read Only": "People",
+          "Unit leader capability": "People",
+          "Template editor capability": "People",
+          "Read Only project manager": "People"
+        },
+        "/projects/NAV-001/files": {
+          "Admin": "Files",
+          "Executive": "Files",
+          "Supervisor": "Files",
+          "Project Manager": "Files",
+          "Team member": "Files",
+          "Read Only": "Files",
+          "Unit leader capability": "Files",
+          "Template editor capability": "Files",
+          "Read Only project manager": "Files"
+        },
+        "/projects/NAV-001/activity": {
+          "Admin": "Activity",
+          "Executive": "Activity",
+          "Supervisor": "Activity",
+          "Project Manager": "Activity",
+          "Team member": "Activity",
+          "Read Only": "Activity",
+          "Unit leader capability": "Activity",
+          "Template editor capability": "Activity",
+          "Read Only project manager": "Activity"
+        },
+        "/projects/NAV-001/settings": {
+          "Admin": "Settings",
+          "Executive": "Settings",
+          "Supervisor": "Settings",
+          "Project Manager": "Settings",
+          "Team member": "Settings",
+          "Read Only": "Settings",
+          "Unit leader capability": "Settings",
+          "Template editor capability": "Settings",
+          "Read Only project manager": "Settings"
+        },
+        "/projects/NAV-001/vacation": {
+          "Admin": null,
+          "Executive": null,
+          "Supervisor": null,
+          "Project Manager": null,
+          "Team member": null,
+          "Unit leader capability": null,
+          "Template editor capability": null
+        }
+      }
+    }
+  }
+}

@@ -1,20 +1,23 @@
 import type { components } from '@/gen/api'
 import { fmtDate, fmtTime, hours } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { t, textFor, tv, type KeyIn, type TextKey } from '@/lib/i18n'
 import type { TaskRow } from './Tasks'
 
 export type TaskListGroup = components['schemas']['TaskListGroup']
 type Metrics = Pick<TaskListGroup, 'rowCount' | 'estimatedHours' | 'unestimatedCount' | 'overdueCount' | 'unavailableStateCount' | 'progressPct' | 'progressBasis' | 'progressTaskCount' | 'nextDueDate' | 'undatedOpenCount'>
 type GroupPage = { groups?: TaskListGroup[] | null; asOf?: string | null }
 export const taskGroupOptions = ['none', 'discipline', 'deliverable', 'milestone', 'assignee', 'status', 'due'] as const
-export const taskGroupLabel = (key: string, values?: Record<string, string | number>) => runtimeText(`taskGroups.${key}`, values)
-export const taskGroupChoices = () => taskGroupOptions.map(value => ({ value, label: runtimeText(({ none: 'tgroup.none', discipline: 'common.discipline', deliverable: 'task.deliverable', milestone: 'field.MilestoneId', assignee: 'field.AssigneeId', status: 'common.status', due: 'common.due' })[value]) }))
+export const taskGroupLabel = (key: KeyIn<'taskGroups.'>, values?: Record<string, string | number>) => t(`taskGroups.${key}`, values)
+const TASK_GROUP_TEXT = { none: 'tgroup.none', discipline: 'common.discipline', deliverable: 'task.deliverable', milestone: 'field.MilestoneId', assignee: 'field.AssigneeId', status: 'common.status', due: 'common.due' } as const satisfies Record<(typeof taskGroupOptions)[number], TextKey>
+const DUE_BUCKETS = { overdue: 'tbucket.overdue', today: 'tbucket.today', thisWeek: 'tbucket.thisWeek', nextWeek: 'tbucket.nextWeek', later: 'tbucket.later', noDate: 'tbucket.noDate' } as const
+const PROGRESS_BASES = { Hours: 'taskGroups.basisHours', Count: 'taskGroups.basisCount', NoTasks: 'taskGroups.basisNoTasks' } as const
+export const taskGroupChoices = () => taskGroupOptions.map(value => ({ value, label: t(TASK_GROUP_TEXT[value]) }))
 
 export function groupHeading(group: TaskListGroup) {
   if (!group.referenceAvailable) return taskGroupLabel('referenceUnavailable')
   if (group.dimension === 'project') return `${group.projectNumber} · ${group.projectName}`
   if (group.dimension === 'status') return tv(group.value ?? '')
-  if (group.dimension === 'due') return group.value === 'unavailable' ? taskGroupLabel('unavailableDates') : runtimeText(`tbucket.${group.value}`)
+  if (group.dimension === 'due') return group.value === 'unavailable' ? taskGroupLabel('unavailableDates') : textFor(DUE_BUCKETS, group.value ?? '')
   return group.label ?? t(group.dimension === 'deliverable' ? 'task.noDeliverable' : group.dimension === 'milestone' ? 'task.noMilestone' : group.dimension === 'assignee' ? 'ind.unassigned' : 'common.unavailable')
 }
 
@@ -72,7 +75,7 @@ export function TaskGroupSummary({ summary, shown, unavailable = false }: { summ
     <span>{taskGroupLabel('shown', { shown: shown ?? summary.rowCount, total: summary.rowCount })}</span>
     <span>{taskGroupLabel(summary.unavailableStateCount > 0 ? 'knownOverdue' : 'overdue', { n: summary.overdueCount })}{summary.unavailableStateCount > 0 && ` · ${taskGroupLabel('stateUnavailable', { n: summary.unavailableStateCount })}`}</span>
     <span>{taskGroupLabel('estimates', { hours: hours(summary.estimatedHours), n: summary.unestimatedCount })}</span>
-    <span>{summary.progressPct == null ? taskGroupLabel('progressUnavailable', { basis: taskGroupLabel(`basis${summary.progressBasis}`) }) : taskGroupLabel('progress', { n: summary.progressPct, basis: taskGroupLabel(`basis${summary.progressBasis}`) })}{summary.progressTaskCount < summary.rowCount && ` · ${taskGroupLabel('excludesCancelled')}`}</span>
+    <span>{summary.progressPct == null ? taskGroupLabel('progressUnavailable', { basis: textFor(PROGRESS_BASES, summary.progressBasis) }) : taskGroupLabel('progress', { n: summary.progressPct, basis: textFor(PROGRESS_BASES, summary.progressBasis) })}{summary.progressTaskCount < summary.rowCount && ` · ${taskGroupLabel('excludesCancelled')}`}</span>
     <span>{summary.nextDueDate ? taskGroupLabel('nextDue', { date: fmtDate(summary.nextDueDate) }) : taskGroupLabel('noDatedOpen')} · {taskGroupLabel('undated', { n: summary.undatedOpenCount })}</span>
   </span>
 }

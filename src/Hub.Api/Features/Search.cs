@@ -351,7 +351,7 @@ public static partial class SearchEndpoints
         // One bounded User read across all returned groups. This adds no directory discovery,
         // person-panel authority, writes or per-hit queries; the panel checks its own scope.
         var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id))
-            .Select(user => new { user.Id, user.DisplayName, user.IsActive }).ToDictionaryAsync(user => user.Id);
+            .Select(user => new HitUser(user.Id, user.DisplayName, user.IsActive)).ToDictionaryAsync(user => user.Id);
         foreach (var (hit, role) in selected)
             if (hit.PersonUserId is { } id && users.TryGetValue(id, out var user) && !string.IsNullOrWhiteSpace(user.DisplayName))
                 hit.Person = new(user.Id, user.DisplayName, user.IsActive, role);
@@ -398,3 +398,5 @@ public static partial class SearchEndpoints
         return new SearchExact(hit.Type, hit.Id, await db.Projects.Where(p => p.Id == hit.ProjectId).Select(p => p.ProjectNumber).FirstAsync(), hit.Key);
     }
 }
+
+file sealed record HitUser(Guid Id, string DisplayName, bool IsActive);

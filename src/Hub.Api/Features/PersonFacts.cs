@@ -61,7 +61,7 @@ public static class PersonFacts
         => new(type, start, end, start > today, end is { } date && date >= today && date.DayNumber - today.DayNumber <= window);
     static async Task<Dictionary<Guid, Notices>> LoadNotices(HubDb db, Guid[] ids, DateOnly today, int window)
     {
-        var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id)).Select(user => new { user.Id, user.PersonType, user.PersonStartDate, user.PersonEndDate }).ToArrayAsync();
+        var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id)).Select(user => new NoticeSource(user.Id, user.PersonType, user.PersonStartDate, user.PersonEndDate)).ToArrayAsync();
         return users.ToDictionary(user => user.Id, user => Notice(user.PersonType, user.PersonStartDate, user.PersonEndDate, today, window));
     }
     public static async Task<Dictionary<Guid, Notices>> ReadNotices(HubDb db, Guid[] authorisedIds, OrgSettings settings, TimeProvider clock)
@@ -83,7 +83,7 @@ public static class PersonFacts
             join tag in db.CertificationTags.AsNoTracking() on record.CertificationTagId equals tag.Id
             where ids.Contains(record.UserId)
             orderby tag.SortOrder, tag.Name, record.Id
-            select new { record.Id, record.UserId, record.CertificationTagId, tag.Name, tag.IsActive, record.ExpiresOn, record.RowVersion }).ToArrayAsync();
+            select new CertificationRow(record.Id, record.UserId, record.CertificationTagId, tag.Name, tag.IsActive, record.ExpiresOn, record.RowVersion)).ToArrayAsync();
         return notices.ToDictionary(pair => pair.Key, pair => new Facts(pair.Value, certifications.Where(record => record.UserId == pair.Key).Select(record => {
             var days = record.ExpiresOn?.DayNumber - today.DayNumber;
             var state = days is null ? "Unknown" : days < 0 ? "Expired" : days <= settings.CertificationWarnDays ? "ExpiresIn" : "Recorded";
@@ -188,3 +188,6 @@ public static class PersonFacts
         });
     }
 }
+
+file sealed record NoticeSource(Guid Id, string? PersonType, DateOnly? PersonStartDate, DateOnly? PersonEndDate);
+file sealed record CertificationRow(Guid Id, Guid UserId, Guid CertificationTagId, string Name, bool IsActive, DateOnly? ExpiresOn, int RowVersion);

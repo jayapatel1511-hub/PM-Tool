@@ -331,7 +331,7 @@ public static partial class AllocationEndpoints
             // The command's active-link unique index would reject these inputs. Do not preview a second reservation of the same work slice.
             var reserved = await db.AllocationWorkLinks.AsNoTracking().Where(link => link.PersonId == body.PersonId && link.ReleasedAt == null
                 && link.WorkDate >= body.FromDate && link.WorkDate <= body.ThroughDate)
-                .Select(link => new { link.WorkType, link.WorkId, link.WorkDate }).ToArrayAsync();
+                .Select(link => new ReservedSlice(link.WorkType, link.WorkId, link.WorkDate)).ToArrayAsync();
             Check.That(!body.Links.Any(link => reserved.Any(existing => existing.WorkType == link.WorkType && existing.WorkId == link.WorkId && existing.WorkDate == link.WorkDate)),
                 "links", "error.invalid");
         }
@@ -598,3 +598,5 @@ public static partial class AllocationEndpoints
             return a;
         });
 }
+
+file sealed record ReservedSlice(string WorkType, Guid WorkId, DateOnly WorkDate);

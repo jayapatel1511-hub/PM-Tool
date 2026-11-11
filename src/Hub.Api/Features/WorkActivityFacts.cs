@@ -67,13 +67,13 @@ public static class WorkActivityFacts
     {
         if (items.Count == 0) return new Dictionary<WorkSeenKey, WorkActivityFact>();
         var keys = items.Distinct().ToArray();
-        var latest = await Typed(logs, keys).GroupBy(log => new { log.ItemType, log.ItemId })
+        var latest = await Typed(logs, keys).GroupBy(log => new ItemGroupKey<Guid?> { ItemType = log.ItemType, ItemId = log.ItemId })
             .Select(group => group.OrderByDescending(log => log.OccurredAt).ThenByDescending(log => log.Id).First()).ToListAsync(ct);
         var actorIds = latest.Where(log => log.ActorType is "User" or "Admin").Select(log => log.ActorUserId).OfType<Guid>().Distinct().ToArray();
         var names = await db.Users.AsNoTracking().Where(user => actorIds.Contains(user.Id)).ToDictionaryAsync(user => user.Id, user => user.DisplayName, ct);
         var discussions = keys.Where(key => ItemType.Commentable.Contains(key.ItemType)).ToArray();
         var counts = await Typed(comments.Where(comment => comment.DeletedAt == null), discussions)
-            .GroupBy(comment => new { comment.ItemType, comment.ItemId }).Select(group => new { group.Key.ItemType, group.Key.ItemId, Count = group.Count() }).ToListAsync(ct);
+            .GroupBy(comment => new ItemGroupKey<Guid> { ItemType = comment.ItemType, ItemId = comment.ItemId }).Select(group => new ItemCommentCount(group.Key.ItemType, group.Key.ItemId, group.Count())).ToListAsync(ct);
         var events = latest.Where(log => log.ItemId != null).ToDictionary(log => new WorkSeenKey(log.ItemType, log.ItemId!.Value));
         var totals = counts.ToDictionary(count => new WorkSeenKey(count.ItemType, count.ItemId), count => count.Count);
         return keys.ToDictionary(key => key, key => {
@@ -86,3 +86,11 @@ public static class WorkActivityFacts
         });
     }
 }
+
+/// Member-init so EF Core can translate it as a composite GROUP BY key.
+file sealed class ItemGroupKey<TId>
+{
+    public string ItemType { get; init; } = "";
+    public TId ItemId { get; init; } = default!;
+}
+file sealed record ItemCommentCount(string ItemType, Guid ItemId, int Count);

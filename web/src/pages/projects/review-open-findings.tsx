@@ -4,7 +4,7 @@ import type { MouseEvent } from 'react'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
-import { t, runtimeText } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, selectCls } from '@/components/hub/common'
 import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
@@ -45,10 +45,7 @@ function reasonText(reason: string | null) {
     case 'not_assessed': return t('reviewRegister.reasonNotAssessed')
     case 'not_your_action': return t('reviewRegister.reasonNotYours')
     case 'person_unavailable': return t('reviewRegister.reasonPerson')
-    default: {
-      const translated = reason ? runtimeText(reason) : null
-      return translated && translated !== reason ? translated : t('reviewRegister.reasonOther')
-    }
+    default: return t('reviewRegister.reasonOther')
   }
 }
 

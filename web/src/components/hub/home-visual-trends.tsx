@@ -3,6 +3,7 @@ import type { components } from '@/gen/api'
 import { TableRegion } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { BareTable } from '@/components/ui/table'
 import { formatReferenceTime } from '@/components/hub/title-block'
 import { useMe } from '@/lib/auth-context'
 import { t } from '@/lib/i18n'
@@ -50,16 +51,16 @@ export function HomeTrendInspection({ trends, dueDays, open, onClose }: { trends
   return <Dialog open={open} onOpenChange={next => !next && onClose()}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto">
     <DialogHeader><DialogTitle>{t('home.trends.details')}</DialogTitle><DialogDescription>{t('home.trends.basis', { target: trends.targetDate, days: trends.compareDays, window: dueDays })}</DialogDescription></DialogHeader>
     <p className="text-sm">{t('home.trends.cohort', { included: trends.projects.length, excluded: trends.excludedProjects })}</p>
-    <TableRegion role="region" aria-label={t('home.trends.details')} className="rounded-none border-0"><table className="w-full min-w-[32rem] text-left text-sm"><thead><tr>
+    <TableRegion role="region" aria-label={t('home.trends.details')} className="rounded-none border-0"><BareTable className="w-full min-w-[32rem] text-left text-sm"><thead><tr>
       <th scope="col" className="p-2">{t('home.trends.metric')}</th><th scope="col" className="p-2">{t('home.trends.current')}</th><th scope="col" className="p-2">{t('home.trends.previous')}</th><th scope="col" className="p-2">{t('home.trends.change')}</th>
     </tr></thead><tbody>{trends.metrics.map(metric => <tr key={metric.id} className="border-t">
       <th scope="row" className="p-2 font-medium">{label(metric.id, dueDays)}</th><td className="p-2 font-mono">{value(metric, metric.current)}</td><td className="p-2 font-mono">{value(metric, metric.previous)}</td><td className="p-2"><HomeTrendChip metric={metric} /></td>
-    </tr>)}</tbody></table></TableRegion>
+    </tr>)}</tbody></BareTable></TableRegion>
     <p className="text-xs text-muted-foreground">{t('home.trends.exclusions')}</p>
     {trends.metrics.some(metric => metric.reason === 'FilteredScope') && <p className="text-sm">{t('home.trends.filteredScope')}</p>}
-    {trends.projects.length > 0 && <TableRegion role="region" aria-label={t('home.trends.projects')} className="rounded-none border-0"><table className="w-full min-w-[26rem] text-left text-sm"><caption className="pb-2 text-left font-medium">{t('home.trends.projects')}</caption><thead><tr><th scope="col" className="p-2">{t('common.project')}</th><th scope="col" className="p-2">{t('home.trends.snapshotDate')}</th><th scope="col" className="p-2">{t('home.trends.capturedAt')}</th></tr></thead><tbody>
+    {trends.projects.length > 0 && <TableRegion role="region" aria-label={t('home.trends.projects')} className="rounded-none border-0"><BareTable className="w-full min-w-[26rem] text-left text-sm"><caption className="pb-2 text-left font-medium">{t('home.trends.projects')}</caption><thead><tr><th scope="col" className="p-2">{t('common.project')}</th><th scope="col" className="p-2">{t('home.trends.snapshotDate')}</th><th scope="col" className="p-2">{t('home.trends.capturedAt')}</th></tr></thead><tbody>
       {trends.projects.map(project => <tr key={project.projectNumber} className="border-t"><th scope="row" className="p-2 font-mono font-medium">{project.projectNumber}</th><td className="p-2 font-mono">{project.snapshotDate}</td><td className="p-2 font-mono"><time dateTime={project.capturedAt}>{formatReferenceTime(project.capturedAt, me.settings.orgTimeZone) ?? t('common.unavailable')}</time></td></tr>)}
-    </tbody></table></TableRegion>}
+    </tbody></BareTable></TableRegion>}
     <DialogFooter><Button variant="outline" onClick={onClose}>{t('common.close')}</Button></DialogFooter>
   </DialogContent></Dialog>
 }

@@ -128,7 +128,7 @@ public static class ExternalReviewEndpoints
                 && item.DeliverableIssueId == issue.Id && item.SourceRevisionId is null)), "externalReviewId", "externalReview.integrity");
         var counts = await db.ReviewFindings.AsNoTracking().Where(finding => finding.ProjectId == projectId && finding.PackageId == packageId
                 && finding.ExternalReviewId != null && receiptIds.Contains(finding.ExternalReviewId.Value) && finding.CarriedFromId == null).GroupBy(finding => finding.ExternalReviewId!.Value)
-            .Select(group => new { Id = group.Key, Count = group.Count() }).ToDictionaryAsync(value => value.Id, value => value.Count);
+            .Select(group => new ExternalReviewFindingCount(group.Key, group.Count())).ToDictionaryAsync(value => value.Id, value => value.Count);
         return receipts.Select(row => new ExternalReviewRead(row.Id, row.RowVersion, row.PackageId, row.RoundId, row.DeliverableIssueId, row.ExternalPartyId,
             row.PartyNameSnapshot, row.PartyOrganisationSnapshot, parties[row.ExternalPartyId].IsActive ? "Active" : "Inactive", row.ReceivedDate,
             row.ReturnCodeId, row.ReturnCodeSnapshot, row.ReturnLabelSnapshot, row.CreatedBy, row.CreatedAt, counts.GetValueOrDefault(row.Id))).ToList();
@@ -148,7 +148,7 @@ public static class ExternalReviewEndpoints
     {
         await Package(projectId, id, access, db);
         var (_, scope) = await access.Project(projectId, false); Access.Demand(await RecordPermission(db, access.Actor, scope));
-        var payload = new { operation = "review.external.record", id, body };
+        var payload = new ExternalReviewRecordPayload("review.external.record", id, body);
         return await Coordination.Run(projectId, body.RequestId, payload, access, db, clock, async (project, context) =>
         {
             Access.Demand(await RecordPermission(db, access.Actor, context));
@@ -209,7 +209,7 @@ public static class ExternalReviewEndpoints
     static void Version(int actual, int? expected)
     {
         if (expected is null) throw new ApiException(428, "precondition_required", Text.Get("error.if_match"));
-        if (actual != expected) throw ApiException.Conflict("concurrency_conflict", "coord.stale", new { currentRowVersion = actual });
+        if (actual != expected) throw ApiException.Conflict("concurrency_conflict", "coord.stale", new ExternalReviewStaleVersion(actual));
     }
 
     internal static async Task NamedVerifier(HubDb db, Project project, Guid roundId, Guid verifier)
@@ -328,3 +328,8 @@ public static class ExternalReviewEndpoints
         }
     }
 }
+
+file sealed record ExternalReviewFindingCount(Guid Id, int Count);
+// Wire shapes: the payload hash is a stored receipt and the stale version is problem-body JSON; names and order are fixed.
+file sealed record ExternalReviewRecordPayload(string Operation, Guid Id, ExternalReviewRecordBody Body);
+file sealed record ExternalReviewStaleVersion(int CurrentRowVersion);

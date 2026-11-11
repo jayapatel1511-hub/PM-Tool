@@ -2,7 +2,7 @@ import { MessageSquare } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 import { useFlag } from '@/lib/auth'
 import { ago, fmtTime } from '@/lib/format'
-import { runtimeText, t } from '@/lib/i18n'
+import { t, type KeyIn } from '@/lib/i18n'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import type { TaskRow } from './Tasks'
 import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
@@ -10,7 +10,7 @@ import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 type Row = Pick<TaskRow, 'id' | 'key' | 'lastActivityAt' | 'lastActivityActorName' | 'commentCount'> & {
   lastActivityEventAt?: string | null; lastActivityActorId?: string | null; lastActivityActorType?: string | null
 }
-const label = (key: string, values?: Record<string, string | number>) => runtimeText(`workActivity.${key}`, values)
+const label = (key: KeyIn<'workActivity.'>, values?: Record<string, string | number>) => t(`workActivity.${key}`, values)
 
 /** Existing page facts only: a missing actor is unknown, never an inferred System write. */
 export function TaskLastActivity({ row, focusKey }: { row: Row; focusKey?: string }) {

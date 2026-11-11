@@ -34,9 +34,9 @@ public static class ProjectListCompleteness
         var today = clock.Today(settings); var from = Workload.WeekOf(today); var weeks = settings.StaffingLookaheadWeeks;
         var through = from.AddDays(weeks * 7 - 1);
         var milestones = includeSpan ? await db.Milestones.AsNoTracking().Where(m => projects.Contains(m.ProjectId) && !m.IsComplete && !m.IsCancelled)
-            .GroupBy(m => m.ProjectId).Select(g => new { Id = g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Id, g => g.Count) : null;
+            .GroupBy(m => m.ProjectId).Select(g => new ProjectItemCount(g.Key, g.Count())).ToDictionaryAsync(g => g.Id, g => g.Count) : null;
         var roles = await db.OpenRoles.AsNoTracking().Where(r => projects.Contains(r.ProjectId) && r.Status == OpenRoleStatus.Open)
-            .GroupBy(r => r.ProjectId).Select(g => new { Id = g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Id, g => g.Count);
+            .GroupBy(r => r.ProjectId).Select(g => new ProjectItemCount(g.Key, g.Count())).ToDictionaryAsync(g => g.Id, g => g.Count);
         var members = await db.ProjectMembers.AsNoTracking().Where(m => projects.Contains(m.ProjectId) && m.RemovedAt == null
                 && db.Users.Any(u => u.Id == m.UserId && u.IsActive))
             .Select(m => new Membership(m.ProjectId, m.UserId)).Distinct().ToListAsync();
@@ -94,10 +94,10 @@ public static class ProjectListCompleteness
         var milestones = milestoneRows.OrderBy(m => m.Date ?? DateOnly.MaxValue).ThenBy(m => m.Key, StringComparer.Ordinal).ThenBy(m => m.Id).Take(3)
             .Select(m => new ProjectEndpoints.ProjectMilestoneRef(m.Id, m.Key, m.Name, m.Date, m.Status)).ToArray();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == id && d.IsActive).OrderBy(d => d.SortOrder).ThenBy(d => d.Id)
-            .Select(d => new { d.Id, Name = d.Discipline!.Name, d.LeadUserId,
-                Lead = db.Users.Where(u => u.Id == d.LeadUserId).Select(u => new { u.DisplayName, u.IsActive }).FirstOrDefault(),
-                Overdue = db.Tasks.Count(t => t.ProjectId == id && t.ProjectDisciplineId == d.Id
-                    && db.TaskStates.Any(s => s.ProjectId == id && s.TaskId == t.Id && s.IsOverdue)) }).ToListAsync();
+            .Select(d => new PeekDisciplineSource(d.Id, d.Discipline!.Name, d.LeadUserId,
+                db.Users.Where(u => u.Id == d.LeadUserId).Select(u => new PeekLeadSource(u.DisplayName, u.IsActive)).FirstOrDefault(),
+                db.Tasks.Count(t => t.ProjectId == id && t.ProjectDisciplineId == d.Id
+                    && db.TaskStates.Any(s => s.ProjectId == id && s.TaskId == t.Id && s.IsOverdue)))).ToListAsync();
         var noteOn = settings.IsFlagOn("project_status_note");
         return TypedResults.Ok(new PeekView(project.Id, project.ProjectNumber, project.Name, milestones,
             disciplines.Select(d => new PeekDiscipline(d.Id, d.Name, new(d.LeadUserId, d.Lead?.DisplayName,
@@ -105,3 +105,7 @@ public static class ProjectListCompleteness
             noteOn ? await ProjectStatusNote.Read(project, db, clock) : null, noteOn, clock.GetUtcNow()));
     }
 }
+
+file sealed record ProjectItemCount(Guid Id, int Count);
+file sealed record PeekLeadSource(string DisplayName, bool IsActive);
+file sealed record PeekDisciplineSource(Guid Id, string Name, Guid? LeadUserId, PeekLeadSource? Lead, int Overdue);

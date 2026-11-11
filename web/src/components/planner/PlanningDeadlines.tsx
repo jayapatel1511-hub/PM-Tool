@@ -5,6 +5,7 @@ import { useItemPanel } from '@/components/hub/panel-host'
 import { ItemMark } from '@/components/hub/item-mark'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { BareTable } from '@/components/ui/table'
 import { addDays, fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
@@ -45,5 +46,5 @@ export function PlanningUndatedTray({ context }: { context?: DeadlineContext | n
 
 /** Allocations has a date-range table; this compact header strip adds week context without changing that table. */
 export function AllocationDeadlineHeaders({ context }: { context: DeadlineContext }) {
-  return <section aria-labelledby="allocation-deadline-title" className="space-y-2"><h2 id="allocation-deadline-title" className="text-sm font-medium">{t('planner.projectDeadlines')}</h2><p className="text-xs text-muted-foreground">{t('planner.projectDeadlineBasis')}</p><div className="overflow-auto rounded-lg border bg-card"><table className="w-full min-w-max text-sm"><caption className="sr-only">{t('planner.projectDeadlines')}</caption><thead><tr>{context.weeks.map(week => <th key={week} scope="col" className="min-w-36 border-r p-3 text-left align-top font-medium">{t('planner.weekOf')} {fmtDate(week)}<PlanningDeadlineMarkers context={context} weeks={[week]} /></th>)}</tr></thead></table></div><PlanningUndatedTray context={context} /></section>
+  return <section aria-labelledby="allocation-deadline-title" className="space-y-2"><h2 id="allocation-deadline-title" className="text-sm font-medium">{t('planner.projectDeadlines')}</h2><p className="text-xs text-muted-foreground">{t('planner.projectDeadlineBasis')}</p><div className="overflow-auto rounded-lg border bg-card"><BareTable className="w-full min-w-max text-sm"><caption className="sr-only">{t('planner.projectDeadlines')}</caption><thead><tr>{context.weeks.map(week => <th key={week} scope="col" className="min-w-36 border-r p-3 text-left align-top font-medium">{t('planner.weekOf')} {fmtDate(week)}<PlanningDeadlineMarkers context={context} weeks={[week]} /></th>)}</tr></thead></BareTable></div><PlanningUndatedTray context={context} /></section>
 }

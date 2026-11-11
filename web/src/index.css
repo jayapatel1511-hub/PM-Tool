@@ -232,8 +232,18 @@
 [data-accent="amber"] { --acc-fg: #7a5817; --acc-stripe: #e3d29d; }
 [data-accent="rose"] { --acc-fg: #974a68; --acc-stripe: #e7b8c8; }
 
-/* Only decorative person/section surfaces become neutral. Count tiles, status
-   pills and stored project identities keep their own explicit colour domains. */
+/* FR-VSN-04/09: the derived accents above have no meaning in the v2 palette, so under v2 their rings, stripes and
+   chips are neutral. Count tiles awaiting their scoped migration, status pills and stored identities keep their own. */
+:root[data-visual="v2"] :is(.border-\(--acc-stripe\), .border-\(color\:--acc-stripe\), .border-t-\(color\:--acc-stripe\), .border-l-\(--acc-stripe\), .border-l-\(color\:--acc-stripe\), .bg-\(--acc-stripe\)) { --acc-stripe: var(--line-3); }
+:root[data-visual="v2"] [data-accent]:not([data-visual-decoration]).text-\(--acc-fg\) { --acc-fg: var(--ink-2); --acc-bg: var(--raised); }
+/* Translucent status/brand utilities would mix new hues; under v2 they resolve to the named token for their role. */
+:root[data-visual="v2"] :is(.border-ok\/30, .border-warn\/30, .border-warn\/40, .border-bad\/30, .border-bad\/40, .border-done\/30) { border-color: var(--border); }
+:root[data-visual="v2"] .border-primary\/40 { border-color: var(--brand); }
+:root[data-visual="v2"] .border-primary\/60 { border-color: var(--ink-3); }
+:root[data-visual="v2"] .bg-accent\/40 { background-color: var(--brand-tint); }
+:root[data-visual="v2"] .bg-ok-bg\/50 { background-color: var(--pill-ok-bg); }
+:root[data-visual="v2"] :is(.bg-bad-bg\/40, .bg-bad-bg\/60) { background-color: var(--pill-critical-bg); }
+/* Decorative person/section surfaces have their own neutral roles. */
 :root[data-visual="v2"] [data-visual-decoration="person"] {
   --acc-fg: var(--ink-2);
   --acc-stripe: var(--line-3);

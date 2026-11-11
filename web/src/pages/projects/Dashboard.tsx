@@ -18,13 +18,14 @@ import { Chip, HealthPill, Key, StatusPill } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { BareTable } from '@/components/ui/table'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { useOffer } from '@/lib/auth'
 import { fmtDate, fmtTime, hours, relative } from '@/lib/format'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import { itemHref } from '@/components/hub/search'
-import { t , runtimeText } from '@/lib/i18n'
+import { t, runtimeText, type KeyIn } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
 import { MilestoneStrip, type MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
@@ -191,7 +192,7 @@ function Headline() {
   )
 }
 
-type Entry = [key: string, c: Count, to: string]
+type Entry = [key: KeyIn<'dash.count.'>, c: Count, to: string]
 const BAD = ['overdue', 'blocked', 'atRisk', 'issuesHigh', 'risksHigh'], WARN = ['waiting', 'unassigned']
 
 /** The counts row (§13.1 item 4) as summary tiles: every number opens the filtered list it was counted from, and each tile
@@ -231,7 +232,7 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={t('dashboardScreens.otherCounts')}>{siblings.map(group => <section key={group.title} className="rounded border bg-card p-4">
         <h3 className="mb-2 text-sm font-medium">{group.title}{group.whole && scoped && <span className="ml-2 text-xs text-muted-foreground">{t('sig.wholeProject')}</span>}</h3>
         <ul className="space-y-1">{group.values.map(([key, count, href]) => <li key={key}><Link className="flex min-h-7 items-baseline justify-between gap-3 rounded text-sm hover:underline" to={href}>
-          <span>{runtimeText(`dash.count.${key}`)}</span><span className="font-medium tabular-nums">{count.value}</span>
+          <span>{t(`dash.count.${key}`)}</span><span className="font-medium tabular-nums">{count.value}</span>
         </Link></li>)}</ul>
       </section>)}</div>
     </div>
@@ -295,7 +296,7 @@ function StaffingUntilSubmission({ value, pending }: { value?: Dash['staffing'];
         {value.allocationCoverage !== 'Complete' && <p>{t('dashboardScreens.visibleAllocations')}</p>}
         {(value.unattributedConfirmedHours == null || (value.knownUnattributedConfirmedHours ?? 0) > 0 || (value.unavailableUnattributed ?? 0) > 0) && <p>{t('dashboardScreens.unattributedReservations', { hours: hours(value.knownUnattributedConfirmedHours ?? 0) })}</p>}
         {!value.disciplines.length ? <Empty>{t('dashboardScreens.noDisciplines')}</Empty> : <TableRegion className="rounded-none border-0" role="region" aria-label={t('dashboardScreens.staffing')}>
-          <table className="w-full text-sm"><caption className="sr-only">{t('dashboardScreens.staffing')}</caption><thead className="bg-muted"><tr>
+          <BareTable className="w-full text-sm"><caption className="sr-only">{t('dashboardScreens.staffing')}</caption><thead className="bg-muted"><tr>
             <th className={thCls} scope="col">{t('common.discipline')}</th><th className={thCls} scope="col">{t('dashboardScreens.remaining')}</th><th className={thCls} scope="col">{t('dashboardScreens.confirmed')}</th><th className={thCls} scope="col">{t('dashboardScreens.openRoles')}</th><th className={thCls} scope="col">{t('dashboardScreens.comparison')}</th>
           </tr></thead><tbody>{value.disciplines.map(row => <tr key={row.projectDisciplineId ?? 'unattributed'} className="border-t" data-dashboard-staffing={row.projectDisciplineId ?? 'unattributed'}>
             <th className={cn(tdCls, 'text-left font-medium')} scope="row">{row.name ?? t('dashboardScreens.unattributed')}</th>
@@ -303,7 +304,7 @@ function StaffingUntilSubmission({ value, pending }: { value?: Dash['staffing'];
             <td className={tdCls}>{measure(row.confirmedHours, row.knownConfirmedHours)}{row.unavailableConfirmed > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.unavailableReservations', { n: row.unavailableConfirmed })}</p>}</td>
             <td className={tdCls}>{measure(row.openRoleHours, row.knownOpenRoleHours)}{row.unavailableOpenRoles > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.unavailableRoles', { n: row.unavailableOpenRoles })}</p>}</td>
             <td className={tdCls}>{row.excessHours == null ? t('dashboardScreens.comparisonUnavailable') : row.excessHours > 0 ? t('dashboardScreens.excess', { hours: hours(row.excessHours) }) : t('dashboardScreens.noExcess')}</td>
-          </tr>)}</tbody></table>
+          </tr>)}</tbody></BareTable>
         </TableRegion>}
       </>}
     </div>}

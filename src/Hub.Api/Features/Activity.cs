@@ -58,7 +58,7 @@ public static class ActivityEndpoints
             var q = await ItemQuery(db, access, ItemType.Task, id, canonicalTaskKey: true);
             var ids = await q.Where(row => row.ActorUserId != null).Select(row => row.ActorUserId!.Value).Distinct().ToListAsync();
             var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id))
-                .Select(user => new { user.Id, user.DisplayName, user.IsActive }).ToDictionaryAsync(user => user.Id);
+                .Select(user => new TaskHistoryActorChoice(user.Id, user.DisplayName, user.IsActive)).ToDictionaryAsync(user => user.Id);
             var choices = ids.Select(actor => users.TryGetValue(actor, out var user)
                 ? new TaskHistoryActorChoice(actor, user.DisplayName, user.IsActive)
                 : new TaskHistoryActorChoice(actor, Text.Get("taskHistory.actorUnavailable"), false))

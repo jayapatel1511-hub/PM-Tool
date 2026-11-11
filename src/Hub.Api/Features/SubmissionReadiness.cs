@@ -117,7 +117,7 @@ public static class SubmissionReadiness
         }
         var ids = manifest.Select(m => m.DeliverableId).ToArray();
         var manifestTasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == package.ProjectId && t.DeliverableId != null && ids.Contains(t.DeliverableId.Value) && t.Status != TaskStatuses.Cancelled)
-            .Select(t => new { t.Id, t.DeliverableId }).ToListAsync();
+            .Select(t => new ManifestTask(t.Id, t.DeliverableId)).ToListAsync();
         var taskIds = manifestTasks.Select(t => t.Id).ToArray();
         foreach (var handoff in await db.Handoffs.AsNoTracking().Where(h => h.ProjectId == package.ProjectId && h.DeletedAt == null && h.Status != HandoffStatus.Cancelled &&
             (h.TargetDeliverableId != null && ids.Contains(h.TargetDeliverableId.Value) || h.TargetTaskId != null && taskIds.Contains(h.TargetTaskId.Value))).OrderBy(h => h.Id).ToListAsync())
@@ -175,3 +175,5 @@ public static class SubmissionReadiness
         return new SubmissionReadinessResult(blockers.Count == 0, Coordination.Hash(new { package.Id, package.RowVersion, package.ManifestVersion, Facts = facts }), blockers) { AssessedCheckIds = assessed };
     }
 }
+
+file sealed record ManifestTask(Guid Id, Guid? DeliverableId);

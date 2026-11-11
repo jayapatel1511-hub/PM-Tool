@@ -51,8 +51,8 @@ public static class ReviewDisciplineDefaults
         db.DeliverableReviewDefaults.RemoveRange(existing.Where(d => removed.Contains(d.DisciplineId)));
         db.DeliverableReviewDefaults.AddRange(added.Select(d => new DeliverableReviewDefault { DeliverableTypeId = id, DisciplineId = d }));
         db.Entry(type).Property(t => t.RowVersion).IsModified = true;
-        var changes = removed.Select(d => new { field = "RequiredReviewDisciplineId", old = (Guid?)d, @new = (Guid?)null })
-            .Concat(added.Select(d => new { field = "RequiredReviewDisciplineId", old = (Guid?)null, @new = (Guid?)d })).ToArray();
+        var changes = removed.Select(d => new DefaultChange("RequiredReviewDisciplineId", d, null))
+            .Concat(added.Select(d => new DefaultChange("RequiredReviewDisciplineId", null, d))).ToArray();
         db.LogEvent("ReferenceData", type.Id, "Updated", "admin", key: nameof(DeliverableType), name: type.Name, changes: changes);
         await db.SaveChangesAsync(); if (transaction is not null) await transaction.CommitAsync();
         return TypedResults.Ok(new ReviewDefaultSettings(id, type.RowVersion, wanted.Order().ToArray()));
@@ -98,3 +98,6 @@ public static class ReviewDisciplineDefaults
         return TypedResults.Ok(new ReviewDefaultSuggestions(projectId, ids.Order().ToArray(), sourceTypes, suggestions, suggestions.Length > 50));
     }
 }
+
+// Activity change entry; JsonOpts.Web writes it as {"field","old","new"}.
+file sealed record DefaultChange(string Field, Guid? Old, Guid? New);

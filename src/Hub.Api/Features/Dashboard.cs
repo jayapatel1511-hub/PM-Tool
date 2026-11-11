@@ -227,7 +227,7 @@ public static class DashboardEndpoints
     {
         var from = clock.Today(settings); var asOf = clock.GetUtcNow();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
-            .Select(d => new { d.Id, d.IsActive, d.SortOrder, d.Discipline!.Name }).ToDictionaryAsync(d => d.Id);
+            .Select(d => new StaffingDisciplineRow(d.Id, d.IsActive, d.SortOrder, d.Discipline!.Name)).ToDictionaryAsync(d => d.Id);
         if (disciplineId is { } selected && !disciplines.ContainsKey(selected)) throw ApiException.NotFound();
         // This is the package's own target, not the evaluator's submission milestone.
         var package = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId
@@ -250,15 +250,15 @@ public static class DashboardEndpoints
         var query = TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId),
             TaskFilter.Of(new Dictionary<string, string?> { ["open"] = "true", ["disciplineId"] = disciplineId?.ToString() }), me.Id, from, settings);
         var tasks = await query.Where(t => t.DueDate == null || t.DueDate >= from && t.DueDate <= target.Date)
-            .Select(t => new { t.ProjectDisciplineId, t.DueDate, t.EstimatedHours, t.ProgressPct }).ToListAsync();
+            .Select(t => new StaffingTaskRow(t.ProjectDisciplineId, t.DueDate, t.EstimatedHours, t.ProgressPct)).ToListAsync();
         var roles = await db.OpenRoles.AsNoTracking().Where(r => r.ProjectId == projectId && r.Status == OpenRoleStatus.Open
             && r.FromDate <= target.Date && r.ThroughDate >= from && (disciplineId == null || r.ProjectDisciplineId == disciplineId)).ToListAsync();
         var calendars = await OpenRoleEndpoints.Calendars(db, [projectId]);
         var roleHours = roles.Select(role => {
             var spread = OpenRoleEndpoints.Spread(role, calendars(projectId));
             var unavailable = role.PlannedHours <= 0 || spread.Count == 0;
-            return new { role.ProjectDisciplineId, Unavailable = unavailable,
-                Hours = unavailable ? 0m : spread.Where(day => day.Key >= from && day.Key <= target.Date).Sum(day => day.Value) };
+            return new StaffingRoleHours(role.ProjectDisciplineId, unavailable,
+                unavailable ? 0m : spread.Where(day => day.Key >= from && day.Key <= target.Date).Sum(day => day.Value));
         }).ToArray();
         Guid Key(Guid? id) => id is { } value && disciplines.ContainsKey(value) ? value : Guid.Empty;
         var keys = disciplines.Values.Where(d => d.IsActive).Select(d => d.Id)
@@ -430,3 +430,7 @@ public static class DashboardEndpoints
     sealed record MilestoneWithState(Milestone Milestone, MilestoneState? State);
     sealed record OpenTaskFacts(Guid Id, Guid ProjectDisciplineId, DateOnly? DueDate, bool Overdue, bool Blocked);
 }
+
+file sealed record StaffingDisciplineRow(Guid Id, bool IsActive, int SortOrder, string Name);
+file sealed record StaffingTaskRow(Guid ProjectDisciplineId, DateOnly? DueDate, decimal? EstimatedHours, int ProgressPct);
+file sealed record StaffingRoleHours(Guid? ProjectDisciplineId, bool Unavailable, decimal Hours);

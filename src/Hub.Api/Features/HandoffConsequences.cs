@@ -62,12 +62,12 @@ public static class HandoffConsequencesEndpoints
         var edges = Edges(db, project.Id, ids);
         var counts = await (from e in edges join t in db.Tasks.AsNoTracking() on e.TaskId equals t.Id
             group t by e.HandoffId into g
-            select new { Id = g.Key, Count = g.Count(), Dated = g.Count(t => t.DueDate.HasValue), First = g.Min(t => t.DueDate) }).ToDictionaryAsync(x => x.Id);
+            select new HandoffTaskCounts(g.Key, g.Count(), g.Count(t => t.DueDate.HasValue), g.Min(t => t.DueDate))).ToDictionaryAsync(x => x.Id);
         var linkedCounts = await (from c in Constraints(db, project.Id, ids)
             join t in db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled) on c.TargetId equals t.Id
             where c.TargetType == ItemType.Task
-            select new { HandoffId = c.LinkedId!.Value, TaskId = t.Id }).Distinct().GroupBy(x => x.HandoffId)
-            .Select(g => new { Id = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.Id, x => x.Count);
+            select new Edge { HandoffId = c.LinkedId!.Value, TaskId = t.Id }).Distinct().GroupBy(x => x.HandoffId)
+            .Select(g => new HandoffLinkedCount(g.Key, g.Count())).ToDictionaryAsync(x => x.Id, x => x.Count);
         var directIds = (await (from h in db.Handoffs.AsNoTracking()
             join t in db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled) on h.TargetTaskId equals (Guid?)t.Id
             where h.ProjectId == project.Id && ids.Contains(h.Id) && h.Status != HandoffStatus.Cancelled
@@ -112,3 +112,6 @@ public static class HandoffConsequencesEndpoints
         return TypedResults.Ok(new HandoffLinkedTaskPage(projectId, id, summary, new(rows, pg, size, summary.TaskCount!.Value)));
     }
 }
+
+file sealed record HandoffTaskCounts(Guid Id, int Count, int Dated, DateOnly? First);
+file sealed record HandoffLinkedCount(Guid Id, int Count);

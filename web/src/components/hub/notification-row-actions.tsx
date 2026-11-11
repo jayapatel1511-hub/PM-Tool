@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
-import { runtimeText, t } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import { fmtTime } from '@/lib/format'
 import { invalidateNotifications, invalidatePreferences, refreshProject } from '@/lib/keys'
 
@@ -14,6 +14,7 @@ const levels = ['AllActivity', 'MyItemsOnly', 'Muted'] as const
 type Entry = components['schemas']['NotificationScreenRow']
 const deliveryStates = ['Pending', 'PendingAvailability', 'HeldAway', 'HeldNoDigest', 'Queued', 'ReservedForDigest', 'Accepted', 'Simulated',
   'Unknown', 'Uncertain', 'Exhausted', 'ChannelOff', 'NoAddress', 'Muted', 'AccessRemoved', 'RecipientInactive', 'Duplicate', 'Mixed', 'Emailed', 'Partial'] as const
+const oneOf = <T extends string>(values: readonly T[], value: string): value is T => values.some(known => known === value)
 const occurrenceCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 2147483647
 const acceptanceTime = (value: string | null | undefined): value is string => {
   if (typeof value !== 'string') return false
@@ -30,8 +31,8 @@ const acceptanceTime = (value: string | null | undefined): value is string => {
 function NotificationDelivery({ entry }: { entry: Entry }) {
   const delivery = entry.screen.delivery
   const unknown = <span data-notification-delivery="Unknown">{t('notifScreen.deliveryUnknown')}</span>
-  if (!delivery || !deliveryStates.some(state => state === delivery.state) || delivery.state === 'Unknown'
-    || !['Known', 'Partial'].includes(delivery.historyCoverage)) return unknown
+  if (!delivery || !oneOf(deliveryStates, delivery.state) || delivery.state === 'Unknown'
+    || !oneOf(['Known', 'Partial'] as const, delivery.historyCoverage)) return unknown
   const { knownOccurrences: known, totalOccurrences: total, realEmailedOccurrences: real, uncertainOccurrences: uncertain, acceptedAt } = delivery
   if (!occurrenceCount(known) || !occurrenceCount(total) || !occurrenceCount(real) || !occurrenceCount(uncertain) || total <= 0
     || total !== entry.notification.count || known <= 0 || known > total || real + uncertain > known
@@ -44,11 +45,11 @@ function NotificationDelivery({ entry }: { entry: Entry }) {
     || delivery.historyCoverage === 'Partial' && !['Mixed', 'Partial', 'Uncertain'].includes(delivery.state)
     || delivery.state === 'Simulated' && (real !== 0 || uncertain !== 0)) return unknown
   return <span className="inline-flex min-w-0 flex-col gap-1" data-notification-delivery={delivery.state} data-notification-delivery-coverage={delivery.historyCoverage}>
-    <span>{runtimeText(`notifScreen.deliveryState.${delivery.state}`)}</span>
-    <span>{runtimeText(`notifScreen.deliveryCoverage.${delivery.historyCoverage}`)} · {runtimeText(total === 1 ? 'notifScreen.deliveryCountsOne' : 'notifScreen.deliveryCounts', { known, total })}</span>
-    {real > 0 && <span>{runtimeText(real === 1 ? 'notifScreen.deliveryRealCountOne' : 'notifScreen.deliveryRealCount', { n: real })}</span>}
-    {uncertain > 0 && <span>{runtimeText(uncertain === 1 ? 'notifScreen.deliveryUncertainCountOne' : 'notifScreen.deliveryUncertainCount', { n: uncertain })}</span>}
-    {emailed && <time dateTime={acceptedAt!}>{runtimeText('notifScreen.deliveryAcceptedAt', { time: fmtTime(acceptedAt) })}</time>}
+    <span>{t(`notifScreen.deliveryState.${delivery.state}`)}</span>
+    <span>{t(`notifScreen.deliveryCoverage.${delivery.historyCoverage}`)} · {t(total === 1 ? 'notifScreen.deliveryCountsOne' : 'notifScreen.deliveryCounts', { known, total })}</span>
+    {real > 0 && <span>{t(real === 1 ? 'notifScreen.deliveryRealCountOne' : 'notifScreen.deliveryRealCount', { n: real })}</span>}
+    {uncertain > 0 && <span>{t(uncertain === 1 ? 'notifScreen.deliveryUncertainCountOne' : 'notifScreen.deliveryUncertainCount', { n: uncertain })}</span>}
+    {emailed && <time dateTime={acceptedAt!}>{t('notifScreen.deliveryAcceptedAt', { time: fmtTime(acceptedAt) })}</time>}
   </span>
 }
 
@@ -76,7 +77,7 @@ export function NotificationRowActions({ entry }: { entry: Entry }) {
       {valid && follow ? <DropdownMenu><DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" aria-busy={busy} aria-label={t('notifScreen.followFor', { project: follow.projectNumber })}
           title={busy ? t('notifScreen.followSaving') : undefined}>
-          <span className="key">{follow.projectNumber}</span><span>{follow.level ? runtimeText(`follow.${follow.level}`) : t('follow.none')}</span><ChevronDown className="size-3.5" />
+          <span className="key">{follow.projectNumber}</span><span>{t(`follow.${levels.find(level => level === follow.level) ?? 'none'}`)}</span><ChevronDown className="size-3.5" />
         </Button>
       </DropdownMenuTrigger><DropdownMenuContent align="start"><DropdownMenuRadioGroup value={follow.level ?? ''}>
         {levels.map(level => <DropdownMenuRadioItem key={level} value={level} disabled={busy} onSelect={() => void change(level)}>{t(`follow.${level}`)}</DropdownMenuRadioItem>)}

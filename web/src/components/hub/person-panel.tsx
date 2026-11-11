@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate } from '@/lib/format'
-import { runtimeText, t, tv } from '@/lib/i18n'
+import { t, textFor, tv } from '@/lib/i18n'
 import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 
+const PROJECT_ROLES = { PM: 'role.PM', DisciplineLead: 'role.DisciplineLead', TeamMember: 'role.TeamMember', Reviewer: 'role.Reviewer', Viewer: 'role.Viewer' } as const
 const pageNumber = (raw: string | null, fallback: number) => raw && /^\d+$/.test(raw) && Number.isSafeInteger(Number(raw)) && Number(raw) > 0 ? Number(raw) : fallback
 
 /** Read-only facts. The separate canonical planner read may omit an out-of-scope person entirely. */
@@ -57,7 +58,7 @@ export function PersonPanel({ id }: PanelProps) {
           if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
           event.preventDefault(); navigate(`/projects/${membership.projectNumber}/team`, { state: { recordContextReturn: captureRecordContextOrigin(location, event.currentTarget) } })
         }}>{membership.projectNumber} · {membership.projectName}</a>
-        <p className="break-words text-xs text-muted-foreground">{tv(membership.projectStatus)} · {membership.roles.map(role => runtimeText(`role.${role}`)).join(' · ')}{membership.primaryDiscipline && ` · ${membership.primaryDiscipline.name || t('common.unavailable')}`}</p>
+        <p className="break-words text-xs text-muted-foreground">{tv(membership.projectStatus)} · {membership.roles.map(role => textFor(PROJECT_ROLES, role)).join(' · ')}{membership.primaryDiscipline && ` · ${membership.primaryDiscipline.name || t('common.unavailable')}`}</p>
         {membership.leadOf.map(discipline => <p key={discipline.id} className="break-words text-xs">{t('team.leadOf', { name: discipline.name || t('common.unavailable') })}</p>)}
         <p className="break-words"><span className="text-muted-foreground">{t('responsibility.label')}: </span>{membership.responsibilityNote || t('teamOrganisation.notSet')}</p>
       </li>)}</ul> : <Empty>{t(projects.total ? 'personPanel.emptyPage' : 'personPanel.noProjects')}</Empty>}

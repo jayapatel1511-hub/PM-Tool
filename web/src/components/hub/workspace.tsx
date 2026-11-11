@@ -16,7 +16,7 @@ import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useFlag, useMe, type Me } from '@/lib/auth-context'
 import { refreshWorkspaces } from '@/lib/keys'
-import { plural, t , runtimeText } from '@/lib/i18n'
+import { plural, t, runtimeText, type TextKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
 import './visual-tabs.css'
@@ -244,7 +244,9 @@ export const VIEWS: View[] = [
   { id: 'workload', path: '/workload', icon: FolderKanban, label: 'wsview.workload', show: (m) => m.capabilities.workload },
 ]
 
-type AreaTab = { path: string; label: string; show?: (me: Me) => boolean }
+/** Home preset codes the server and the address bar carry; each names its role's label. */
+export const HOME_PRESETS = { ProjectManager: 'homeScope.ProjectManager', DisciplineLead: 'homeScope.DisciplineLead', Supervisor: 'homeScope.Supervisor' } as const
+type AreaTab = { path: string; label: TextKey; show?: (me: Me) => boolean }
 const PROJECT_AREA_TABS: AreaTab[] = [
   { path: '/projects', label: 'wsview.list' },
   { path: '/projects?layout=board', label: 'nav.boards' },
@@ -274,7 +276,7 @@ function AreaTabs({ tabs, queryKeys, activePath }: { tabs: AreaTab[]; queryKeys:
   if (!visualSystem) return null
   const visible = tabs.filter((tab) => !tab.show || tab.show(me))
   return <nav data-area-tabs aria-label={t('wsview.label')} className="visual-area-tabs">
-    {visible.map((tab) => <Link key={tab.path} to={{ pathname: tab.path, search: areaSearch(sp, queryKeys(tab.path)) }} aria-current={activePath === tab.path ? 'page' : undefined}>{runtimeText(tab.label)}</Link>)}
+    {visible.map((tab) => <Link key={tab.path} to={{ pathname: tab.path, search: areaSearch(sp, queryKeys(tab.path)) }} aria-current={activePath === tab.path ? 'page' : undefined}>{t(tab.label)}</Link>)}
   </nav>
 }
 
@@ -299,7 +301,7 @@ export function ProjectAreaTabs() {
       }
       const search = areaSearch(sp, queryKeys)
       const next = new URLSearchParams(search); if (isBoard) next.set('layout', 'board'); else next.delete('layout')
-      return <Link key={tab.label} to={{ pathname: target, search: next.toString() }} aria-current={(isBoard ? board : pathname === target && !board) ? 'page' : undefined}>{runtimeText(tab.label)}</Link>
+      return <Link key={tab.label} to={{ pathname: target, search: next.toString() }} aria-current={(isBoard ? board : pathname === target && !board) ? 'page' : undefined}>{t(tab.label)}</Link>
     })}
   </nav>
 }

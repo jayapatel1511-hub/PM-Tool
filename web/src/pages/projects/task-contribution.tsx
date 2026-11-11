@@ -3,7 +3,7 @@ import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { useUnsavedGuard } from '@/hooks/drafts'
-import { runtimeText, t } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import { fmtTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -46,7 +46,7 @@ export function TaskContribution({ taskId, userId, value, memberPresent = true, 
     setOrigin(original); setSent(intent); setBusy(true); setError(null); setChecked(undefined)
     try {
       const result = await typedRequest('patch', '/api/v1/tasks/{id}/contribution', { params: { id: taskId }, body: intent, ifMatch: original.rowVersion })
-      if (!validRead(result) || result.collaboratorId !== original.collaboratorId || result.rowVersion < original.rowVersion || !!result.markedAt !== intent.marked || normalized(result.note) !== normalized(intent.note)) throw new Error(runtimeText('taskContribution.uncertainty'))
+      if (!validRead(result) || result.collaboratorId !== original.collaboratorId || result.rowVersion < original.rowVersion || !!result.markedAt !== intent.marked || normalized(result.note) !== normalized(intent.note)) throw new Error(t('taskContribution.uncertainty'))
       if (!mounted.current) return
       setConfirmed(result); setOrigin(null); setSent(null); setNote(''); setReason(''); setUncertain(false)
       // A failed background refresh cannot turn a confirmed PATCH into an uncertain command.
@@ -61,7 +61,7 @@ export function TaskContribution({ taskId, userId, value, memberPresent = true, 
     setBusy(true); setError(null); setChecked(undefined)
     try {
       const detail = await readCurrent(), next = detail.collaborators.find(person => person.id === me.id)?.contribution
-      if (next && !validRead(next)) throw new Error(runtimeText('taskContribution.unavailable'))
+      if (next && !validRead(next)) throw new Error(t('taskContribution.unavailable'))
       if (mounted.current) setChecked(next ?? null)
     } catch (caught) { if (mounted.current) setError(caught) }
     finally { if (mounted.current) setBusy(false) }
@@ -69,25 +69,25 @@ export function TaskContribution({ taskId, userId, value, memberPresent = true, 
   const matches = !!checked && !!sent && checked.collaboratorId === sent.collaboratorId && !!checked.markedAt === sent.marked && normalized(checked.note) === normalized(sent.note)
   if (!memberPresent && !origin && !sent && !note && !reason) return null
   return <div data-task-contribution-user={userId} className="min-w-0 space-y-2 text-sm">
-    {currentAvailable && memberPresent && shown && validRead(shown) ? shown.markedAt && <div data-task-contribution-mark><p className="font-medium"><time dateTime={shown.markedAt}>{runtimeText(own ? 'taskContribution.markedAt' : 'taskContribution.markedBy', { when: fmtTime(shown.markedAt) })}</time></p>{shown.note && <p className="whitespace-pre-wrap break-words">{shown.note}</p>}</div>
-      : <p className="text-muted-foreground">{runtimeText('taskContribution.unavailable')}</p>}
+    {currentAvailable && memberPresent && shown && validRead(shown) ? shown.markedAt && <div data-task-contribution-mark><p className="font-medium"><time dateTime={shown.markedAt}>{t(own ? 'taskContribution.markedAt' : 'taskContribution.markedBy', { when: fmtTime(shown.markedAt) })}</time></p>{shown.note && <p className="whitespace-pre-wrap break-words">{shown.note}</p>}</div>
+      : <p className="text-muted-foreground">{t('taskContribution.unavailable')}</p>}
     {own && <>
       {(!shown?.markedAt || !!origin || !!sent) && <div className="space-y-1">
-        <label htmlFor={prefix + '-note'}>{runtimeText('taskContribution.note')}</label>
+        <label htmlFor={prefix + '-note'}>{t('taskContribution.note')}</label>
         <Textarea id={prefix + '-note'} value={note} maxLength={200} rows={2} disabled={busy || !!sent || !currentAvailable || !value || !validRead(value) || !value.canMark || relationChanged} aria-describedby={prefix + '-hint'} onChange={event => { startDraft(); setNote(event.target.value) }} />
-        <p id={prefix + '-hint'} className="text-xs text-muted-foreground">{runtimeText('taskContribution.noteHint')} <span className="tabular-nums">{note.length}/200</span></p>
+        <p id={prefix + '-hint'} className="text-xs text-muted-foreground">{t('taskContribution.noteHint')} <span className="tabular-nums">{note.length}/200</span></p>
       </div>}
       {needsReason && <div className="space-y-1"><label htmlFor={prefix + '-reason'}>{t('common.reason')}</label><Textarea id={prefix + '-reason'} rows={2} value={reason} disabled={busy || !!sent || relationChanged} onChange={event => { startDraft(); setReason(event.target.value) }} /></div>}
-      {relationChanged && <p role="status">{runtimeText('taskContribution.membershipChanged')}</p>}
+      {relationChanged && <p role="status">{t('taskContribution.membershipChanged')}</p>}
       {shown?.refusalReason && <p className="text-muted-foreground">{shown.refusalReason}</p>}
-      {uncertain && <p role="status">{runtimeText('taskContribution.uncertainty')}</p>}
+      {uncertain && <p role="status">{t('taskContribution.uncertainty')}</p>}
       {error != null && <ErrorBanner error={error} />}
-      {checked !== undefined && <p role="status">{runtimeText(matches ? 'taskContribution.currentMatches' : 'taskContribution.currentDifferent')}</p>}
+      {checked !== undefined && <p role="status">{t(matches ? 'taskContribution.currentMatches' : 'taskContribution.currentDifferent')}</p>}
       <div className="flex flex-wrap gap-2">
-        {!sent && !shown?.markedAt && <Button size="sm" variant="outline" disabled={!usable || !shown?.canMark || needsReason && !reason.trim()} onClick={() => submit(true)}>{busy && <Spinner />}{runtimeText('taskContribution.mark')}</Button>}
-        {!sent && shown?.markedAt && <Button size="sm" variant="outline" disabled={!usable || !shown.canWithdraw || needsReason && !reason.trim()} onClick={() => submit(false)}>{runtimeText('taskContribution.withdraw')}</Button>}
-        {(!!sent || relationChanged || !currentAvailable) && <Button size="sm" variant="outline" disabled={busy} onClick={check}>{busy && <Spinner />}{runtimeText('taskContribution.checkCurrent')}</Button>}
-        {checked && <Button size="sm" variant="outline" disabled={busy} onClick={() => { setConfirmed(checked); discard() }}>{runtimeText('taskContribution.newIntent')}</Button>}
+        {!sent && !shown?.markedAt && <Button size="sm" variant="outline" disabled={!usable || !shown?.canMark || needsReason && !reason.trim()} onClick={() => submit(true)}>{busy && <Spinner />}{t('taskContribution.mark')}</Button>}
+        {!sent && shown?.markedAt && <Button size="sm" variant="outline" disabled={!usable || !shown.canWithdraw || needsReason && !reason.trim()} onClick={() => submit(false)}>{t('taskContribution.withdraw')}</Button>}
+        {(!!sent || relationChanged || !currentAvailable) && <Button size="sm" variant="outline" disabled={busy} onClick={check}>{busy && <Spinner />}{t('taskContribution.checkCurrent')}</Button>}
+        {checked && <Button size="sm" variant="outline" disabled={busy} onClick={() => { setConfirmed(checked); discard() }}>{t('taskContribution.newIntent')}</Button>}
       </div>
     </>}
   </div>

@@ -136,9 +136,9 @@ public static class WorkSeenEligibility
         var source = "eligible_roles";
         if (items is not null)
         {
-            args.Add(new NpgsqlParameter("bounds", JsonSerializer.Serialize(items.Select(item => new {
-                itemType = item.Key.ItemType, itemId = item.Key.ItemId, item.ProjectId, item.SourceVersion, item.Roles
-            }), JsonOpts.Web)));
+            args.Add(new NpgsqlParameter("bounds", JsonSerializer.Serialize(items.Select(item => new BoundRow(
+                item.Key.ItemType, item.Key.ItemId, item.ProjectId, item.SourceVersion, item.Roles
+            )), JsonOpts.Web)));
             cte += """
                 , bounded_roles AS (
                   SELECT r.item_type,r.item_id,r.project_id,b."sourceVersion" read_version,r.role,r.recipient_id
@@ -213,3 +213,6 @@ public static class WorkSeenEligibility
         return result.Added;
     }
 }
+
+// Read by jsonb_to_recordset as "itemType","itemId","projectId","sourceVersion",roles (JsonOpts.Web camelCase).
+file sealed record BoundRow(string ItemType, Guid ItemId, Guid ProjectId, int SourceVersion, IReadOnlyList<WorkSeenRoleRecipient> Roles);

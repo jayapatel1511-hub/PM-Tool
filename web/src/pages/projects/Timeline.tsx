@@ -21,7 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useProjectRefresh } from '@/hooks/data'
 import { typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
-import { plural, t, tv , runtimeText } from '@/lib/i18n'
+import { plural, t, tv, runtimeText, type TextKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { captureTimelineView, timelineLayerChoices, timelineViewLayers, timelineViewSet, timelineViewSetParam, timelineViewZoom } from './timeline-view-state'
 import { TimelineLayerControls } from './timeline-view-controls'
@@ -83,6 +83,7 @@ export function taskLaneAppearance(lane?: string | null) {
     progress: lane === 'On Hold' ? 'var(--ink-2)' : fill ?? 'var(--ink-2)',
   }
 }
+const LANE_LEGEND = { 'To Do': 'lane.To Do', 'In Progress': 'lane.In Progress', Review: 'sig.laneReview', Done: 'lane.Done', 'On Hold': 'lane.On Hold' } as const satisfies Record<keyof typeof LANE_FILLS, TextKey>
 const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to', 'chainTo'] as const
 
 type TimelineTask = components['schemas']['TimelineTask']
@@ -545,11 +546,11 @@ function LegendItems({ className }: { className: string }) {
     <ul className={className}>
       <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-foreground/50 bg-muted" aria-hidden />{t('sig.legendBar')}</li>
       <li className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: visualSystem ? 'var(--ink-2)' : tone('In Progress'), background: visualSystem ? 'var(--raised)' : toneBg('In Progress') }} aria-hidden><span className="absolute inset-y-0 left-0 w-3 bg-card/65" /></span>{t('sig.legendAssumed')}</li>
-      {visualSystem && Object.keys(LANE_FILLS).map(lane => <li data-task-lane-legend={lane} key={`lane-${lane}`} className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: taskLaneAppearance(lane).borderColor, background: taskLaneAppearance(lane).background }} aria-hidden><span className="absolute bottom-0 left-0 h-[2px] w-3" style={{ background: taskLaneAppearance(lane).progress }} /></span>{t('itemType.Task')}: {lane === 'Review' ? t('sig.laneReview') : runtimeText(`lane.${lane}`)}</li>)}
+      {visualSystem && Object.entries(LANE_LEGEND).map(([lane, label]) => <li data-task-lane-legend={lane} key={`lane-${lane}`} className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: taskLaneAppearance(lane).borderColor, background: taskLaneAppearance(lane).background }} aria-hidden><span className="absolute bottom-0 left-0 h-[2px] w-3" style={{ background: taskLaneAppearance(lane).progress }} /></span>{t('itemType.Task')}: {t(label)}</li>)}
       {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((st) => <li key={st} className="flex items-center gap-2">{swatch(st)}{visualSystem && <>{t('itemType.Deliverable')}: </>}{tv(st)}</li>)}
       <li className="flex items-center gap-2"><span data-visual-overdue-legend={visualSystem || undefined} className="inline-block h-3 w-5 rounded-sm border border-bad" style={overdueAppearance(visualSystem)} aria-hidden />{t('timeline.legendOverdue')}</li>
       <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-dashed border-foreground/40" aria-hidden />{t('timeline.legendBaseline')}</li>
-      {visualSystem && <li className="flex flex-wrap items-center gap-x-3 gap-y-1">{(['Task', 'Deliverable'] as const).map(kind => <span key={kind} className="inline-flex items-center gap-2"><ItemMark kind={kind} />{runtimeText(`itemType.${kind}`)}</span>)}</li>}
+      {visualSystem && <li className="flex flex-wrap items-center gap-x-3 gap-y-1">{(['Task', 'Deliverable'] as const).map(kind => <span key={kind} className="inline-flex items-center gap-2"><ItemMark kind={kind} />{t(`itemType.${kind}`)}</span>)}</li>}
       <li className="flex items-center gap-2"><ItemMark kind="Milestone" fallback={<span className="mx-1 inline-block size-2.5 rotate-45" style={{ background: 'var(--ok)' }} aria-hidden />} />{t('timeline.legendMilestone')}</li>
       <li className="flex items-center gap-2"><span className="mx-1 inline-block size-2.5 rotate-45 border-2" style={{ borderColor: 'var(--warn)' }} aria-hidden />{t('timeline.legendOriginal')}</li>
       <li className="flex items-center gap-2"><svg width="22" height="8" aria-hidden><path d="M1 4 H18" stroke="var(--bad)" strokeWidth="1.6" /><path d="M16 1 L21 4 L16 7 z" fill="var(--bad)" /></svg>{t('timeline.legendLate')}</li>

@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
@@ -88,6 +91,21 @@ public sealed class MyWorkSeenTests
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse(committed), replay));
         Assert.Equal("New", (await s.Read([late.G("id")]))[new("Task", late.G("id"))].State);
         Assert.Single(s.Factory.Db(db => db.WorkSeenCommandReceipts.Where(row => row.UserId == s.Data.User(TestData.Alex) && row.RequestId == request).ToArray()));
+    }
+
+    [Fact]
+    public async Task Receipt_hashes_are_the_exact_legacy_anonymous_payload_wire()
+    {
+        using var s = new WorkSeenTestContext(); await s.Enable(); var p = await s.Data.Project();
+        var visit = Guid.NewGuid(); await s.Visit(request: visit);
+        var id = (await s.Data.NewTask(p.Id, extra: new { assigneeId = s.Data.User(TestData.Alex) })).G("id");
+        var token = s.Latest(id); var opened = Guid.NewGuid(); await s.Open(id, [token], opened);
+        var all = Guid.NewGuid(); await s.MarkAll(request: all);
+        static string Legacy(object value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, JsonOpts.Web)))).ToLowerInvariant();
+        string Stored(Guid request) => s.Factory.Db(db => db.WorkSeenCommandReceipts.Single(row => row.UserId == s.Data.User(TestData.Alex) && row.RequestId == request).PayloadHash);
+        Assert.Equal(Legacy(new { action = "Visit", payload = new { } }), Stored(visit));
+        Assert.Equal(Legacy(new { action = "MarkAll", payload = new { } }), Stored(all));
+        Assert.Equal(Legacy(new { action = "Opened", payload = new { ItemType = "Task", ItemId = id, observedTokens = new[] { token } } }), Stored(opened));
     }
 
     [Fact]

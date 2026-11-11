@@ -16,16 +16,16 @@ public static class MyWorkSeenEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapPost("/me/work/visits", async Task<Ok<WorkSeenCommandResult>> (WorkSeenVisitBody body, HubDb db, Access access, SettingsStore settings, TimeProvider clock) =>
-            TypedResults.Ok(await Run("Visit", body.RequestId, new { }, null, db, access, settings, clock))).WithMetadata(new AtomicCommand());
+            TypedResults.Ok(await Run("Visit", body.RequestId, new NoSeenPayload(), null, db, access, settings, clock))).WithMetadata(new AtomicCommand());
         api.MapPost("/me/work/seen-all", async Task<Ok<WorkSeenCommandResult>> (WorkSeenVisitBody body, HubDb db, Access access, SettingsStore settings, TimeProvider clock) =>
-            TypedResults.Ok(await Run("MarkAll", body.RequestId, new { }, null, db, access, settings, clock))).WithMetadata(new AtomicCommand());
+            TypedResults.Ok(await Run("MarkAll", body.RequestId, new NoSeenPayload(), null, db, access, settings, clock))).WithMetadata(new AtomicCommand());
         api.MapPost("/me/work/opened", async Task<Ok<WorkSeenCommandResult>> (WorkSeenOpenedBody body, HubDb db, Access access, SettingsStore settings, TimeProvider clock) => {
             Own(access, await settings.Get(db));
             Check.That(body.ItemId != Guid.Empty, "itemId", "error.required");
             Check.That(body.ObservedTokens is { Length: > 0 and <= 32 } && body.ObservedTokens.All(token => token != Guid.Empty), "observedTokens", "error.invalid");
             var tokens = body.ObservedTokens.Distinct().Order().ToArray();
             var normalized = body with { ObservedTokens = tokens };
-            return TypedResults.Ok(await Run("Opened", body.RequestId, new { normalized.ItemType, normalized.ItemId, observedTokens = tokens },
+            return TypedResults.Ok(await Run("Opened", body.RequestId, new OpenedSeenPayload(normalized.ItemType, normalized.ItemId, tokens),
                 normalized, db, access, settings, clock));
         }).WithMetadata(new AtomicCommand());
     }
@@ -71,7 +71,7 @@ public static class MyWorkSeenEndpoints
         var org = await store.Get(db);
         Own(access, org);
         Check.That(requestId != Guid.Empty, "requestId", "error.required");
-        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { action, payload }, JsonOpts.Web)))).ToLowerInvariant();
+        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SeenHashInput(action, payload), JsonOpts.Web)))).ToLowerInvariant();
         return await Tx.Run(db, async () => {
             var preferences = await UserPreferences.GetOrCreate(db, access.Actor.Id);
             await db.Database.SqlQuery<Guid>($"SELECT user_id AS \"Value\" FROM hub.user_setting WHERE user_id={access.Actor.Id} FOR UPDATE").ToListAsync();
@@ -128,3 +128,8 @@ public static class MyWorkSeenEndpoints
         });
     }
 }
+
+// Receipt hash inputs: property names and order are the stored wire format.
+file sealed record NoSeenPayload;
+file sealed record OpenedSeenPayload(string ItemType, Guid ItemId, Guid[] ObservedTokens);
+file sealed record SeenHashInput(string Action, object Payload);

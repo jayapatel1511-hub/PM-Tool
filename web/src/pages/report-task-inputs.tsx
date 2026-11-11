@@ -6,6 +6,7 @@ import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { BareTable } from '@/components/ui/table'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
@@ -103,7 +104,7 @@ function ReportTaskInputDialog({ code, summary, applied }: { code: string; summa
         {data.unavailableReferences > 0 ? <p className="text-sm">{t('reportInputs.unavailableReferences', { n: data.unavailableReferences })}</p> : data.total == null && <p className="text-sm">{t('reportInputs.unavailable')}</p>}
         {!!applied.length && <dl className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">{applied.map(parameter => <div key={parameter.label}><dt className="inline">{parameter.label}: </dt><dd className="inline font-medium text-foreground">{parameter.value}</dd></div>)}</dl>}
         {!data.items.length ? <Empty>{t(data.total == null ? 'reportInputs.noneKnown' : 'reportInputs.none')}</Empty> : <TableRegion>
-          <table className="w-full text-sm" data-report-input-table={metric}><caption className="sr-only">{metricTitle(metric)}</caption>
+          <BareTable className="w-full text-sm" data-report-input-table={metric}><caption className="sr-only">{metricTitle(metric)}</caption>
             <thead className="bg-muted"><tr>{[t('common.name'), t('common.project'), t('common.discipline'), t('common.status'), t('field.EstimatedHours'), t('field.DueDate')].map(label => <th key={label} className={thCls} scope="col">{label}</th>)}</tr></thead>
             <tbody>{data.items.map(row => <tr key={row.id} className="border-t hover:bg-muted">
               <td className={tdCls}><button type="button" id={`report-input-task-${row.id}`} className="inline-flex items-baseline gap-2 text-left hover:underline focus-visible:outline-2 focus-visible:outline-ring" onClick={event => { sourceTask.current = row.id; openPanel('Task', row.id, captureRecordContextOrigin(location, event.currentTarget)) }}><Key>{row.key}</Key><span>{row.name}</span></button></td>
@@ -111,7 +112,7 @@ function ReportTaskInputDialog({ code, summary, applied }: { code: string; summa
               <td className={tdCls}>{row.disciplineName ?? <Missing />}</td><td className={tdCls}><StatusPill status={row.status} /></td>
               <td className={tdCls}>{row.estimatedHours == null ? <Missing /> : row.estimatedHours}</td><td className={tdCls}>{row.dueDate ? fmtDate(row.dueDate) : <Missing />}</td>
             </tr>)}</tbody>
-          </table>
+          </BareTable>
         </TableRegion>}
         <nav aria-label={t('reportInputs.title')} className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm tabular-nums">{t(data.total == null ? 'reportInputs.knownPage' : 'reportInputs.page', { page: data.page, pages })}</span>

@@ -27,6 +27,7 @@ import { useProject, useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
+import { offersWholeProjectShift } from '@/lib/auth-context'
 import { fmtDate, hours, today, loadBandText } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -46,6 +47,7 @@ type Preview = components['schemas']['ConfirmationPreviewRead']
 type AllocationPreview = Extract<paths['/api/v1/projects/{projectId}/allocations']['post']['responses'][200]['content']['application/json'], { preview: boolean }>
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
 type OpenRole = components['schemas']['OpenRoleRow']
+const ROLE_STATUSES = ['Open', 'Filled', 'Cancelled'] as const
 type Fill = { openRoleId: string; roleLabel: string; fromDate: string; throughDate: string; plannedHours: number }
 
 /** The preview's band and indicator codes (§45.4, FR-VER-12) to text. */
@@ -88,8 +90,8 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const toggleShift = (id: string) => setShiftSelection(previous => { const ids = previous.projectId === project.id ? previous.ids : []; return { projectId: project.id, ids: ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id] } })
 
   const projectScreens = useFlag('project_screens')
-  const roleStatus = projectScreens && ['Open', 'Filled', 'Cancelled'].includes(sp.get('roleStatus') ?? '') ? sp.get('roleStatus') : null
-  const roleTokens = roleStatus ? [{ key: 'roleStatus', label: t('openRole.statusFilter'), value: runtimeText(`openRole.status.${roleStatus}`) }] : []
+  const roleStatus = projectScreens ? ROLE_STATUSES.find(status => status === sp.get('roleStatus')) ?? null : null
+  const roleTokens = roleStatus ? [{ key: 'roleStatus', label: t('openRole.statusFilter'), value: t(`openRole.status.${roleStatus}`) }] : []
   const deadlines = useQuery({ queryKey: ['allocations', project.id, 'deadlines', filters.from], enabled: capacityScreens,
     queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/deadlines', { params: { projectId: project.id }, query: { from: filters.from || undefined } }) })
   const comparison = useQuery({ queryKey: ['allocations', project.id, 'discipline-context', filters.from], enabled: capacityScreens,
@@ -147,7 +149,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     { id: 'hours', label: t('allocation.plannedHours'), fixed: true, className: 'text-right align-top font-medium tabular-nums', cell: a => hours(a.plannedHours) },
     { id: 'status', label: t('allocation.status'), fixed: true, className: 'align-top', cell: a => <AllocationStatus status={a.status} /> },
   ], list.data?.items ?? [], a => [a.fromDate, a.personName])
-  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{capacityScreens && proposal.shown && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" {...proposal.props}>{t('allocationShift.shiftAll')}</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftFor({ projectId: project.id, mode: 'Selected' })}>{t('allocationShift.selected', { n: shiftIds.length })}</DropdownMenuItem>{project.permissions.isPm && <DropdownMenuItem onSelect={() => setShiftFor({ projectId: project.id, mode: 'WholeProject' })}>{t('allocationShift.whole')}</DropdownMenuItem>}<DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftSelection({ projectId: project.id, ids: [] })}>{t('allocationShift.clear')}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}{proposal.shown && propose}</>}>
+  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{capacityScreens && proposal.shown && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" {...proposal.props}>{t('allocationShift.shiftAll')}</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftFor({ projectId: project.id, mode: 'Selected' })}>{t('allocationShift.selected', { n: shiftIds.length })}</DropdownMenuItem>{offersWholeProjectShift(project.permissions) && <DropdownMenuItem onSelect={() => setShiftFor({ projectId: project.id, mode: 'WholeProject' })}>{t('allocationShift.whole')}</DropdownMenuItem>}<DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftSelection({ projectId: project.id, ids: [] })}>{t('allocationShift.clear')}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}{proposal.shown && propose}</>}>
     <FilterBar activeCount={view === 'roles' && projectScreens ? roleTokens.length : tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       active={view === 'allocations' ? <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} /> : projectScreens && <ActiveFilters tokens={roleTokens} onRemove={() => change('roleStatus', '')} onClear={() => change('roleStatus', '')} />}
@@ -160,7 +162,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
         <Field label={t('allocation.from')} htmlFor="allocation-filter-from" className="w-full sm:w-40"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
         <Field label={t('allocation.through')} htmlFor="allocation-filter-to" className="w-full sm:w-40"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
       </div>}
-      {view === 'roles' && projectScreens && <Field label={t('openRole.statusFilter')} htmlFor="open-role-status" className="w-full sm:w-48"><select id="open-role-status" className={selectCls} value={roleStatus ?? ''} onChange={event => change('roleStatus', event.target.value)}><option value="">{t('openRole.allStatuses')}</option>{['Open', 'Filled', 'Cancelled'].map(status => <option key={status} value={status}>{runtimeText(`openRole.status.${status}`)}</option>)}</select></Field>}
+      {view === 'roles' && projectScreens && <Field label={t('openRole.statusFilter')} htmlFor="open-role-status" className="w-full sm:w-48"><select id="open-role-status" className={selectCls} value={roleStatus ?? ''} onChange={event => change('roleStatus', event.target.value)}><option value="">{t('openRole.allStatuses')}</option>{ROLE_STATUSES.map(status => <option key={status} value={status}>{t(`openRole.status.${status}`)}</option>)}</select></Field>}
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {view === 'roles' ? <OpenRoles roles={roles} roleStatus={roleStatus} projectId={project.id} proposal={proposal} canFill={proposal.shown && !!options.data}

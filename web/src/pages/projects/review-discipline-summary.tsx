@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { ErrorBanner, Loading } from '@/components/hub/common'
+import { BareTable } from '@/components/ui/table'
 import { useFlag, useMe } from '@/lib/auth'
 import { typedRequest } from '@/lib/api'
 import { t } from '@/lib/i18n'
@@ -16,7 +17,7 @@ export function ReviewDisciplineSummary({ projectId }: { projectId: string }) {
     <h2 className="text-base font-semibold">{t('reviewDiscipline.title')}</h2>
     <p className="text-sm text-muted-foreground">{t('reviewDiscipline.scope')}</p>
     <p className="text-xs text-muted-foreground">{t('reviewDiscipline.timingHint')}</p>
-    {!query.data.disciplines.length ? <p>{t('reviewDiscipline.empty')}</p> : <div className="overflow-x-auto"><table className="w-full text-left text-sm">
+    {!query.data.disciplines.length ? <p>{t('reviewDiscipline.empty')}</p> : <div className="overflow-x-auto"><BareTable className="w-full text-left text-sm">
       <thead><tr>{[t('common.discipline'), t('reviewDiscipline.roundMedian'), t('reviewDiscipline.roundMax'), t('reviewDiscipline.packages'), t('reviewDiscipline.nonApplicable'), t('reviewDiscipline.timing'), t('reviewDiscipline.timed')].map(label => <th key={label} className="p-2 font-medium">{label}</th>)}</tr></thead>
       <tbody>{query.data.disciplines.map(row => <tr key={row.projectDisciplineId} className="border-t">
         <th scope="row" className="p-2 font-medium">{row.name || '—'}{row.state === 'Inactive' && ` · ${t('reviewDiscipline.retired')}`}
@@ -25,6 +26,6 @@ export function ReviewDisciplineSummary({ projectId }: { projectId: string }) {
         <td className="p-2 tabular-nums">{row.packageSampleCount} / {row.eligiblePackageCount}</td><td className="p-2 tabular-nums">{row.nonApplicablePackageCount}</td>
         <td className="p-2 tabular-nums">{metric(row.medianDaysPerRound)}</td><td className="p-2 tabular-nums">{row.timedAssignmentRoundCount} / {row.startedAssignmentRoundCount}</td>
       </tr>)}</tbody>
-    </table></div>}
+    </BareTable></div>}
   </section>
 }

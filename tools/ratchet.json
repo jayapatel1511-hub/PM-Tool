@@ -2,7 +2,7 @@
   "counters": {
     "anonymous_objects": {
       "ratchet": true,
-      "value": 320
+      "value": 209
     },
     "api_helpers_without_type": {
       "ratchet": true,
@@ -18,7 +18,7 @@
     },
     "html_tables": {
       "ratchet": true,
-      "value": 63
+      "value": 49
     },
     "load_percentage_literals": {
       "ratchet": true,
@@ -26,11 +26,11 @@
     },
     "page_permission_derivations": {
       "ratchet": true,
-      "value": 4
+      "value": 2
     },
     "runtime_text_keys": {
       "ratchet": true,
-      "value": 386
+      "value": 227
     },
     "task_object_handlers": {
       "ratchet": true,
@@ -40,6 +40,9 @@
       "ratchet": true,
       "value": 0
     }
+  },
+  "notes": {
+    "053-D24": "anonymous_objects 211, runtime_text_keys 230, html_tables 49 and page_permission_derivations 2 at the 039-051 release candidate (ac2fa894) rose with the packet 052/053 build and were raised under decision 053-D24. 053 S50 (2026-11-11) restored them: 209, 227, 49 and 2. client_permission_derivations (report-only until server permission flags land, section 45) reads 74 against 62; it is left at 62, so ratchet.py --update refuses until it drops."
   },
   "text_differences": {
     "basis.assumption": {
@@ -134,8 +137,5 @@
       "client": "Partial project scope; spare capacity is unknown",
       "server": "Partial project scope"
     }
-  },
-  "notes": {
-    "053-D24": "anonymous_objects 211, runtime_text_keys 230, html_tables 49 and page_permission_derivations 2 at the 039-051 release candidate (ac2fa894) rose with the packet 052/053 build. Raised to the measured values under decision 053-D24; 053 S50 restores them before any 052/053 flag goes on in pilot."
   }
 }

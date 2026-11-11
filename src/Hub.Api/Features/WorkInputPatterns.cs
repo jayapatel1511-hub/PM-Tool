@@ -24,7 +24,7 @@ public static class WorkInputPatterns
         var tasks = await db.TaskStates.AsNoTracking().Where(s => s.ProjectId == projectId && (s.IsWaiting || s.IsBlocked))
             .Join(db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.Id != taskId
                 && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
-                s => s.TaskId, t => t.Id, (s, t) => new { t.Id, t.Key, t.Name, s.BlockedBy }).ToListAsync();
+                s => s.TaskId, t => t.Id, (s, t) => new BlockedTask { Id = t.Id, Key = t.Key, Name = t.Name, BlockedBy = s.BlockedBy }).ToListAsync();
         var groups = relevant.ToDictionary(x => x, _ => new List<WorkInputAffectedTask>());
         foreach (var task in tasks)
             foreach (var identity in References(task.BlockedBy).Where(relevant.Contains))
@@ -71,7 +71,7 @@ public static class WorkInputPatterns
         var currentIds = heads.Values.Select(h => h.CurrentRevisionId).Distinct().ToArray();
         var assessments = await db.ChangeAssessments.AsNoTracking().Where(a => a.ProjectId == projectId && a.TargetType == ItemType.Task && a.TargetId == taskId)
             .Join(db.ChangeNotices.AsNoTracking().Where(n => n.ProjectId == projectId && currentIds.Contains(n.NewRevisionId) && n.Status != ChangeStatus.Draft),
-                a => a.ChangeNoticeId, n => n.Id, (a, n) => new { Assessment = a, Notice = n }).ToListAsync();
+                a => a.ChangeNoticeId, n => n.Id, (a, n) => new NoticeAssessment { Assessment = a, Notice = n }).ToListAsync();
         WorkInputRevision? Revision(Guid id, string identity) => revisions.TryGetValue(id, out var r) && Coordination.Identity(r) == identity
             ? new(r.Id, r.SourceKey, r.Title, r.Revision, r.CreatedAt, r.SourceCheckedAt) : null;
         return uses.Select(use =>
@@ -87,3 +87,7 @@ public static class WorkInputPatterns
         }).OrderBy(x => x.RevisionUsed?.Key ?? x.CurrentRegisteredRevision?.Key ?? "", StringComparer.Ordinal).ThenBy(x => x.Id).ToArray();
     }
 }
+
+// Join result selectors stay member-init projections for EF.
+file sealed class BlockedTask { public Guid Id { get; init; } public string Key { get; init; } = ""; public string Name { get; init; } = ""; public string BlockedBy { get; init; } = ""; }
+file sealed class NoticeAssessment { public ChangeAssessment Assessment { get; init; } = null!; public ChangeNotice Notice { get; init; } = null!; }

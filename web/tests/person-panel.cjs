@@ -147,12 +147,13 @@ const workspace = () => ({ projects: 1, people: members().map(member => ({ userI
     await panel().getByText('P-SYN-25 · Synthetic visible project 25', { exact: true }).waitFor()
     assert.equal(new URL(page.url()).searchParams.get('q'), 'Alex'); assert.equal(new URL(page.url()).searchParams.get('officeId'), officeId)
     manyProjects = false
-    // Direct-link Close clears exactly Person context, retains unrelated task/list params, never navigates to a directory.
+    // Direct-link Close clears exactly Person context and the task panel's presentation keys (work/people screens),
+    // retains unrelated list params, never navigates to a directory.
     const direct = `${listUrl}&taskSection=activity&panel=Person:${alex}&personStaffScope=direct&personProjectsPage=1&personProjectsPageSize=25`
     await goto(direct); await panel().waitFor(); assert.equal(reads.at(-1).params.staffScope, 'direct'); await close()
     await page.waitForURL(url => !url.searchParams.has('panel'))
     const after = new URL(page.url()); for (const key of ['personStaffScope', 'personProjectsPage', 'personProjectsPageSize']) assert.equal(after.searchParams.has(key), false)
-    assert.equal(after.searchParams.get('taskSection'), 'activity'); assert.equal(after.searchParams.get('officeId'), officeId)
+    assert.equal(after.searchParams.has('taskSection'), false); assert.equal(after.searchParams.get('officeId'), officeId)
     // main.tsx keeps successful queries fresh15s. Let actual time expire, then normally reopen the SAME key.
     // Hold only the network fixture response to observe cached facts before an answered404; never inject query/focus/clock state.
     await goto(`${projectUrl}?panel=Person:${alex}`); await panel().waitFor(); const successfulPersonObservedAt = Date.now()

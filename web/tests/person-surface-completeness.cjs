@@ -88,6 +88,8 @@ const discussion = surfaceComments({ author: people.jill, authorName: names.get(
       }
       if (path === `tasks/${work.id}`) return route.fulfill({ json: detail() })
       if (path === `tasks/${work.id}/dependencies`) return route.fulfill({ json: taskDependencies() })
+      // With work_screens on, the Task History section reads its person filter choices: the actors in this task's history.
+      if (path === `tasks/${work.id}/activity/actors`) return route.fulfill({ json: [{ id: people.jill, displayName: names.get(people.jill), isActive: true }] })
       if (path === 'tasks' || path === `projects/${project.id}/tasks`) return route.fulfill({ json: taskPage([work]) })
       if (path === `items/Task/${work.id}/links`) return route.fulfill({ json: links })
       if (path === `items/Task/${work.id}/comments`) return route.fulfill({ json: discussion })
@@ -251,7 +253,10 @@ const discussion = surfaceComments({ author: people.jill, authorName: names.get(
     assert.equal(await historyFolds.nth(0).evaluate(d => d.open), true)
     assert.equal(await historyFolds.nth(1).evaluate(d => d.open), false)
     await roundTrip(trigger(`history:Task:${work.id}:`, people.jill), people.jill, { unmounted: true })
-    assert.equal(await page.getByRole('tab', { name: 'History', exact: true }).getAttribute('aria-selected'), 'true')
+    // work_screens: the Task panel mounts every section instead of tabs, so the remounted folds sit in its History section
+    // (roundTrip has already checked the restored scroll position).
+    assert.equal(await page.getByRole('tab', { name: 'History', exact: true }).count(), 0)
+    assert.equal(await historyFolds.nth(0).evaluate(d => d.closest('[data-task-section]')?.getAttribute('data-task-section')), 'history')
     assert.equal(await historyFolds.nth(0).evaluate(d => d.open), true)
     assert.equal(await historyFolds.nth(1).evaluate(d => d.open), false)
     await page.goto(`${base}/notifications?tab=following&projectId=${project.id}`)

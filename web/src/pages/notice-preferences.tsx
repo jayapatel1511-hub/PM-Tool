@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
-import { runtimeText } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import { invalidateNotifications } from '@/lib/keys'
 import { useUnsavedGuard } from '@/hooks/drafts'
 import { ErrorBanner, Field, Loading, Section, Spinner } from '@/components/hub/common'
@@ -41,12 +41,12 @@ export function NoticePreferences() {
   const q = useQuery({ queryKey, enabled, retry: false, queryFn: async ({ signal }) => {
     const value = await typedRequest('get', '/api/v1/me/notice-preferences', { signal })
     const previous = qc.getQueryData<Read>(queryKey)
-    if (!validRead(value) || previous && value.revision < previous.revision) throw new Error(runtimeText('noticePrefs.invalidRead'))
+    if (!validRead(value) || previous && value.revision < previous.revision) throw new Error(t('noticePrefs.invalidRead'))
     return value
   } })
   if (!enabled) return null
-  if (!q.data) return <Section title={runtimeText('noticePrefs.title')} id="notice-preferences">
-    <div className="space-y-3 px-5 py-4">{q.isPending ? <Loading rows={3} /> : <><ErrorBanner error={q.error} /><Button type="button" size="sm" variant="outline" disabled={q.isFetching} onClick={() => { void q.refetch() }}>{q.isFetching && <Spinner />}{runtimeText(q.isFetching ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button></>}</div>
+  if (!q.data) return <Section title={t('noticePrefs.title')} id="notice-preferences">
+    <div className="space-y-3 px-5 py-4">{q.isPending ? <Loading rows={3} /> : <><ErrorBanner error={q.error} /><Button type="button" size="sm" variant="outline" disabled={q.isFetching} onClick={() => { void q.refetch() }}>{q.isFetching && <Spinner />}{t(q.isFetching ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button></>}</div>
   </Section>
   return <NoticePreferencesEditor key={me.id} value={q.data} available={!q.isError} readError={q.error} fetching={q.isFetching} zone={me.settings.orgTimeZone} afterSaved={() => invalidateNotifications(qc)}
     readCurrent={async () => (await q.refetch({ throwOnError: true, cancelRefetch: false })).data!} acceptReceipt={receipt => {
@@ -96,7 +96,7 @@ function NoticePreferencesEditor({ value, available, readError, fetching, zone, 
     working.current = true; setOrigin(original); setSent(intent); setBusy(true); setError(null); setChecked(null); setSaved(false)
     try {
       const result = await typedRequest('patch', '/api/v1/me/notice-preferences', { body: intent })
-      if (!validRead(result) || result.revision !== expected.revision || !sameChoices(choices(result), choices(expected))) throw new Error(runtimeText('noticePrefs.uncertain'))
+      if (!validRead(result) || result.revision !== expected.revision || !sameChoices(choices(result), choices(expected))) throw new Error(t('noticePrefs.uncertain'))
       if (!mounted.current) return
       setConfirmed(result); setUncertain(false)
       const accepted = acceptReceipt(result)
@@ -114,7 +114,7 @@ function NoticePreferencesEditor({ value, available, readError, fetching, zone, 
     working.current = true; setBusy(true); setError(null); setChecked(null); setSaved(false)
     try {
       const current = await readCurrent()
-      if (!validRead(current)) throw new Error(runtimeText('noticePrefs.invalidRead'))
+      if (!validRead(current)) throw new Error(t('noticePrefs.invalidRead'))
       if (mounted.current) setChecked({ ...current })
     } catch (caught) { if (mounted.current) setError(caught) }
     finally { working.current = false; if (mounted.current) setBusy(false) }
@@ -124,55 +124,55 @@ function NoticePreferencesEditor({ value, available, readError, fetching, zone, 
     setOrigin({ ...checkedCurrent }); setDraft(choices(checkedCurrent)); setSent(null); setChecked(null); setError(null); setUncertain(false); setSaved(false)
   }
   const locked = busy || !!sent || !available
-  return <Section title={runtimeText('noticePrefs.title')} id="notice-preferences">
+  return <Section title={t('noticePrefs.title')} id="notice-preferences">
     {!available && <div className="space-y-3 px-5 py-4" data-notice-preferences-error>
-      <ErrorBanner error={readError} /><p className="text-sm text-muted-foreground">{runtimeText('noticePrefs.unavailable')}</p>
-      <Button type="button" size="sm" variant="outline" disabled={busy || fetching} onClick={check}>{(busy || fetching) && <Spinner />}{runtimeText(busy || fetching ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button>
+      <ErrorBanner error={readError} /><p className="text-sm text-muted-foreground">{t('noticePrefs.unavailable')}</p>
+      <Button type="button" size="sm" variant="outline" disabled={busy || fetching} onClick={check}>{(busy || fetching) && <Spinner />}{t(busy || fetching ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button>
     </div>}
-    <form aria-label={runtimeText('noticePrefs.title')} data-notice-preferences-form hidden={!available} inert={!available ? true : undefined} aria-hidden={!available ? true : undefined}
+    <form aria-label={t('noticePrefs.title')} data-notice-preferences-form hidden={!available} inert={!available ? true : undefined} aria-hidden={!available ? true : undefined}
       onSubmit={event => { event.preventDefault(); void submit() }} className="divide-y">
       <div className="space-y-4 px-5 py-4">
-        <p className="text-sm text-muted-foreground">{runtimeText('noticePrefs.hint')}</p>
-        <Field label={runtimeText('noticePrefs.frequency')} htmlFor={prefix + '-frequency'} hint={runtimeText(shown.noticeDigestFrequency === 'Weekly' ? 'noticePrefs.weeklyHint' : 'noticePrefs.frequencyHint')}>
+        <p className="text-sm text-muted-foreground">{t('noticePrefs.hint')}</p>
+        <Field label={t('noticePrefs.frequency')} htmlFor={prefix + '-frequency'} hint={t(shown.noticeDigestFrequency === 'Weekly' ? 'noticePrefs.weeklyHint' : 'noticePrefs.frequencyHint')}>
           <select id={prefix + '-frequency'} className="h-(--control-row-h) w-full rounded-md border bg-card px-2 text-sm sm:w-44" value={shown.noticeDigestFrequency} disabled={locked}
             onChange={event => change({ noticeDigestFrequency: event.target.value })}>
-            <option value="Daily">{runtimeText('noticePrefs.daily')}</option><option value="Weekly">{runtimeText('noticePrefs.weekly')}</option>
+            <option value="Daily">{t('noticePrefs.daily')}</option><option value="Weekly">{t('noticePrefs.weekly')}</option>
           </select>
         </Field>
         <div className="space-y-1">
-          <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium" htmlFor={prefix + '-hold'}><Switch id={prefix + '-hold'} checked={shown.holdImmediateEmailWhenAway} disabled={locked} onCheckedChange={on => change({ holdImmediateEmailWhenAway: on })} />{runtimeText('noticePrefs.immediateHold')}</label>
-          <p className="text-xs/[18px] text-muted-foreground">{runtimeText('noticePrefs.immediateHint')}</p>
+          <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium" htmlFor={prefix + '-hold'}><Switch id={prefix + '-hold'} checked={shown.holdImmediateEmailWhenAway} disabled={locked} onCheckedChange={on => change({ holdImmediateEmailWhenAway: on })} />{t('noticePrefs.immediateHold')}</label>
+          <p className="text-xs/[18px] text-muted-foreground">{t('noticePrefs.immediateHint')}</p>
         </div>
       </div>
       <div className="space-y-3 px-5 py-4">
-        <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium" htmlFor={prefix + '-reminder'}><Switch id={prefix + '-reminder'} checked={shown.timeReminderEnabled} disabled={locked} onCheckedChange={on => change({ timeReminderEnabled: on })} />{runtimeText('noticePrefs.reminder')}</label>
-        <p className="text-xs/[18px] text-muted-foreground">{runtimeText('noticePrefs.reminderHint')}</p>
+        <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium" htmlFor={prefix + '-reminder'}><Switch id={prefix + '-reminder'} checked={shown.timeReminderEnabled} disabled={locked} onCheckedChange={on => change({ timeReminderEnabled: on })} />{t('noticePrefs.reminder')}</label>
+        <p className="text-xs/[18px] text-muted-foreground">{t('noticePrefs.reminderHint')}</p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label={runtimeText('noticePrefs.day')} htmlFor={prefix + '-day'}>
+          <Field label={t('noticePrefs.day')} htmlFor={prefix + '-day'}>
             <select id={prefix + '-day'} className="h-(--control-row-h) w-full rounded-md border bg-card px-2 text-sm" value={shown.timeReminderWeekday ?? ''} disabled={locked}
               onChange={event => change({ timeReminderWeekday: Number(event.target.value) })}>
-              <option value="" disabled>{runtimeText('noticePrefs.chooseDay')}</option>{weekdays.map((day, index) => <option key={day} value={index + 1}>{runtimeText(`noticePrefs.${day}`)}</option>)}
+              <option value="" disabled>{t('noticePrefs.chooseDay')}</option>{weekdays.map((day, index) => <option key={day} value={index + 1}>{t(`noticePrefs.${day}`)}</option>)}
             </select>
           </Field>
-          <Field label={runtimeText('noticePrefs.time')} htmlFor={prefix + '-time'}><Input id={prefix + '-time'} type="time" step={60} value={shown.timeReminderTimeLocal ?? ''} disabled={locked}
+          <Field label={t('noticePrefs.time')} htmlFor={prefix + '-time'}><Input id={prefix + '-time'} type="time" step={60} value={shown.timeReminderTimeLocal ?? ''} disabled={locked}
             onChange={event => change({ timeReminderTimeLocal: event.target.value || null })} /></Field>
         </div>
-        <p className="text-xs/[18px] text-muted-foreground">{zone ? runtimeText('noticePrefs.zone', { zone }) : <>{runtimeText('field.TimeZone')}: {runtimeText('common.unavailable')}.</>} {runtimeText('noticePrefs.keepChoices')}</p>
-        {invalid && <p role="alert" className="text-sm text-bad">{runtimeText(clearedSavedTime ? 'noticePrefs.keepSavedTime' : 'noticePrefs.chooseBoth')}</p>}
+        <p className="text-xs/[18px] text-muted-foreground">{zone ? t('noticePrefs.zone', { zone }) : <>{t('field.TimeZone')}: {t('common.unavailable')}.</>} {t('noticePrefs.keepChoices')}</p>
+        {invalid && <p role="alert" className="text-sm text-bad">{t(clearedSavedTime ? 'noticePrefs.keepSavedTime' : 'noticePrefs.chooseBoth')}</p>}
       </div>
       <div className="space-y-3 px-5 py-4">
-        {saved && <p role="status" className="text-sm">{runtimeText('noticePrefs.saved')}</p>}
-        {uncertain && <p role="status" className="text-sm">{runtimeText('noticePrefs.uncertain')}</p>}
+        {saved && <p role="status" className="text-sm">{t('noticePrefs.saved')}</p>}
+        {uncertain && <p role="status" className="text-sm">{t('noticePrefs.uncertain')}</p>}
         {error != null && <ErrorBanner error={error} />}
         {checkedCurrent && <div className="space-y-2 text-sm" data-notice-preferences-current>
-          <p role="status">{runtimeText(sameChoices(choices(checkedCurrent), shown) ? 'noticePrefs.currentMatches' : 'noticePrefs.currentDifferent')}</p>
-          <p className="text-xs/[18px] text-muted-foreground">{runtimeText('noticePrefs.useCurrentHint')}</p>
-          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={useCurrent}>{runtimeText('noticePrefs.useCurrent')}</Button>
+          <p role="status">{t(sameChoices(choices(checkedCurrent), shown) ? 'noticePrefs.currentMatches' : 'noticePrefs.currentDifferent')}</p>
+          <p className="text-xs/[18px] text-muted-foreground">{t('noticePrefs.useCurrentHint')}</p>
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={useCurrent}>{t('noticePrefs.useCurrent')}</Button>
         </div>}
         <div className="flex flex-wrap gap-2">
-          {!sent && <><Button type="submit" size="sm" disabled={locked || !dirty || invalid}>{busy && <Spinner />}{runtimeText(busy ? 'noticePrefs.saving' : 'noticePrefs.save')}</Button>
-            {dirty && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={discard}>{runtimeText('noticePrefs.discard')}</Button>}</>}
-          {sent && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={check}>{busy && <Spinner />}{runtimeText(busy ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button>}
+          {!sent && <><Button type="submit" size="sm" disabled={locked || !dirty || invalid}>{busy && <Spinner />}{t(busy ? 'noticePrefs.saving' : 'noticePrefs.save')}</Button>
+            {dirty && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={discard}>{t('noticePrefs.discard')}</Button>}</>}
+          {sent && <Button type="button" size="sm" variant="outline" disabled={busy} onClick={check}>{busy && <Spinner />}{t(busy ? 'noticePrefs.checking' : 'noticePrefs.check')}</Button>}
         </div>
       </div>
     </form>

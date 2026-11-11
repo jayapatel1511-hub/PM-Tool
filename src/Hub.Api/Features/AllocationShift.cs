@@ -66,7 +66,7 @@ public static partial class AllocationEndpoints
                 await Validate(db, project, body.PersonId, body.Purpose, body.FromDate, body.ThroughDate, body.PlannedHours, body.Days, body.Links, store);
                 plans.Add(new(row, body));
             }
-            catch (ApiException error) { throw new ApiException(error.Status, error.Code, error.Message, error.Errors, new { allocationId = row.Id }); }
+            catch (ApiException error) { throw new ApiException(error.Status, error.Code, error.Message, error.Errors, new ShiftRefusedAllocation(row.Id)); }
         }
         // Reject an occupied target slice without revealing the other allocation or its creator/person metadata.
         var targets = plans.SelectMany(plan => plan.Body.Links.Select(link => (plan.Body.PersonId, link.WorkType, link.WorkId, link.WorkDate))).ToArray();
@@ -75,7 +75,7 @@ public static partial class AllocationEndpoints
         var from = plans.Min(plan => plan.Body.FromDate); var through = plans.Max(plan => plan.Body.ThroughDate);
         var occupied = await db.AllocationWorkLinks.AsNoTracking().Where(link => !ids.Contains(link.AllocationId) && people.Contains(link.PersonId)
             && link.ReleasedAt == null && link.WorkDate >= from && link.WorkDate <= through)
-            .Select(link => new { link.PersonId, link.WorkType, link.WorkId, link.WorkDate }).ToArrayAsync();
+            .Select(link => new ShiftOccupiedLink(link.PersonId, link.WorkType, link.WorkId, link.WorkDate)).ToArrayAsync();
         var existing = occupied.Select(link => (link.PersonId, link.WorkType, link.WorkId, link.WorkDate)).ToHashSet();
         if (targets.Any(existing.Contains)) throw ApiException.Conflict("allocation_shift_conflict", "allocation.shift_conflict");
         return plans.ToArray();
@@ -95,7 +95,7 @@ public static partial class AllocationEndpoints
         var ids = rows.Select(row => row.Id).ToArray();
         var roles = await db.OpenRoles.AsNoTracking().Where(role => role.ProjectId == projectId && role.Status == OpenRoleStatus.Filled
             && role.FilledAllocationId != null && ids.Contains(role.FilledAllocationId.Value))
-            .Select(role => new { role.FilledAllocationId, Value = new AllocationShiftRole(role.Id, role.RoleLabel, role.FromDate, role.ThroughDate) }).ToArrayAsync();
+            .Select(role => new ShiftFilledRole(role.FilledAllocationId, new AllocationShiftRole(role.Id, role.RoleLabel, role.FromDate, role.ThroughDate))).ToArrayAsync();
         return TypedResults.Ok(new AllocationShiftPreview(body.Mode, body.Weeks, plans.Select(plan => new AllocationShiftRow(plan.Allocation.Id, plan.Allocation.RowVersion,
             plan.Allocation.PersonId, names[plan.Allocation.PersonId], plan.Allocation.Status, plan.Allocation.FromDate, plan.Allocation.ThroughDate,
             plan.Body.FromDate, plan.Body.ThroughDate, plan.Allocation.Status == AllocationStatus.Confirmed,
@@ -107,7 +107,7 @@ public static partial class AllocationEndpoints
         if (!(await store.Get(db)).IsFlagOn("capacity_screens")) throw ApiException.NotFound();
         var delta = ShiftDays(body.Mode, body.Weeks);
         Check.That(body.Allocations is { Length: > 0 } && body.Allocations.All(row => row is not null), "allocations", "error.required");
-        return await Coordination.Run(projectId, body.RequestId, new { operation = "allocation.shift", body }, access, db, clock, async (project, context) =>
+        return await Coordination.Run(projectId, body.RequestId, new AllocationShiftPayload("allocation.shift", body), access, db, clock, async (project, context) =>
         {
             var rows = await ShiftRows(projectId, body.Mode, body.Allocations.Select(row => row.Id).ToArray(), context, access, db, true);
             var versions = body.Allocations.ToDictionary(row => row.Id, row => row.RowVersion);
@@ -123,3 +123,9 @@ public static partial class AllocationEndpoints
         });
     }
 }
+
+file sealed record ShiftOccupiedLink(Guid PersonId, string WorkType, Guid WorkId, DateOnly WorkDate);
+file sealed record ShiftFilledRole(Guid? FilledAllocationId, AllocationEndpoints.AllocationShiftRole Value);
+// Wire shapes: the refusal is problem-body JSON and the payload hash is a stored receipt; names and order are fixed.
+file sealed record ShiftRefusedAllocation(Guid AllocationId);
+file sealed record AllocationShiftPayload(string Operation, AllocationEndpoints.AllocationShiftBody Body);

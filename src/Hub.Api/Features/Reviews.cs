@@ -306,14 +306,15 @@ public static class ReviewEndpoints
     }
     static async Task<Coordination.Result> Create(Guid projectId, CreateBody body, Access access, HubDb db, SettingsStore settings, TimeProvider clock)
     {
+        var payload = new ReviewCreatePayload("review.create", body);
         if (body.IssuedRevisionIds is not null)
         {
             Http.RequireFlag(await settings.Get(db), DeliverableEndpoints.RegisterFlag);
             var (_, context) = await access.Project(projectId, false);
             Access.Demand(Permissions.ManageCoordination(access.Actor, context, body.ProjectDisciplineId));
-            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, new { operation = "review.create", body }, body.IssuedRevisionIds, access, db);
+            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, payload, body.IssuedRevisionIds, access, db);
         }
-        return await Coordination.Run(projectId, body.RequestId, new { operation = "review.create", body }, access, db, clock, async (project, ctx) => {
+        return await Coordination.Run(projectId, body.RequestId, payload, access, db, clock, async (project, ctx) => {
             Access.Demand(Permissions.ManageCoordination(access.Actor, ctx, body.ProjectDisciplineId));
             await Coordination.Person(db, project, body.CoordinatorId, "coordinatorId"); await Coordination.Discipline(db, project.Id, body.ProjectDisciplineId);
             var p = new ReviewPackage { ProjectId = project.Id, Title = Check.Required(body.Title, "title"), Purpose = Check.Required(body.Purpose, "purpose", 2000), CoordinatorId = body.CoordinatorId, ProjectDisciplineId = body.ProjectDisciplineId, RequiredForIssue = body.RequiredForIssue };
@@ -333,16 +334,17 @@ public static class ReviewEndpoints
         {
             Http.RequireFlag(await settings.Get(db), DeliverableEndpoints.RegisterFlag);
             Access.Demand(Permissions.ManageCoordination(access.Actor, context, body.ProjectDisciplineId));
-            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, new { operation = "review.create", body }, body.IssuedRevisionIds, access, db);
+            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, payload, body.IssuedRevisionIds, access, db);
         });
     }
     static async Task<Coordination.Result> NewRound(Guid projectId, Guid id, RoundBody body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock)
     {
+        var payload = new ReviewRoundPayload("review.round", id, body);
         if (body.IssuedRevisionIds is not null) Http.RequireFlag(await settings.Get(db), DeliverableEndpoints.RegisterFlag);
         await ExternalReviewEndpoints.GuardReplay(projectId, id, "round", null, null, access, db);
         if (body.IssuedRevisionIds is not null)
-            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, new { operation = "review.round", id, body }, body.IssuedRevisionIds, access, db);
-        return await Coordination.Run(projectId, body.RequestId, new { operation = "review.round", id, body }, access, db, clock, async (project, ctx) => {
+            await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, payload, body.IssuedRevisionIds, access, db);
+        return await Coordination.Run(projectId, body.RequestId, payload, access, db, clock, async (project, ctx) => {
             var p = await Load(db, project.Id, id); Live(p); Coordination.Version(p, body.RowVersion);
             Check.That(await ReviewIssuedSources.IsIssuedPackage(db, id) == (body.IssuedRevisionIds is not null), "issuedRevisionIds", "externalReview.sourceMode");
             Access.Demand(Permissions.CoordinateReview(access.Actor, ctx, p.ProjectDisciplineId, p.CoordinatorId));
@@ -401,7 +403,7 @@ public static class ReviewEndpoints
         {
             await ExternalReviewEndpoints.GuardReplay(projectId, id, "round", null, null, access, db, project, context);
             if (body.IssuedRevisionIds is not null)
-                await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, new { operation = "review.round", id, body }, body.IssuedRevisionIds, access, db);
+                await ExternalReviewEndpoints.GuardSourceReplay(projectId, body.RequestId, payload, body.IssuedRevisionIds, access, db);
         });
     }
     static async Task<Coordination.Result> Action(Guid projectId, Guid id, ActionBody body, Access access, HubDb db, SettingsStore settings, Notifier notify, TimeProvider clock)
@@ -588,7 +590,7 @@ public static class ReviewEndpoints
         var deliverableIds = revisions.Select(r => r.DeliverableId).OfType<Guid>().Distinct().ToArray();
         var available = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == project.Id && deliverableIds.Contains(d.Id)).Select(d => d.Id).ToListAsync();
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == project.Id && available.Contains(t.DeliverableId ?? Guid.Empty))
-            .Select(t => new { t.DeliverableId, t.Key, t.AssigneeId }).ToListAsync();
+            .Select(t => new ReviewSourceTask(t.DeliverableId, t.Key, t.AssigneeId)).ToListAsync();
         var peopleIds = tasks.Select(t => t.AssigneeId).OfType<Guid>().Distinct().ToArray();
         var people = await db.Users.AsNoTracking().Where(u => peopleIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id);
         var eligible = await Coordination.People(db, project).Select(u => u.Id).ToListAsync();
@@ -733,3 +735,8 @@ public static class ReviewEndpoints
         return await ExportFile.Send(db, store, format, Text.Get("export.reviews", project.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), project.Id, $"{project.ProjectNumber}-reviews", clock);
     }
 }
+
+file sealed record ReviewSourceTask(Guid? DeliverableId, string Key, Guid? AssigneeId);
+// Stored receipt hash inputs: property names and order are the wire format.
+file sealed record ReviewCreatePayload(string Operation, ReviewEndpoints.CreateBody Body);
+file sealed record ReviewRoundPayload(string Operation, Guid Id, ReviewEndpoints.RoundBody Body);

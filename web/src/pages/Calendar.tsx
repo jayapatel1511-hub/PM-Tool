@@ -157,17 +157,25 @@ function CalendarScreenPage() {
         <Button variant="outline" size="icon" aria-label={t('calendar.previous')} onClick={() => step(-1)}><ChevronLeft className="size-5" /></Button>
         <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => step(1)}><ChevronRight className="size-5" /></Button>
         <span aria-live="polite" className="text-base/6 font-semibold tabular-nums">{label}</span>
-      </div>
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4" data-calendar-filters>
-        <div className="flex flex-wrap gap-2" role="group" aria-label={t('calendar.types')}>{TYPES.map(type => <ChipToggle key={type.id} on={!hidden.includes(type.id)} onClick={() => toggle(type.id)}>{t(type.label)}</ChipToggle>)}</div>
-        <ChipToggle on={showAway} onClick={() => set('showAway', showAway ? null : 'true')}>{t('calendarScreen.timeAway')}</ChipToggle>
-        <Field label={t('calendarScreen.person')} htmlFor="calendar-person"><select id="calendar-person" className={selectCls} value={personId ?? ''} disabled={!data} onChange={event => set('personId', event.target.value)}>
-          <option value="">{t('common.all')}</option>{personId && !data?.people.some(person => person.id === personId) && <option value={personId}>{t('calendarScreen.unavailable')}</option>}{data?.people.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}
-        </select></Field>
-        <Field label={t('calendarScreen.discipline')} htmlFor="calendar-discipline" hint={t('calendarScreen.disciplineHelp')}><select id="calendar-discipline" className={selectCls} value={disciplineId ?? ''} disabled={!data} onChange={event => set('disciplineId', event.target.value)}>
-          <option value="">{t('common.all')}</option>{disciplineId && !data?.disciplines.some(discipline => discipline.id === disciplineId) && <option value={disciplineId}>{t('calendarScreen.unavailable')}</option>}{data?.disciplines.map(discipline => <option key={discipline.id} value={discipline.id}>{discipline.name}</option>)}
-        </select></Field>
-        <Button variant="ghost" onClick={() => { setPage(1); setSp(clearCalendarFilters(sp), { replace: true }) }}>{t('calendarScreen.clear')}</Button>
+        {/* §41 R1: the type layers, Time away, Person and Discipline open from Filters; set filters show as chips. */}
+        <FilterBar activeCount={hidden.length + (showAway ? 1 : 0) + (personId ? 1 : 0) + (disciplineId ? 1 : 0)} active={<ActiveFilters tokens={[
+          // Each chip is named by its layer, so its remove button says which layer it restores.
+          ...TYPES.filter(type => hidden.includes(type.id)).map(type => ({ key: type.id, label: t(type.label), value: t('calendar.hiddenType') })),
+          ...(showAway ? [{ key: 'showAway', label: t('calendarScreen.timeAway'), value: t('calendarScreen.awayShown') }] : []),
+          ...(personId ? [{ key: 'personId', label: t('calendarScreen.person'), value: data?.people.find(person => person.id === personId)?.name ?? t('calendarScreen.unavailable') }] : []),
+          ...(disciplineId ? [{ key: 'disciplineId', label: t('calendarScreen.discipline'), value: data?.disciplines.find(discipline => discipline.id === disciplineId)?.name ?? t('calendarScreen.unavailable') }] : []),
+        ]} onRemove={key => TYPES.some(type => type.id === key) ? toggle(key) : set(key, null)} onClear={() => { setPage(1); setSp(clearCalendarFilters(sp), { replace: true }) }} />}>
+          <div className="flex flex-col gap-4" data-calendar-filters>
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t('calendar.types')}>{TYPES.map(type => <ChipToggle key={type.id} on={!hidden.includes(type.id)} onClick={() => toggle(type.id)}>{t(type.label)}</ChipToggle>)}</div>
+            <div><ChipToggle on={showAway} onClick={() => set('showAway', showAway ? null : 'true')}>{t('calendarScreen.timeAway')}</ChipToggle></div>
+            <Field label={t('calendarScreen.person')} htmlFor="calendar-person"><select id="calendar-person" className={selectCls} value={personId ?? ''} disabled={!data} onChange={event => set('personId', event.target.value)}>
+              <option value="">{t('common.all')}</option>{personId && !data?.people.some(person => person.id === personId) && <option value={personId}>{t('calendarScreen.unavailable')}</option>}{data?.people.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}
+            </select></Field>
+            <Field label={t('calendarScreen.discipline')} htmlFor="calendar-discipline" hint={t('calendarScreen.disciplineHelp')}><select id="calendar-discipline" className={selectCls} value={disciplineId ?? ''} disabled={!data} onChange={event => set('disciplineId', event.target.value)}>
+              <option value="">{t('common.all')}</option>{disciplineId && !data?.disciplines.some(discipline => discipline.id === disciplineId) && <option value={disciplineId}>{t('calendarScreen.unavailable')}</option>}{data?.disciplines.map(discipline => <option key={discipline.id} value={discipline.id}>{discipline.name}</option>)}
+            </select></Field>
+          </div>
+        </FilterBar>
       </div>
       {showAway && data?.away.state === 'Unavailable' && <Notice title={t('calendarScreen.awayUnavailable')} />}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}

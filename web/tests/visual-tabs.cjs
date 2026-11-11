@@ -37,11 +37,12 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     let enabled = false
     let homeOverview = false
     let readOnly = false
+    let adminFlags = {}
     await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'sam@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
     await page.route('**/api/**', async route => {
       const request = route.request(); const pathname = new URL(request.url()).pathname.replace('/api/v1/', '')
       if (pathname === 'config') return route.fulfill({ json: clientConfig() })
-      if (pathname === 'me') return route.fulfill({ json: meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', capabilities: { workload: !readOnly, portfolio: !readOnly, readOnly }, flags: { visual_system: enabled, home_overview: homeOverview } }) })
+      if (pathname === 'me') return route.fulfill({ json: meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', capabilities: { workload: !readOnly, portfolio: !readOnly, readOnly }, flags: { visual_system: enabled, home_overview: homeOverview, ...adminFlags } }) })
       if (pathname === 'reference') return route.fulfill({ json: referenceData() })
       if (pathname === 'workspaces') return route.fulfill({ json: [] })
       if (pathname === 'views') return route.fulfill({ json: viewList() })
@@ -55,6 +56,8 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
       if (pathname === `projects/${project.projectNumber}/reviews`) return route.fulfill({ json: reviewPage([]) })
       if (pathname === `projects/${project.id}/issues`) return route.fulfill({ json: { items: [], totalCount: 0, page: 1, pageSize: 50 } })
       if (pathname === 'planning/grid') return route.fulfill({ json: planningGrid() })
+      if (pathname === 'me/notifications' || pathname === 'me/following') return route.fulfill({ json: { items: [], projects: [], page: 1, pageSize: 50, totalCount: 0 } })
+      if (pathname === 'admin/settings') return route.fulfill({ json: [] })
       if (pathname === 'planning/availability') {
         availabilityRequests.push(new URL(request.url()))
         if (readOnly) {
@@ -77,6 +80,15 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     assert.equal(await page.getByText('Availability for people you can view across projects.', { exact: true }).count(), 0, 'off embedded subtitle remains unchanged')
     assert.equal(await page.getByRole('navigation', { name: 'Breadcrumb', exact: true }).getByText('Vacation & Coverage', { exact: true }).count(), 0, 'off breadcrumb keeps its prior inventory')
     assert.equal(await page.locator('[data-visual-project-tabs] a[aria-current]').count(), 0, 'off project grouping is unchanged on the old alias')
+    // Flag off, Notifications keeps its tab list inside the card and Admin its wrapping row on the light page.
+    await page.goto(`${base}/notifications`); await page.getByRole('tablist').waitFor()
+    assert.equal(await page.getByRole('tablist').evaluate(el => el.parentElement.className), 'overflow-hidden rounded-lg border bg-card', 'off Notifications tabs stay inside their card')
+    adminFlags = { register_screens: true, org_structure: true, verifiable_log: true, admin_review: true }
+    await page.goto(`${base}/admin/settings`)
+    const adminRow = page.getByRole('navigation', { name: 'Administration', exact: true }); await adminRow.waitFor()
+    assert.equal(await adminRow.getAttribute('class'), 'flex min-w-0 flex-wrap gap-1 shadow-[inset_0_-1px_0_var(--border)]', 'off Admin row is unchanged')
+    assert.equal(await page.locator('[data-admin-tabs]').count(), 0, 'off has no band Admin row')
+    adminFlags = {}
 
     enabled = true
     await page.goto(`${base}/home?projects=alpha%2Cbeta`); await page.reload()
@@ -103,6 +115,33 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     const projectHrefs = await projectTabs.locator('a').evaluateAll(as => as.map(a => a.getAttribute('href')))
     for (const path of ['dashboard', 'files', 'settings'])
       assert.ok(projectHrefs.some(href => href?.split('?')[0].endsWith(`/${path}`)), `deep link target ${path}: ${projectHrefs.join(', ')}`)
+
+    // FR-VSN-11: Notifications / Following and the Admin pages put their tab row in the band. Like the band's other rows,
+    // a row that does not fit scrolls sideways on one line, with the current page scrolled into view.
+    await page.goto(`${base}/notifications`)
+    const bandList = page.locator('.visual-page-band .visual-page-band-tabs > [role="tablist"]'); await bandList.waitFor()
+    assert.deepEqual(await bandList.getByRole('tab').allTextContents(), ['Notifications', 'Following'])
+    assert.equal(await page.locator('.visual-page-content [role="tablist"]').count(), 0, 'the tab list left the card')
+    assert.equal(await bandList.getByRole('tab', { selected: true }).evaluate(el => getComputedStyle(el).color), 'rgb(255, 255, 255)', 'selected tab reads as the band text')
+    await bandList.getByRole('tab', { name: 'Following', exact: true }).click()
+    await page.waitForURL(/[?&]tab=following/)
+    await bandList.getByRole('tab', { name: 'Following', exact: true, selected: true }).waitFor()
+    assert.equal(await bandList.getByRole('tab', { selected: true }).count(), 1)
+    adminFlags = { register_screens: true, org_structure: true, verifiable_log: true, admin_review: true }
+    await page.goto(`${base}/admin/settings`)
+    const bandAdmin = page.locator('.visual-page-band [data-admin-tabs]'); await bandAdmin.waitFor()
+    assert.equal(await bandAdmin.getAttribute('aria-label'), 'Administration')
+    const adminGeometry = await bandAdmin.evaluate(nav => {
+      const links = [...nav.querySelectorAll('a')], row = nav.getBoundingClientRect(), current = nav.querySelector('a[aria-current="page"]').getBoundingClientRect()
+      return { links: links.length, tops: new Set(links.map(a => Math.round(a.getBoundingClientRect().top))).size, overflowX: getComputedStyle(nav).overflowX, overflows: nav.scrollWidth > nav.clientWidth, currentShown: current.left >= row.left - 1 && current.right <= row.right + 1, current: nav.querySelector('a[aria-current="page"]').textContent }
+    })
+    assert.deepEqual(adminGeometry, { links: 19, tops: 1, overflowX: 'auto', overflows: true, currentShown: true, current: 'Settings' }, 'every Admin tab (11 reference lists, 6 pages, 2 registered) on one scrolling band row, current page in view')
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 1440, 'the Admin row scrolls inside the band, not the page')
+    for (let i = 0; i < 80 && !await page.evaluate(() => !!document.activeElement?.closest('[data-admin-tabs]')); i++) await page.keyboard.press('Tab')
+    // Reduced motion still runs a 0.01 ms transition from the unfocused outline; read the settled value.
+    await page.waitForFunction(() => !document.activeElement.getAnimations().some(animation => animation.pending || animation.playState === 'running'))
+    assert.deepEqual(await page.evaluate(() => { const el = document.activeElement; return [!!el.closest('[data-admin-tabs]'), el.matches(':focus-visible'), getComputedStyle(el).outlineColor] }), [true, true, 'rgb(155, 184, 255)'], 'keyboard focus on a band tab uses the navy focus colour (FR-VSN-13)')
+    adminFlags = {}
 
     await page.goto(`${base}/projects/${project.projectNumber}/vacation?year=2026&month=10`)
     await page.getByRole('heading', { name: 'Vacation & Coverage', exact: true }).waitFor()
@@ -211,7 +250,9 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     await page.locator('[data-workspace-tabs] nav').waitFor()
     assert.equal(await page.locator('[data-workspace-tabs] nav').evaluate(el => getComputedStyle(el).overflowX), 'auto')
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 375, 'phone page has no horizontal overflow')
+    await page.goto(`${base}/notifications`); await bandList.waitFor()
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 375, 'phone Notifications band tabs do not widen the page')
     assert.equal(errors.length, 0, errors.map(error => error.stack ?? error.message).join('\n'))
-    console.log('PASS: legacy parity, workspace/parent tabs, scalar Home List-Boards scope, embedded Vacation disclosure/alias and desktop/phone quiet links.')
+    console.log('PASS: legacy parity, workspace/parent tabs, Notifications and Admin band rows, scalar Home List-Boards scope, embedded Vacation disclosure/alias and desktop/phone quiet links.')
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

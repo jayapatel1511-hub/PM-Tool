@@ -71,7 +71,7 @@ public static class CalendarScreenEndpoints
             undated.AddRange(tasks); undated.AddRange(deliverables);
         }
         var cohort = await PlanningEndpoints.CalendarPeople(db, access, settings);
-        var planners = cohort is null ? [] : await cohort.Select(user => new { user.Id, user.DisplayName, user.HomeDisciplineId }).ToListAsync();
+        var planners = cohort is null ? [] : await cohort.Select(user => new CalendarPlanner(user.Id, user.DisplayName, user.HomeDisciplineId)).ToListAsync();
         var owners = sources.Select(source => source.PersonId).Concat(undated.Select(source => source.PersonId)).OfType<Guid>()
             .Concat(range.Entries.OfType<CalendarEndpoints.CalendarEventRow>().Select(item => item.OwnerId)).Concat(planners.Select(user => user.Id)).Distinct().ToArray();
         var people = await db.Users.AsNoTracking().Where(user => owners.Contains(user.Id)).OrderBy(user => user.DisplayName).ThenBy(user => user.Id)
@@ -110,10 +110,10 @@ public static class CalendarScreenEndpoints
         var ids = people.Select(person => person.Id).ToArray();
         var days = await PersonCapacity.Load(db, ids, from, to, settings);
         var leaves = await db.ApprovedLeaves.AsNoTracking().Where(leave => ids.Contains(leave.PersonId) && leave.Status != "Cancelled" && leave.FromDate <= to && leave.ThroughDate >= from)
-            .Select(leave => new { leave.PersonId, leave.FromDate, leave.ThroughDate, leave.Status }).ToListAsync();
+            .Select(leave => new CalendarLeave(leave.PersonId, leave.FromDate, leave.ThroughDate, leave.Status)).ToListAsync();
         var legacy = await db.AvailabilityOverrides.AsNoTracking().Where(value => ids.Contains(value.PersonId) && value.ReconciledLeaveId == null
             && value.WorkDate >= from && value.WorkDate <= to && (value.Category == "Unavailable" || value.Category == "Reduced"))
-            .Select(value => new { value.PersonId, value.WorkDate }).ToListAsync();
+            .Select(value => new CalendarLegacyAway(value.PersonId, value.WorkDate)).ToListAsync();
         var rows = new List<CalendarScreenAwayDay>();
         foreach (var person in people)
         for (var date = from; date <= to; date = date.AddDays(1))
@@ -181,3 +181,7 @@ public static class CalendarScreenEndpoints
         return TypedResults.Ok(new CalendarScreenPreview(source.Row, dueDate, context, null));
     }
 }
+
+file sealed record CalendarPlanner(Guid Id, string DisplayName, Guid? HomeDisciplineId);
+file sealed record CalendarLeave(Guid PersonId, DateOnly FromDate, DateOnly ThroughDate, string Status);
+file sealed record CalendarLegacyAway(Guid PersonId, DateOnly WorkDate);

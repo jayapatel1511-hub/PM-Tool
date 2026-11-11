@@ -210,12 +210,12 @@ assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), '
       for (const node of ancestors.reverse()) { const next = rgba(getComputedStyle(node).backgroundColor), alpha = next[3] / 255; background = background.map((channel, i) => next[i] * alpha + channel * (1 - alpha)) }
       return { color: s.color, size: parseFloat(s.fontSize), weight: Number(s.fontWeight), background }
     })
-    assert.deepEqual({ color: ink.color, size: ink.size, weight: ink.weight }, { color: 'rgb(15, 138, 150)', size: 19, weight: 700 }, 'primary hours use the named teal at large bold text size')
+    assert.deepEqual({ color: ink.color, size: ink.size, weight: ink.weight }, { color: 'rgb(22, 26, 35)', size: 19, weight: 700 }, 'primary hours under 24 px use ink, not teal (FR-VSN-21)')
     const linear = value => { value /= 255; return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4 }
     const luminance = rgb => rgb.map(linear).reduce((sum, value, i) => sum + value * [.2126, .7152, .0722][i], 0)
-    const a = luminance(ink.background), b = luminance([15, 138, 150])
+    const a = luminance(ink.background), b = luminance([22, 26, 35])
     const contrast = (Math.max(a, b) + .05) / (Math.min(a, b) + .05)
-    assert.ok(contrast >= 3, 'large primary teal figure has required contrast against its actual composited grid surface')
+    assert.ok(contrast >= 4.5, 'primary hours figure under 24 px has 4.5:1 against its actual composited grid surface (AC-VSN-11)')
     assert.equal(planningRequests.length, 0, 'presentation harness seeded existing reads and made no planning/private-data request or write')
     await render({ visual: false, capacity: false }); await expand()
     assert.deepEqual(await style(sourceButton(6)), legacySource, 'off restoration keeps original source/draft/kept presentation')

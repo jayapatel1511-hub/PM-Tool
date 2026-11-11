@@ -16,6 +16,14 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+/** The table element alone: no container and no default classes, so it renders exactly the caller's markup. For tables
+ *  that sit in a scroll region their caller owns (TableRegion, or an overflow wrapper with sticky header or first
+ *  column): Table's own overflow-x-auto container would become the nearest scrolling box, moving the sticky offsets
+ *  and keyboard scrolling off the caller's focusable region. */
+function BareTable(props: React.ComponentProps<"table">) {
+  return <table {...props} />
+}
+
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
@@ -103,6 +111,7 @@ function TableCaption({
 
 export {
   Table,
+  BareTable,
   TableHeader,
   TableBody,
   TableFooter,

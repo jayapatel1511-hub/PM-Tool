@@ -69,6 +69,12 @@ assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), '
         assert.ok(await page.evaluate(() => document.activeElement?.closest('[role="dialog"]')), `focus stays inside throughout a complete cycle: ${i}`)
       }
       assert.equal(await firstLink.evaluate(el => document.activeElement === el), true, 'one full keyboard cycle returns to the first link')
+      await dialog.getByRole('link', { name: 'Admin', exact: true }).focus()
+      await page.keyboard.press('Escape')
+      await dialog.waitFor({ state: 'hidden' })
+      await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Main navigation')
+      assert.equal(await menu.evaluate(el => document.activeElement === el), true, 'one Escape from a focused drawer link closes the drawer and returns focus')
+      await menu.click(); await dialog.waitFor()
       await page.locator('[data-slot="sheet-overlay"]').click({ position: { x: 370, y: 4 } })
       await dialog.waitFor({ state: 'hidden' })
       await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Main navigation')

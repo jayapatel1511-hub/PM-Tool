@@ -17,13 +17,13 @@ import { useReference } from '@/hooks/data'
 import { get, typedRequest } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { ago, fmtDate, relative } from '@/lib/format'
-import { t , runtimeText } from '@/lib/i18n'
+import { t, runtimeText, textFor } from '@/lib/i18n'
 import type { components } from '@/gen/api'
 import { accentOf, cn } from '@/lib/utils'
 import { CreateProjectDialog } from './CreateProject'
 import { ExportMenu } from '@/components/hub/export'
 import { ViewMenu } from '@/components/hub/views'
-import { ProjectAreaTabs } from '@/components/hub/workspace'
+import { HOME_PRESETS, ProjectAreaTabs } from '@/components/hub/workspace'
 import { PeoplePicker } from '@/components/hub/people'
 import { ProjectPeek, ProjectPlainProgress, ProjectSpan, ProjectStaffing } from './project-list-details'
 import { ProjectBulkEdit, type SelectedProject } from './project-bulk-edit'
@@ -172,7 +172,7 @@ export function ProjectListPage() {
   const filterKeys: readonly string[] = [...(visualSystem || projectScreens ? [...FILTERS, ...VISUAL_FILTERS] : FILTERS), ...(overview ? ['homePreset', 'homeProjects'] : [])]
   const tokens = ([
     ['q', t('common.search'), sp.get('q')],
-    ['homePreset', t('homeScope.label'), runtimeText(`homeScope.${sp.get('homePreset')}`)],
+    ['homePreset', t('homeScope.label'), textFor(HOME_PRESETS, sp.get('homePreset') ?? '')],
     ['homeProjects', t('homeScope.projects'), sp.get('homeProjects') === 'all' ? t('homeScope.allProjects') : sp.get('homeProjects') === 'mine' ? t('homeScope.myProjects') : sp.get('homeProjects') === 'none' ? t('homeScope.noProjects') : t('homeScope.chosenProjects', { n: sp.get('homeProjects')?.split(',').filter(Boolean).length ?? 0 })],
     ['status', t('common.status'), sp.get('status') && runtimeText(`value.${sp.get('status')}`)],
     ['health', t('projects.health'), sp.get('health') && runtimeText(`health.${sp.get('health')}`)],
@@ -261,7 +261,7 @@ export function ProjectListPage() {
             <Field label={t('projects.col.client')} htmlFor="pl-client" className="w-full sm:w-44"><select id="pl-client" className={selectCls} value={sp.get('clientId') ?? ''} onChange={e => set('clientId', e.target.value)}><option value="">{t('projectScreens.anyClient')}</option>{ref.data?.clients.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
             <Field label={t('projects.col.phase')} htmlFor="pl-phase" className="w-full sm:w-44"><select id="pl-phase" className={selectCls} value={sp.get('phaseId') ?? ''} onChange={e => set('phaseId', e.target.value)}><option value="">{t('projectScreens.anyPhase')}</option>{ref.data?.phases.filter(x => x.isActive || x.id === sp.get('phaseId')).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
             <Field label={t('projects.type')} htmlFor="pl-type" className="w-full sm:w-44"><select id="pl-type" className={selectCls} value={sp.get('projectTypeId') ?? ''} onChange={e => set('projectTypeId', e.target.value)}><option value="">{t('projectScreens.anyType')}</option>{ref.data?.projectTypes.filter(x => x.isActive || x.id === sp.get('projectTypeId')).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
-            <Field label={t('projects.col.priority')} htmlFor="pl-priority" className="w-full sm:w-40"><select id="pl-priority" className={selectCls} value={sp.get('priority') ?? ''} onChange={e => set('priority', e.target.value)}><option value="">{t('projectScreens.anyPriority')}</option>{['Low', 'Medium', 'High', 'Critical'].map(value => <option key={value} value={value}>{runtimeText(`value.${value}`)}</option>)}</select></Field>
+            <Field label={t('projects.col.priority')} htmlFor="pl-priority" className="w-full sm:w-40"><select id="pl-priority" className={selectCls} value={sp.get('priority') ?? ''} onChange={e => set('priority', e.target.value)}><option value="">{t('projectScreens.anyPriority')}</option>{(['Low', 'Medium', 'High', 'Critical'] as const).map(value => <option key={value} value={value}>{t(`value.${value}`)}</option>)}</select></Field>
           </>}
           {me.flags?.org_structure === true && <Field label={t('org.leadUnit')} htmlFor="pl-lead-unit" className="w-full sm:w-48">
             <select id="pl-lead-unit" className={selectCls} value={sp.get('leadUnitId') ?? ''} onChange={(e) => set('leadUnitId', e.target.value)}>

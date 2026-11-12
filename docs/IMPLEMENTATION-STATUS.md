@@ -1,5 +1,9 @@
 # Implementation status
 
+## 2026-11-11 packets 052–053 deployed to the public synthetic review
+
+Jay asked to finish the build, review it and deploy it once verified. Packets 052 (S01–S09) and 053 (all 50 slices, S50 included) are built and checked locally on `codex/build-052-053`; the gates, two independent reviews and their fixes are in [053 verification](../specs/053-screen-completeness/verification.md). Jay activated `88b33103c1102058b85ec797cb15eb57e81cc541` in his own homedev sudo terminal; [hosted verification](handoffs/2026-11-11-packets-052-053-hosted-verification.md) records PASS, 56 migrations, every 052/053 flag off, no table or row lost, and the public probes. Nothing is pushed. No 052/053 flag is on anywhere; pilot activation waits on 052-D1–D10 and the AC-CALM-05 word-budget decision. No packet is marked Accepted.
+
 ## 2026-10-29 public synthetic review deployed
 
 Jay requested deployment. Live inspection found the integration omitted the already-deployed Social-plus-tester login compatibility. That behavior is restored with focused auth/session/contract/browser verification; [the preflight](handoffs/2026-10-29-packets-039-051-deploy-preflight.md) records exact boundaries and the staged operator handoff. Jay completed activation in his own homedev sudo terminal. Review now runs `bf8a39d7290d8bad8f9138872582b164baaf1894`; [hosted verification](handoffs/2026-10-29-packets-039-051-hosted-verification.md) records PASS results and limits. The original full-suite/rehearsal SHA below remains historical evidence; it does not cover this auth correction. Pickup stays dark pending its P2 fix. This is public synthetic review deployment only; no pilot/production promotion or acceptance claim.

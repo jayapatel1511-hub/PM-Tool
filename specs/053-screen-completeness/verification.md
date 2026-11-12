@@ -705,3 +705,89 @@ Before deployment, Jay needs to:
 
 Pilot activation of any 052/053 flag remains gated on S50 (053-D24 ratchet), the thirteen suites above, and the open decisions
 053-D9, 053-D13, 053-D24 and 052-D1–D10.
+
+
+## Build completion · 2026-11-11 · S50 and the remaining 052 slices
+
+Jay asked to finish the rest of the build, to review the work so nothing is broken, and then to deploy it once done and
+verified. Seven parallel lanes worked in separate worktrees from `65cbcd64` under Jay's standing permission for up to ten
+agents, one writer per area. Claude reviewed and merged each lane on `codex/build-052-053`, then two fresh reviewers read the
+merged backend and web diffs. Every 052/053 flag stays off and no decision status changed.
+
+**S50 (053-D24): the four ratcheted counters are back at or below the 039–051 release.**
+
+| Counter (FR-PLAT-20) | 039–051 (`ac2fa894`) | Before (`65cbcd64`) | Now |
+|---|---|---|---|
+| `anonymous_objects` | 211 | 320 | 209 |
+| `runtime_text_keys` | 230 | 386 | 227 |
+| `html_tables` | 49 | 63 | 49 |
+| `page_permission_derivations` | 2 | 4 | 2 |
+| `client_permission_derivations` (report-only until §45 server flags) | 62 | 74 | 74 |
+
+`tools/ratchet.json` now holds the four lowered values. `ratchet.py --update` refuses to write while the report-only counter
+is above its baseline, so the four were lowered directly and that counter stays at 62.
+- *Anonymous objects.* The 109 added in 052/053 are file-local named types (`file sealed record`, or `file sealed class`
+  with init members where EF composes the projection further or groups by it). A temporary side-by-side run compared the old
+  and new serialization at every hashed, stored or returned site (receipt hashes, the drawing-import fingerprint, activity
+  Changes/Snapshot, problem-body extras): 424 tests, 0 mismatches. Durable tests now pin the receipt hashes of My Work seen
+  (Visit, MarkAll, Opened), review create and round, the external review record and the allocation shift, and the deliverable
+  register's activity JSON. Contract, registry and registry-parity tests pass unchanged and `web/src/gen/openapi.json` is
+  unchanged.
+- *Run-time text keys.* The 156 added `runtimeText` calls are `t()` calls or type-checked key maps (`KeyIn`, `textFor` and
+  `hasKey` in `web/src/lib/i18n.ts`); none is a cast. Text is identical for every value the server sends. A hand-edited address
+  parameter outside the contract (`homePreset`, `homeProjectStatus`, notification `type`, all on flag-on screens) now shows the
+  value instead of its raw key.
+- *Raw tables.* The 14 tables render through `BareTable` in `web/src/components/ui/table.tsx`, which is the bare element: `Table`'s
+  own overflow wrapper would nest a second scroll box inside grids that own theirs. Before/after images of all 14 at 1440 and 375 px
+  (38 images) differ by 0 pixels. This meets the counter; it does not move these tables onto the §47 shared list.
+- *Page permission derivations.* `offersWholeProjectShift` and `managedDisciplineChoices` moved to `web/src/lib/auth-context.ts`
+  with the same boolean logic.
+
+**The thirteen stale suites now pass, three runs each.** Twelve predated later 053 slices (notice preferences FR-SCR-80, the role
+explainer FR-SCR-83, My Work visits FR-SCR-16, the selection column FR-SCR-19, the task section strip FR-SCR-26 and the S05
+delivery presentation); each mock answers the new reads and asserts the new behaviour exactly. The five native-visibility suites
+also failed because their shared helper launched the headless shell, which never hides a background tab; the helper now uses
+Chrome for those suites and waits for a fully written `DevToolsActivePort`.
+
+**Product defects found and fixed in this pass** (flags-on surfaces; flags-off output unchanged):
+- *Task section strip (FR-SCR-26, AC-SCR-26).* Near the end of a long task, choosing Comments marked History and opening at
+  Comments marked Review, because the scroll stopped short and the next measurement overrode the choice. The chosen section now
+  stays marked until the reader scrolls. `work-activity-comments.cjs` asserts the marker; it fails without the fix.
+- *Calendar (FR-SCR-24).* The always-open filter card failed AC-CALM-01/02/03 (first row 417 px, two fields, 28 controls). Types,
+  Time away, Person and Discipline now open from Filters, with removable chips named by layer (§41 R1).
+- *Team.* A visible Group by select was a second filter field (AC-CALM-02); it is now the compact Group menu (§41 R1).
+- *`/tasks/:id` page* (052 S02): see the 052 record. The independent review found that the first version made the page behave
+  as a closed panel with the visual flag on; fixed, with a `task-sections.cjs` check that fails without the fix.
+- *`live-browser.cjs` (CI).* A fixed 300 ms wait for the first pulse failed about half the runs; it now waits up to 5 s.
+
+**Flags-off notes.** Since `5663eca1` the `/projects/<n>` redirect keeps the query and anchor (the live release dropped them, e.g.
+`?attention=` on critical-attention notifications); no screen reads them with flags off and the content is identical, so it was
+left. Open-findings reason codes such as `perm.not_member`, `historical_round` and `package_terminal` have no client text and show
+"Other", as before this pass (open).
+
+**Independent review.** Backend: no defects (serialization and hashing, equality of the new types, EF translation, argument
+order). Web: one high finding (the `/tasks/:id` page above) and two low findings (identical calendar chip names; a `data-slot`
+attribute on the 14 tables), all fixed; one low finding accepted (the out-of-contract address parameters above).
+
+**Gates (this Mac; `d83b150b`, then `88b33103` for the header fix).**
+
+| Gate | Result |
+|---|---|
+| `dotnet build Hub.slnx -c Release` | 0 errors, 1,206 warnings (as at `65cbcd64`) |
+| Whole backend suite, one process | 2,924 passed, 1 skipped (`HUB_SCALE` only), 3 failed while the parity, web and census runs shared the machine: two ExternalReview lock-ordering tests and `CalendarViewReplayTests` timed out on fixed 20 s waits. Alone the three pass (16 s), and their two classes pass 33 of 33 (`d83b150b`; `88b33103` changes CSS only) |
+| Web build, served-asset allowlist, chunk report, lint (0 errors), generated contract unchanged, `test:keys`, `typecheck:tests`, `ratchet.py`, `text_keys.py`, `npm audit` (0 vulnerabilities), smoke-live unit tests | pass |
+| CI `web` job browser steps (36) | pass, including `test:browser-verification` |
+| Every mocked browser suite outside the real-API ones (89) | 88 pass; `project-header-compact` found a real defect: at 375 px a health override pushed the project number and name above the band. Fixed in `88b33103` (status moves beside the name, the health button is 24 px tall); it and six header and layout suites pass |
+| CI `checks` job (15 steps) | pass |
+| `pr_checks.py migrations --base ac2fa894` | the two known contract migrations; pass with the `contract` label, given by Jay's deploy instruction |
+| `trace_spec.py --ratchet --base HEAD`, `build_spec.py --check` | pass (303 ACs cited before and after) |
+| Record parity against the live release (`ac2fa894` → `d83b150b`; `88b33103` adds v2-only CSS) | PASS: self-check, 12 persona/width sets, AC-REC-09 off and on |
+| Real-API census on `88b33103` (17 screens × 2 roles × flags off/on) | 68 observations, 0 findings; acceptance probe over 51 routes (band on each, 30 count cards, 197 inputs); reflow 68/68; `clutter.cjs` flags off PASS; flags on reports only the 052-D2/D3/D4 replacements and the §57 word and control counts below |
+
+**Open.**
+- AC-CALM-05's word budget against §57 content: with flags on, ten screens exceed it (Home 98/41, Reports 235/40, Allocations up to
+  139/49). The words are §57 content, so this needs Jay's decision (an exception for §57 screens, or per-screen restructuring).
+- Traceability: against `ac2fa894`, 68 changed ACs (56 AC-SCR, 11 AC-VSN, 1 AC-CALM) have no test that cites their ID; the CI
+  ratchet against `HEAD` passes (303 cited before and after).
+- `client_permission_derivations` 74 against 62 (report-only).
+- Decision statuses unchanged: 053-D9, D13 and D24 stay Open with their defaults built; 052-D1–D10 Open.

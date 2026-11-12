@@ -56,7 +56,7 @@ checks. Existing features stay available when a flag is off.
 | S47 | [x] Notice preferences and away hold | Preferences.tsx; Notifications.cs; digest/outbox dispatch | FR-SCR-80 / AC-SCR-80 |
 | S48 | [x] Template version provenance | Templates.tsx; Templates.cs; project settings provenance | FR-SCR-81 / AC-SCR-81 |
 | S49 | [x] Admin person scope and role explainer | admin/Admin.tsx; Admin.cs; canonical permission description adapter | FR-SCR-82 / AC-SCR-82, FR-SCR-83 / AC-SCR-83 |
-| S50 | [ ] Ratchet restoration (053-D24), before any 052/053 flag goes on in pilot | the 052/053 files named in verification.md checkpoint 36 | FR-PLAT-20 counters back to the 039–051 baseline |
+| S50 | [x] Ratchet restoration (053-D24), before any 052/053 flag goes on in pilot | the 052/053 files named in verification.md checkpoint 36 | FR-PLAT-20 counters back to the 039–051 baseline |
 
 Additional dependencies: S03/S04/S05 use S02’s context contract; S07 uses S06 counts;
 S08 uses the exact same scope contract; S27 uses S26’s header inputs; S43 uses S29

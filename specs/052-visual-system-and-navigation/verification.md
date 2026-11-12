@@ -1,6 +1,6 @@
 # Verification: Visual System and Navigation
 
-Specification drafting completed on 2026-10-31. The later user-authorized dark build is in progress; local implementation evidence appears below. Open pilot/design decisions remain Open.
+Specification drafting completed on 2026-10-31. The dark build is complete locally (S01–S09, 2026-11-11; S10 follows pilot activation); local implementation evidence appears below. Open pilot/design decisions remain Open.
 
 ## Specification checks run on 2026-10-31
 
@@ -20,18 +20,18 @@ These are token-pair calculations, not an implementation or browser audit. Final
 
 | AC ID | Area | Slice | Status |
 |---|---|---|---|
-| AC-VSN-01 | Token census, fonts, no third-party font request | S01, S09 | Font/switch checks PASS locally; complete token census pending |
-| AC-VSN-02 | Count-card colours by metric | S03 | Home focused checks PASS; full-screen census pending |
-| AC-VSN-03 | Lane colours and hatch | S03 | Home chart/runway focused checks PASS; other surfaces pending |
+| AC-VSN-01 | Token census, fonts, no third-party font request | S01, S09 | PASS locally 2026-11-11: fonts self-hosted; rendered token census 0 non-token fills outside Admin discipline data |
+| AC-VSN-02 | Count-card colours by metric | S03 | PASS locally 2026-11-11: count-card figure colours by metric on every count-card screen |
+| AC-VSN-03 | Lane colours and hatch | S03 | PASS locally 2026-11-11: lanes and hatch across 37 lanes in the acceptance probe |
 | AC-VSN-04 | Project identity colour | S04 | PASS locally with synthetic API/browser data; no pilot/human acceptance |
-| AC-VSN-05 | One-line project header within 72 px | S02 | Focused desktop/phone check PASS; wider S02 census pending |
+| AC-VSN-05 | One-line project header within 72 px | S02 | PASS locally 2026-11-11: band order on 51 routes; header 72 px with a 120-character name, desktop and 375 px, with and without a health override; inputs 3:1 |
 | AC-VSN-06 | Title block from the response time | S05 | PASS locally: response clock, organisation zone, shifted browser clock |
-| AC-VSN-07 | Count card link and definition | S06 | Home focused checks PASS; full slice remains partial |
-| AC-VSN-08 | Sidebar list and foot group per role | S07 | Focused role/parent checks PASS locally; decision gates remain Open |
-| AC-VSN-09 | Workspace and project tab rows | S07 | Focused actual links/scope checks PASS; whole-route acceptance pending |
-| AC-VSN-10 | Phone drawer and bottom bar | S08 | Focused focus trap/return/search and 375px checks PASS; all-screen census pending |
-| AC-VSN-11 | Accessibility scan and contrast census | S09 | Visual/Home pair: 68 observations with zero serious/critical axe; all-flags reflow finds Workload focus issue; full acceptance pending |
-| AC-VSN-12 | Flag off changes nothing | S01 to S09 | Focused shape/navigation/browser checks PASS; packet-wide parity pending |
+| AC-VSN-07 | Count card link and definition | S06 | PASS locally 2026-11-11: 30 count cards each one link equal to its list; On Track two links (052-D11); definition on focus |
+| AC-VSN-08 | Sidebar list and foot group per role | S07 | PASS locally 2026-11-11: route matrix 62 routes × 9 profiles; one highlight per content route, none on utility pages (052-D12) |
+| AC-VSN-09 | Workspace and project tab rows | S07 | PASS locally 2026-11-11: workspace and project tab rows; Notifications and Admin tab rows in the band; former project routes load |
+| AC-VSN-10 | Phone drawer and bottom bar | S08 | PASS locally 2026-11-11: drawer focus trap, Escape and return; bottom bar kept; 744 real page loads with no sideways scroll |
+| AC-VSN-11 | Accessibility scan and contrast census | S09 | PASS locally 2026-11-11: 17 screens off/on 0 serious/critical axe, 0 contrast failures; reflow 68/68 |
+| AC-VSN-12 | Flag off changes nothing | S01 to S09 | PASS locally 2026-11-11: flags-off census and route matrix match `ac2fa894`; record parity 13/13 |
 
 At the specification-drafting checkpoint, all runtime checks were unrun. The later build evidence below supersedes that historical state; whole-packet acceptance is still pending.
 
@@ -198,3 +198,54 @@ Checks after the fixes (committed locally as `98ed6fd3` on `codex/build-052-053`
 
 Side-by-side gallery of all 33 pairs, desktop and phone: `~/PM-Tool/.review/2026-11-04-mockup-check/index.html`
 (untracked). The scratch database `hub_mockup` was dropped afterwards.
+
+
+## Build completion · 2026-11-11 · S02, S03, S06, S07, S08 and S09
+
+Jay asked to finish the rest of the build. Two lanes measured and finished the open slices with `flag.visual_system` and the
+053 screen flags on, keeping flags-off output unchanged; Claude merged them on `codex/build-052-053` with the 053 S50 work and
+fixed three defects their censuses found. Details, gates and the independent review are in
+[053 verification](../053-screen-completeness/verification.md), "Build completion · 2026-11-11".
+
+**Navigation (S07, S08).**
+- The route matrix (`web/tests/visual-route-matrix.cjs`) failed because it seeded the project into the wrong cache slot; the app's
+  `/projects/<n>` redirect was right. It now covers all 62 router routes × 9 role profiles at 1440 and 375 px, flags on and off:
+  every content route highlights exactly one sidebar item and Search, Notifications and Preferences highlight none (052-D12);
+  the flags-off pass matches the `ac2fa894` source exactly.
+- Notifications (Notifications / Following) and Admin now put their tab rows in the band (FR-VSN-11). §56 does not say how
+  Admin's 19 tabs fit on desktop; they are one band row that scrolls sideways like the band's other rows, with the current tab
+  scrolled into view (a presentation choice, not a decision). Band tab rows take the navy focus colour; the inherited ring was
+  2.2:1 on navy.
+- Escape from a focused drawer link closed a hidden tooltip instead of the drawer; drawer links no longer carry a tooltip, and
+  `visual-drawer.cjs` checks it.
+- A real-API sweep of 744 page loads (6 roles, 2 widths, every flag on) found no sideways scroll, page error or second selected
+  item. Evidence: `evidence/final-navigation-matrix.json`, `evidence/final-navigation-real-sweep.json`.
+
+**Census (S02, S03, S06, S09).** Fixes are CSS under `:root[data-visual="v2"]`:
+- 375 px project header: the 120-character name showed 44 px and the Project Manager was cut; the name now shows 269 px and the
+  Project Manager whole, within 72 px (FR-VSN-12).
+- Three selects drew a 1.2:1 hairline as their boundary; native fields now use the 3:1 control line (FR-VSN-13).
+- Planner, Team Planner month and Vacation figures in teal at 19 px were 4.12:1; they are ink (FR-VSN-21).
+- Legacy accent rings, stripes and chips and translucent status colours now resolve to §56 tokens; the only non-token colours
+  left are the stored discipline swatches on Admin reference data, which are data values.
+- Count cards: all 30 figures equal their destination list counts, each ordinary card is one link and On Track keeps its two
+  links (052-D11); six per row at 1440 px, three at 1000 px and two at 375 px.
+- `/tasks/:id` now opens with the band (FR-VSN-11): the task key and name in the band, the task card below (Claude, this pass).
+Evidence: `evidence/final-visual-census.json`, `evidence/final-reflow-census.json`, `evidence/final-findings.md`.
+
+Defaults used (decisions stay Open): 052-D2 colour budget (non-token fills target 0, met outside Admin data), 052-D3 one sidebar
+list of eight with a foot group, 052-D4 six project group tabs with Activity and Settings links, 052-D10 bottom bar kept with the
+drawer.
+
+**Final census, `88b33103`.** The 17-screen census (all eight flags off and on, PM and Supervisor) has 68 observations and no
+finding: zero serious or critical axe violations, every first data row within 405 px of the top, no page error and no external font.
+Calendar's first row is at 277 px with no visible field and 21 controls; Team has one field. The acceptance probe found the band
+on all 51 routes, 30 count cards matching their lists and 197 inputs at 3:1 or identified by their arrow. Reflow passes 68 of 68
+(375 px, the 800 px DPR 2 equivalent of 200 % zoom, and text spacing). With flags on, `clutter.cjs` reports only the counts the 052
+defaults replace (sidebar items, project group tabs, fills) and §57's words and controls (open, 053 record). Acceptance-table
+status: AC-VSN-01, 02, 03, 05, 07, 08, 09, 10, 11 and 12 pass locally; AC-VSN-04 and 06 passed earlier; none has pilot, hosted
+or human acceptance.
+
+**Open.** AC-CALM-05's word half is exceeded on ten screens by §57 content (needs Jay's decision, see the 053 record). My Staff puts
+its title block in the actions column (still in the band before the tabs). S10 flag cleanup follows pilot activation. Pilot,
+hosted and human acceptance are not covered by these local checks.

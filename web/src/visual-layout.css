@@ -123,6 +123,11 @@
   :root[data-visual="v2"] .visual-project-main > .ml-auto > button:not(.visual-project-health-summary)::after { content: ""; position: absolute; inset: -10px -6px; }
   :root[data-visual="v2"] .visual-project-main:has(.visual-project-health-summary) { column-gap: 4px; }
   :root[data-visual="v2"] .visual-project-health-pills { flex-direction: row; gap: 4px; }
+  /* With a reported-health override the health button needs row 2 to itself: status moves up beside the name, and the
+     button is drawn 24 px tall with its hit area kept by an overlay, so the three rows stay within 72 px. */
+  :root[data-visual="v2"] .visual-project-main:has(.visual-project-health-summary) > :has(> .semantic-pill) { order: 1; }
+  :root[data-visual="v2"] .visual-project-main > .ml-auto > .visual-project-health-summary { position: relative; height: 24px; min-height: 24px; padding-block: 0; }
+  :root[data-visual="v2"] .visual-project-main > .ml-auto > .visual-project-health-summary::after { content: ""; position: absolute; inset: -10px 0; }
   :root[data-visual="v2"] .visual-project-meta { gap: 8px; }
   :root[data-visual="v2"] .visual-project-meta > span:first-child { flex-shrink: 0; max-width: 55%; }
   :root[data-visual="v2"] .visual-project-meta > span:last-child { flex-shrink: 0; }
